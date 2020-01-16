@@ -1,6 +1,7 @@
 <template>
 	<div>
     <HeaderTop></HeaderTop>
+    <img src="../../static/aaa.jpg" style="width: 100%" alt="">
 	</div>
 </template>
 
