@@ -19,10 +19,12 @@
         </div>
       </div>
       <div class="left_bottom">
-        <div class="menu">
+        <div class="menu" @mouseover="mouseOver"
+             @mouseleave="mouseLeave">
           <div class="menu_title">系统导航</div>
-          <ul class="menu_ul">
-            <li>
+          <ul class="menu_ul" v-show="menu_show">
+            <li @mouseover="mouseOverLi(1)"
+                @mouseleave="mouseLeaveLi(1)">
               <div class="but_item">
                 <img src="../../static/images/robotManagement.png" alt="">
                 <span>机器人管理</span>
@@ -34,58 +36,335 @@
                   <span>|</span>
                   <dd>
                     <div>
-                      <a href="#">机器人管理</a>
+                      <router-link to="/robots/robot-management">机器人管理</router-link>
                       <span>|</span>
                     </div>
                   </dd>
                 </dl>
               </div>
             </li>
-            <li>
+            <li @mouseover="mouseOverLi(2)"
+                @mouseleave="mouseLeaveLi(2)">
               <div class="but_item">
                 <img src="../../static/images/taskManagement.png" alt="">
                 <span>任务管理</span>
                 <span>&gt;</span>
               </div>
+              <div class="pop_up">
+                <dl>
+                  <dt>全面巡检</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/tasks/comprehensive-inspection">全面巡检</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>例行巡检</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/tasks/routine-inspection">例行巡检</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>专项巡检</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/tasks/infrared-temperature">红外测温</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/tasks/oil-transcribe">油位油温表抄录</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/tasks/arrester-transcribe">避雷器表抄录</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/tasks/pressure-transcribe">SF6压力表抄录</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/tasks/hydraulic-transcribe">液压表抄录</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/tasks/position-status">位置状态识别</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>特殊巡检</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/tasks/bad-weather">恶劣天气</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/tasks/defect-tracking">缺陷跟踪</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>多光谱巡检</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/tasks/multispectral-inspection">多光谱巡检</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>自定义任务</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/tasks/custom-task">自定义任务</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>任务展示</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/tasks/task-show">任务展示</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+              </div>
             </li>
-            <li>
+            <li @mouseover="mouseOverLi(3)"
+                @mouseleave="mouseLeaveLi(3)">
               <div class="but_item">
                 <img src="../../static/images/monitoring.png" alt="">
                 <span>实时监控</span>
                 <span>&gt;</span>
               </div>
+              <div class="pop_up">
+                <dl>
+                  <dt>巡检监控</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/monitors/inspection-monitoring">巡检监控</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>机器人遥控</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/monitors/robot-control">机器人遥控</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+              </div>
             </li>
-            <li>
+            <li @mouseover="mouseOverLi(4)"
+                @mouseleave="mouseLeaveLi(4)">
               <div class="but_item">
                 <img src="../../static/images/resultsConfirm.png" alt="">
                 <span>巡检结果确认</span>
                 <span>&gt;</span>
               </div>
+              <div class="pop_up">
+                <dl>
+                  <dt>设备告警信息确认</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/resultsConfirm/alarm-query">设备告警信息确认</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/resultsConfirm/interval-show">间隔展示</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>巡检结果浏览</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/resultsConfirm/inspection-results-browse">巡检结果浏览</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/resultsConfirm/inspection-task-audit">巡检任务审核</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>巡检报告生成</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/resultsConfirm/inspection-report-generate">巡检报告生成</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+              </div>
             </li>
-            <li>
+            <li @mouseover="mouseOverLi(5)"
+                @mouseleave="mouseLeaveLi(5)">
               <div class="but_item">
                 <img src="../../static/images/resultsAnalysis.png" alt="">
                 <span>巡检结果分析</span>
                 <span>&gt;</span>
               </div>
+              <div class="pop_up">
+                <dl>
+                  <dt>对比分析</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/resultsAnalysis/comparison-analysis">对比分析</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>生成报表</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/resultsAnalysis/generate-reports">生成报表</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+              </div>
             </li>
-            <li>
+            <li @mouseover="mouseOverLi(6)"
+                @mouseleave="mouseLeaveLi(6)">
               <div class="but_item">
                 <img src="../../static/images/userSet.png" alt="">
                 <span>用户设置</span>
                 <span>&gt;</span>
               </div>
+              <div class="pop_up">
+                <dl>
+                  <dt>告警设置</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/users/threshold-setting">告警阈值设置</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>组织权限设置</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/users/rights-management">权限设置</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>点位设置</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/users/inspection-points-setting">巡检点位设置</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>系统设置</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/users/user-management">用户管理</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/users/organizational-structure">组织结构</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/users/log-management">日志管理</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+              </div>
+
             </li>
-            <li>
+            <li @mouseover="mouseOverLi(7)"
+                @mouseleave="mouseLeaveLi(7)">
               <div class="but_item">
                 <img src="../../static/images/systemSet.png" alt="">
                 <span>机器人系统调试维护</span>
                 <span>&gt;</span>
               </div>
+              <div class="pop_up">
+                <dl>
+                  <dt>软件设置</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/systems/software-settings">软件设置</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>机器人设置</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/systems/robot-setup">机器人设置</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>机器人信息查询</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/systems/robot-alarm-query">机器人告警查询</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/systems/outlier-query">设备异常点查询</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/systems/status-display">机器人状态显示</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+              </div>
             </li>
           </ul>
         </div>
-        <div class="head_center">机器人管理 > 机器人管理</div>
+        <div class="head_center">{{title}}</div>
         <div class="top_count"><span>0</span></div>
       </div>
     </div>
@@ -102,14 +381,36 @@
 </template>
 
 <script>
-export default {
-  name: 'HeaderTop',
-  data () {
-    return {
+  import $ from 'jquery'
+  export default {
+    name: 'HeaderTop',
+    data () {
+      return {
+        menu_show:false,
 
+      }
+
+    },
+    props:['title'],
+    methods: {
+      // 移入
+      mouseOver() {
+        this.menu_show = true
+      },
+      // 移出
+      mouseLeave() {
+        this.menu_show = false
+      },
+      // 移入
+      mouseOverLi(index) {
+        $(`.menu_ul>:nth-child(${index}) .pop_up`).show()
+      },
+      // 移出
+      mouseLeaveLi(index) {
+        $(`.menu_ul>:nth-child(${index}) .pop_up`).hide()
+      }
     }
   }
-}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
@@ -121,6 +422,7 @@ export default {
     background-size: 100% 100%;
     height 70px
     position relative
+    z-index 999
     .head_left
       .left_top
         display flex
@@ -185,6 +487,7 @@ export default {
             cursor pointer
           .menu_ul
             position: absolute;
+            z-index 999
             background-color: #eee;
             width: 230px;
             min-height: 430px;
@@ -202,6 +505,7 @@ export default {
               background-position: 100%;
               border-top: 1px solid #d2fae6;
               border-bottom: 1px solid #d2fae6;
+              color #109cb4
               >:nth-child(1)
                 width: 26px;
                 height: 26px;
@@ -211,11 +515,13 @@ export default {
                 line-height 40px
                 font-size 13px
               >:nth-child(3)
-                color: #109cb4;
                 font-size: 15px;
                 transition: color .1s ease-out 0s;
                 margin-right: 18px;
                 float: right;
+            .but_item:hover
+              background #109cb4
+              color white
             .pop_up
               position: absolute;
               background-color: #eee;
@@ -226,6 +532,7 @@ export default {
               padding: 6px;
               box-shadow: 0 0 5px 2px rgba(16,156,180,.3);
               border-radius: 3px;
+              display none
               >dl
                 zoom: 1;
                 color: #fff;
@@ -250,6 +557,9 @@ export default {
                   height: 28px;
                   color: #109cb4;
                 >dd
+                  width: 446px;
+                  line-height: 28px;
+                  float: left;
                   a
                     line-height: 28px;
                     white-space: nowrap;
@@ -268,6 +578,11 @@ export default {
                     transition: color .1s ease-out 0s;
                     color: #333;
                     font-size: 13px;
+                >dd a:hover
+                  background #109cb4
+                  color white
+              >dl:hover
+                background #f9f9f9
         .head_center
           float left
           margin-top 12px
@@ -308,7 +623,7 @@ export default {
           width: 84px;
           display: inline-block;
           text-align: center;
-          font-size: 14px;
+          font-size: 13px;
           margin: 12px 0 0;
           height: 32px;
           color: #13645e;
