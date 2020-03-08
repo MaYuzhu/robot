@@ -1,10 +1,142 @@
 <template>
 	<div id="tabs">
     <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
-      <el-tab-pane label="用户管理" name="first">用户管理111111111</el-tab-pane>
-      <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
-      <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
-      <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
+      <el-tab-pane label="实时信息" name="first">
+        <div style="padding:0 8px">
+          <el-table size="mini"
+
+            border
+            style="width: 100%">
+            <el-table-column
+              prop="date"
+              label="序号"
+              width="50">
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="任务名称"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="点位名称"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="识别时间"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="识别结果"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="识别类型"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="采集信息"
+              >
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="设备警告信息" name="second">
+        <div style="padding:0 8px">
+          <el-table size="mini"
+
+                    border
+                    style="width: 100%">
+            <el-table-column
+              prop="date"
+              label="序号"
+              width="50">
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="任务名称"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="点位名称"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="识别时间"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="识别结果"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="识别类型"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="采集信息"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="告警类型"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="告警等级"
+            >
+            </el-table-column>
+          </el-table>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="系统警告信息" name="third">
+        <div style="padding:0 8px">
+          <el-table size="mini"
+
+                    border
+                    style="width: 100%">
+            <el-table-column
+              prop="date"
+              label="序号"
+              width="50">
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="报警类型"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="报警级别"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="报警内容"
+            >
+            </el-table-column>
+            <el-table-column
+              prop="address"
+              label="报警时间"
+            >
+            </el-table-column>
+
+          </el-table>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="自由模式巡检结果" name="fourth">
+        <div style="height: 100px"></div>
+      </el-tab-pane>
     </el-tabs>
 	</div>
 </template>

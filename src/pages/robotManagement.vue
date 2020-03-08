@@ -15,8 +15,8 @@
     <div style="width: 65%;background:lavender">
       <XunjianContent></XunjianContent>
     </div>
+    <taskControl style="width: 65%"></taskControl>
 
-    <img src="../../static/aaa.jpg" style="width: 100%" alt="">
     <TabsBottom></TabsBottom>
 
 	</div>
@@ -26,11 +26,14 @@
   import HeaderTop from '../components/headerTop.vue'
   import TabsBottom from '../components/tabsBottom.vue'
   import XunjianContent from '../components/xunjianContent.vue'
+  import taskControl from '../components/taskControl.vue'
+
 	export default {
     components: {
       HeaderTop,
       TabsBottom,
-      XunjianContent
+      XunjianContent,
+      taskControl
     },
     data() {
       return {
