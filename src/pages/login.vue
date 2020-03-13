@@ -56,6 +56,7 @@
     width: 100%;
     height: 100%;
     min-width: 1280px;
+    min-height: 680px;
     background: url("../../static/img/loginBackground.jpg") no-repeat 100% 100%;
   }
   .logo{
@@ -159,6 +160,30 @@
   input::-webkit-input-placeholder{
     color: #e0e0e0;
   }
+  .item-left .icon {
+    width: 26px;
+    height: 26px;
+    position: absolute;
+    left: 4px;
+    bottom: 8px;
+  }
+  .item-right .icon {
+    width: 26px;
+    height: 26px;
+    position: absolute;
+    left: 4px;
+    bottom: 8px;
+  }
+  .item-left .icon-user{
+
+    background url("../../static/images/user.png") no-repeat center center
+    background-size: cover
+  }
+  .item-right .icon-password{
+
+    background url("../../static/images/password.png") no-repeat center center
+    background-size: cover
+  }
   .button {
     width: 46%;
     margin-top: 33px;
@@ -195,6 +220,12 @@
     float: right;
     background-color: rgba(205,92,92,.8);
     //filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#C8CD5C5C,endColorstr=#C8CD5C5C);
+  }
+  .button-reset:hover,.button-login:hover{
+    background-color: #ecf5ff;
+    color: #3a8ee6;
+    border-color: #3a8ee6;
+    outline: 0;
   }
   .button-login {
     float: left;

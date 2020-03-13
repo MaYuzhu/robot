@@ -212,7 +212,7 @@
 
 
       .right
-        width 100%
+        width calc(100% - 1060px)
         border 1px solid #cae7ee
         .right_top
           height 30px

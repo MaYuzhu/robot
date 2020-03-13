@@ -17,6 +17,16 @@
           <el-calendar v-model="value">
           </el-calendar>
         </div>
+        <div style="background: #ecf6fa;padding: 5px">
+          <span style="margin-right: 22px;">备注：</span>
+          <span style="margin-right: 22px;color:rgb(60, 179, 113)">执行完成：绿色</span>
+          <span style="margin-right: 22px;color: rgb(210, 105, 30);">中途终止：棕色</span>
+          <span style="margin-right: 22px;color: rgb(0, 255, 255);">中途暂停：青色</span>
+          <span style="margin-right: 22px;color: rgb(255, 69, 0);">正在执行：红色</span>
+          <span style="margin-right: 22px;color: rgb(65, 105, 225);">等待执行：蓝色</span>
+          <span style="margin-right: 22px;color: rgb(255, 215, 0);">超期：黄色</span>
+          <span style="margin-right: 22px;color: rgb(218, 112, 214);">超时：紫色</span>
+        </div>
       </div>
       <div class="task_show_wrap_right">
         <div style="display: flex;padding:10px 14px 4px">

@@ -15,20 +15,25 @@
       </div>
       <div class="interval_show_content_right">
         <ul>
-          <li v-for="(item,index) in rightContent"  class="right-item">{{item}}</li>
+          <li @click="dialogVisible()" v-for="(item,index) in rightContent"  class="right-item">{{item}}</li>
         </ul>
       </div>
     </div>
+    <ShowAlertBox :dialogVisible="show_box_visible" @childVisible="isVisible"
+                  :title_dev="title_dev"></ShowAlertBox>
   </div>
 </template>
 
 <script>
   import HeaderTop from '../components/headerTop.vue'
+  import ShowAlertBox from '../components/intervalShowAlertBox.vue'
 
   export default {
     data(){
       return{
         title:'设备告警信息确认 > 间隔展示',
+        show_box_visible:false,
+        title_dev:'110kV',
         input:'',
         indexIschenked:0,
         leftOptions: ['110kV', '主变', '35kV', '330kV', '330KV', '张掖330kV','1号主变','2号主变' ],
@@ -38,7 +43,7 @@
     },
     components: {
       HeaderTop,
-
+      ShowAlertBox
     },
     methods:{
       queryRightContent(index){
@@ -51,6 +56,13 @@
           this.rightContent = ['1111','1112','110kV','乙母PT','1113','1114','1115','1号主变','1101','1116','1117','1118','2号主变','1102',
             '110kV甲母PT','1119','1120','110kV','母联','1100','1121','1号主变','2号主变']
         }
+      },
+      dialogVisible(){
+      	this.show_box_visible = true
+      },
+      isVisible: function (childValue) {
+        // childValue就是子组件传过来的值
+        this.show_box_visible = childValue
       }
     },
   }
@@ -92,7 +104,7 @@
         .is-checked
           background-color: #cdc0e5;
       .interval_show_content_right
-        width calc(100% - 300px)
+        width calc(100% - 320px)
         border 1px solid #cae7ee
         ul
           margin: 10px;
