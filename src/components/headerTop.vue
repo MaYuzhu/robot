@@ -15,7 +15,7 @@
           <span>退出</span>
         </div>
         <div class="welcome">
-          <span>欢迎您，机器人管理系统，</span><span>admin</span>
+          <span>欢迎您，机器人管理系统，</span><span>{{username}}</span>
         </div>
       </div>
       <div class="left_bottom">
@@ -387,7 +387,7 @@
     data () {
       return {
         menu_show:false,
-
+        username: localStorage.getItem("username")
       }
 
     },
