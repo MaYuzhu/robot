@@ -44,14 +44,12 @@ import systemsOutlierQuery from '@/pages/systemsOutlierQuery'
 import systemsStatusDisplay from '@/pages/systemsStatusDisplay'
 
 
-
-
 Vue.use(Router)
 
 const router = new Router({
   routes: [
     {
-      path: '/',
+      path: '/login',
       name: 'login',
       component: login
     },
@@ -240,7 +238,8 @@ router.beforeEach((to, from, next) => {
   if (to.path === '/login') {
     next();
   } else {
-    let token = localStorage.getItem('Authorization');
+    //let token = localStorage.getItem('Authorization');
+    let token = localStorage.getItem('token');
 
     if (token === 'null' || token === '') {
       next('/login');

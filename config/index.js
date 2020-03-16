@@ -11,14 +11,14 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/api': { // 匹配所有以 '/api'开头的请求路径
+      /*'/api': { // 匹配所有以 '/api'开头的请求路径
         target: 'http://192.168.1.71:8092', // 代理目标的基础路径
         //target: 'http://219.146.120.66:8090',
         changeOrigin: true, // 支持跨域
         pathRewrite: {// 重写路径: 去掉路径中开头的'/api'
           '^/api': '/'
         }
-      }
+      }*/
     },
 
     // Various Dev Server settings

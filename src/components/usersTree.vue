@@ -79,12 +79,24 @@
             }]
           }]
         }],
+
         defaultProps: {
           children: 'children',
-          label: 'label'
+          label: 'name',
+          icon: 'el-icon-document'
         }
       };
-    }
+    },
+    mounted(){
+      this.$axios({
+        method: 'get',
+        url: url_api + '/organization/tree',
+
+      }).then(res => {
+        //console.log(res.data.data)
+        this.data = res.data.data
+      })
+    },
   }
 </script>
 

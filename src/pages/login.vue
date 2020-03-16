@@ -53,8 +53,8 @@
     data(){
       return {
         loginForm: {
-          account: '',
-          password: ''
+          account: 'admin',
+          password: '123456'
         },
         tip_text:'',
         userToken:'',
@@ -64,14 +64,14 @@
     methods: {
       ...mapMutations(['changeLogin']),
       login(){
-        this.$router.push('/robots/robot-management')
+        //this.$router.push('/robots/robot-management')
         let _this = this;
-        /*if (this.loginForm.account === '' || this.loginForm.password === '') {
+        if (this.loginForm.account === '' || this.loginForm.password === '') {
           _this.tip_text = '账号或密码不能为空'
         } else {
           this.$axios({
             method: 'post',
-            url: '/api/ui/user/login',
+            url: url_api + '/user/login',
             data: _this.loginForm,
 
           }).then(res => {
@@ -81,17 +81,18 @@
               _this.userToken = 'Bearer ' + res.data.data.token;
               //console.log(_this.userToken)
               // 将用户token保存到vuex中
-              //_this.changeLogin(_this.userToken);
+             // _this.changeLogin({ Authorization: _this.userToken })
+              _this.changeLogin({ token: res.data.data.token})
               localStorage.setItem("token",res.data.data.token);
               localStorage.setItem("userId",res.data.data.userId);
               localStorage.setItem("username",_this.loginForm.account);
-              _this.$router.push('/robots/robot-management');
               _this.count_login = 0
               //alert('登陆成功');
               _this.$message({
                 message: '登录成功',
                 type: 'success'
               });
+              _this.$router.push('/monitors/inspection-monitoring');
             }else if(res.data.code==40006){
               _this.tip_text = res.data.message
             }else {
@@ -112,7 +113,6 @@
             //alert(111)
           });
         }
-        */
       },
 
       reset_close(){

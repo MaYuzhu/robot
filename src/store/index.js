@@ -10,15 +10,19 @@ const store = new Vuex.Store({
 
   state: {
     // 存储token
-    Authorization: localStorage.getItem('Authorization') ? localStorage.getItem('Authorization') : ''
+    Authorization: localStorage.getItem('Authorization') ? localStorage.getItem('Authorization') : '',
+    token: localStorage.getItem('token') ? localStorage.getItem('token') : ''
   },
 
   mutations: {
     // 修改token，并将token存入localStorage
     changeLogin (state, user) {
-      console.log(state, user)
+      //console.log(state, user)
       state.Authorization = user;
-      //localStorage.setItem('Authorization', user.Authorization);
+      localStorage.setItem('Authorization', user.Authorization);
+
+      state.token = user;
+      localStorage.setItem('token', user.token);
     }
   }
 });

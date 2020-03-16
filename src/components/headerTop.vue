@@ -10,7 +10,7 @@
           <i class="head_i bangzhu"></i>
           <span>帮助</span>
         </div>
-        <div>
+        <div @click="logout">
           <i class="head_i tuichu"></i>
           <span>退出</span>
         </div>
@@ -382,6 +382,7 @@
 
 <script>
   import $ from 'jquery'
+  import {mapMutations} from 'vuex'
   export default {
     name: 'HeaderTop',
     data () {
@@ -393,6 +394,7 @@
     },
     props:['title'],
     methods: {
+      ...mapMutations(['changeLogin']),
       // 移入
       mouseOver() {
         this.menu_show = true
@@ -408,7 +410,23 @@
       // 移出
       mouseLeaveLi(index) {
         $(`.menu_ul>:nth-child(${index}) .pop_up`).hide()
-      }
+      },
+      //退出
+      logout(){
+        this.$axios({
+          method: 'delete',
+          url: url_api + '/user/logout',
+        }).then(res =>{
+        	//console.log(res.data)
+          this.changeLogin({ token: null})
+          //localStorage.setItem("token",null);
+          this.$message({
+            message: '您已退出',
+            type: 'success'
+          });
+          this.$router.push('/login');
+        })
+      },
     }
   }
 </script>

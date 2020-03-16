@@ -28,6 +28,15 @@
       XunjianContent,
       taskControl
     },
+    mounted(){
+      this.$axios({
+        method: 'get',
+        url: url_api + '/user/userList',
+
+      }).then(res=>{
+      	//console.log(res.data)
+      })
+    },
   }
 </script>
 

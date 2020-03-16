@@ -9,6 +9,8 @@ import qs from 'qs'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
+import store from './store'
+
 Vue.config.productionTip = false
 
 Vue.prototype.$axios = axios
@@ -18,7 +20,8 @@ axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
 axios.interceptors.request.use(
   config => {
     if (localStorage.getItem('Authorization')) {
-      config.headers.Authorization = localStorage.getItem('Authorization');
+      //config.headers.Authorization = localStorage.getItem('Authorization');
+      config.headers.token = localStorage.getItem('token');
     }
 
     return config;
@@ -33,6 +36,7 @@ Vue.use(ElementUI)
 new Vue({
   el: '#app',
   router,
+  store,
   components: { App },
   template: '<App/>',
   render: h => h(App)
