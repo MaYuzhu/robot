@@ -2,7 +2,7 @@
   <div class="head_wrap">
     <div class="head_left">
       <div class="left_top">
-        <div>
+        <div @click="goHome">
           <i class="head_i shouye"></i>
           <span>首页</span>
         </div>
@@ -413,7 +413,7 @@
       },
       //退出
       logout(){
-        this.$axios({
+        /*this.$axios({
           method: 'delete',
           url: url_api + '/user/logout',
         }).then(res =>{
@@ -425,7 +425,20 @@
             type: 'success'
           });
           this.$router.push('/login');
+        })*/
+        let _this = this
+        _this.ajax_api('delete',url_api + '/user/logout', null, true, function (res) {
+          localStorage.setItem("token",null);
+          _this.$message({
+            message: '您已退出',
+            type: 'success',
+          });
+          _this.$router.push('/login');
         })
+      },
+      //首页
+      goHome(){
+        this.$router.push('/monitors/inspection-monitoring');
       },
     }
   }
@@ -443,16 +456,19 @@
     z-index 999
     .head_left
       .left_top
-        display flex
+        /*display flex*/
         width: calc(100% - 120px);
         height: 28px;
         padding-left 30px
+        padding-top 7px
         box-sizing border-box
         >div
-          display flex
-          align-items center
+          float left
+          /*display flex*/
+          /*align-items center*/
           width 65px
           margin 0 10px
+          cursor pointer
           .head_i
             display inline-block
             width 14px
@@ -656,6 +672,8 @@
           display: inline-block;
           text-align: center;
           font-size: 14px;
+
+
 
 
 </style>

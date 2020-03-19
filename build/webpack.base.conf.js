@@ -1,4 +1,5 @@
 'use strict'
+const webpack = require('webpack')
 const path = require('path')
 const utils = require('./utils')
 const config = require('../config')
@@ -37,8 +38,19 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
-      'jquery': path.resolve(__dirname, '../node_modules/jquery/src/jquery')
-    }
+      'jquery': path.resolve(__dirname, '../node_modules/jquery/src/jquery'),
+      'event2': path.resolve(__dirname, '../static/js/eventemitter2.min.js'),
+      'ros': path.resolve(__dirname, '../static/js/roslib.min.js')
+    },
+    // 添加代码
+    /*plugins: [
+      new webpack.ProvidePlugin({
+        $: "jquery",
+        jQuery: "jquery",
+        jquery: "jquery",
+        "window.jQuery": "jquery"
+      })
+    ],*/
   },
   module: {
     rules: [

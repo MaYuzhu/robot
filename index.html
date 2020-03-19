@@ -4,9 +4,15 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="stylesheet" href="./static/css/reset.css">
+
     <script type="text/javascript">
-      const url_api = 'http://192.168.1.71:8092/ui'
+      var url_api = 'http://192.168.1.71:8092/ui'
+      //var url_api = 'api/ui'
+
     </script>
+
+    <script type="text/javascript" src="./static/js/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="./static/js/roslib.min.js"></script>
     <style>
       html{
         width: 100%;
@@ -24,6 +30,9 @@
       }
       body .el-table th.gutter {
         display: table-cell !important
+      }
+      .el-message--success .el-message__content{
+        display: inline-block
       }
     </style>
     <title>robot</title>

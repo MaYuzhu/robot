@@ -63,7 +63,7 @@
     },
     methods: {
       ...mapMutations(['changeLogin']),
-      login(){
+      /*login(){
         //this.$router.push('/robots/robot-management')
         let _this = this;
         if (this.loginForm.account === '' || this.loginForm.password === '') {
@@ -82,7 +82,7 @@
               //console.log(_this.userToken)
               // 将用户token保存到vuex中
              // _this.changeLogin({ Authorization: _this.userToken })
-              _this.changeLogin({ token: res.data.data.token})
+              //_this.changeLogin({ token: res.data.data.token})
               localStorage.setItem("token",res.data.data.token);
               localStorage.setItem("userId",res.data.data.userId);
               localStorage.setItem("username",_this.loginForm.account);
@@ -113,8 +113,48 @@
             //alert(111)
           });
         }
-      },
+      },*/
 
+      login(){
+      	var _this = this
+        if (this.loginForm.account === '' || this.loginForm.password === '') {
+          _this.tip_text = '账号或密码不能为空'
+          return
+        }
+
+        this.ajax_api_login('POST',url_api + '/user/login',_this.loginForm,true,function (res) {
+          //console.log(res.code)
+          _this.tip_text = ''
+          if(res.code==200){
+
+            localStorage.setItem("token",res.data.token);
+            localStorage.setItem("userId",res.data.userId);
+            localStorage.setItem("username",_this.loginForm.account);
+            _this.count_login = 0
+            //alert('登陆成功');
+            _this.$message({
+              message: '登录成功',
+              type: 'success',
+            });
+            _this.$router.push('/monitors/inspection-monitoring');
+          }else if(res.code==40006){
+            _this.tip_text = res.message
+          }else {
+            if(_this.count_login<=1){
+              _this.tip_text = res.message
+            }else {
+              _this.count_login--
+              _this.tip_text = `${_this.loginForm.account}密码错误,您还有${_this.count_login}次机会`
+            }
+
+            //_this.tip_text = res.data.message
+            //console.log(_this.count_login)
+          }
+
+        })
+
+
+      },
       reset_close(){
         this.loginForm = {
           account: '',

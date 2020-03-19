@@ -3,7 +3,7 @@
     <HeaderTop :title="title"></HeaderTop>
     <div class="content">
       <div class="content_left">
-        <UsersTree></UsersTree>
+        <UsersTree @childKey="childKey"></UsersTree>
       </div>
       <div class="content_right">
         <div class="right_top">
@@ -16,20 +16,20 @@
             <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
             <li @click="addUser"><img src="../../static/images/add.png" alt=""><span>新增</span></li>
             <li><img src="../../static/images/modify.png" alt=""><span>修改</span></li>
-            <li><img src="../../static/images/remove.png" alt=""><span>删除</span></li>
+            <li @click="delUser"><img src="../../static/images/remove.png" alt=""><span>删除</span></li>
             <li><img src="../../static/images/init.png" alt=""><span>初始化密码</span></li>
           </ul>
         </div>
         <p class="right_title">用户操作</p>
         <div>
-          <el-table
-            :data="tableData"
+          <el-table highlight-current-row ref="singleTable"
+            :data="tableData" @current-change="clickChange"
             border
             style="width: 100%">
             <el-table-column
-              prop="id"
+              type="index" :index="index"
               label="序号"
-              width="80">
+              width="50">
             </el-table-column>
             <el-table-column
               prop="sn"
@@ -37,7 +37,8 @@
             </el-table-column>
             <el-table-column
               prop="account"
-              label="登录名">
+              label="登录名"
+              :formatter="formatStatus">
             </el-table-column>
             <el-table-column
               prop="name"
@@ -74,8 +75,22 @@
 
           </el-table>
         </div>
+        <div class="page_box">
+          <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage"
+            :page-sizes="[1, 2, 3, 10]"
+            :page-size="2"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="total">
+          </el-pagination>
+        </div>
+
       </div>
     </div>
+
+
     <el-dialog title="用户管理" :visible.sync="dialogVisibleAddUser">
       <div class="dialog_content">
         <p class="title">
@@ -131,9 +146,9 @@
         </div>
         <div class="input_wrap">
           <p>角色：</p>
-          <el-checkbox v-model="checked_roles[0].checked_role1">管理员</el-checkbox>
-          <el-checkbox v-model="checked_roles[1].checked_role2">操作员</el-checkbox>
-          <el-checkbox v-model="checked_roles[2].checked_role3">普通用户</el-checkbox>
+          <el-checkbox v-model="checked_roles.checked_role1">管理员</el-checkbox>
+          <el-checkbox v-model="checked_roles.checked_role2">操作员</el-checkbox>
+          <el-checkbox v-model="checked_roles.checked_role3">普通用户</el-checkbox>
           <span class="must-mark" style="margin-left: 30px">*</span>
         </div>
 
@@ -178,17 +193,27 @@
         departmentName:'易达图灵',
         value_date:'',
         value_phone:false,
-        checked_roles:[
-          {checked_role1:false},
-          {checked_role2:false},
-          {checked_role3:false}
-        ],
+        checked_roles: {
+          checked_role1:false,
+          checked_role2:false,
+          checked_role3:false
+        },
+
         account:'',
         password:'',
         password_re:'',
         sn:'',
         name:'',
-        phone:''
+        phone:'',
+        irSysOrganizationId:'',
+        total:1,
+        userData : {
+          pageSize:2,
+          pageNum:1
+        },
+        currentPage: 1,
+        currentUserId:'',
+        currentRow:null,
       }
     },
     components: {
@@ -197,20 +222,29 @@
 
     },
     mounted(){
-      this.$axios({
-        method: 'get',
-        url: url_api + '/user/findAllUser',
-      }).then(res => {
-        console.log(res.data.data)
-        this.tableData = res.data.data.items
-      })
+    	this.getAllUserData()
+
+
     },
     methods:{
+    	//新增用户
     	addUser(){
-        this.dialogVisibleAddUser = true
+        var _this = this
+        if(this.irSysOrganizationId == ''){
+          _this.$message({
+            message: '请选择',
+          });
+          return
+        }
+        _this.dialogVisibleAddUser = true
       },
       addUserCommit(){
-    		let roleIds = '2,3'
+    		let _this = this
+        let roleIds = ''
+        for (var Key in _this.checked_roles){
+          roleIds += _this.checked_roles[Key]?Key.substr(Key.length-1,1)+',':''
+        }
+        roleIds = roleIds.substring(0, roleIds.length - 1);
 
         let addUserData = {
           account:this.account,
@@ -218,48 +252,177 @@
           sn:this.sn,
           name:this.name,
           phone:this.phone,
-          irSysOrganizationId:38,
+          irSysOrganizationId:this.irSysOrganizationId,
           roleIds:roleIds
         }
-        this.$axios({
+
+        if(!addUserData.account){
+          _this.$message({
+            message: '请输入用户名',
+          });
+          return
+        }
+        if(!addUserData.password){
+          _this.$message({
+            message: '请输入密码',
+          });
+          return
+        }
+        if(addUserData.password !== _this.password_re ){
+          _this.$message({
+            message: '两次输入密码不一致',
+          });
+          return
+        }
+        if(!addUserData.phone){
+          _this.$message({
+            message: '请输入手机号',
+          });
+          return
+        }
+        if(roleIds==''){
+          _this.$message({
+            message: '请选择角色',
+          });
+          return
+        }
+
+
+        _this.ajax_api('post',url_api + '/user/addUser', addUserData, true, function (res) {
+          if(res.code == 200){
+            _this.$message({
+              message: '新增成功',
+              type: 'success',
+            });
+            _this.getAllUserData()
+          }else {
+            _this.$message({
+              message: '操作失败，请重试',
+            });
+          }
+        })
+
+        /*this.$axios({
           method: 'post',
           url: url_api + '/user/addUser',
           data: addUserData,
         }).then(res => {
           //console.log(res.data)
+        })*/
+
+      },
+      //删除用户
+      clickChange(raw) {
+      	if(raw){
+          console.log(raw.id);
+        }else {
+          console.log(111);
+        }
+
+
+      },
+      delUser(){
+
+      },
+      delUserCommit(){
+
+      },
+
+      formatStatus(row, column) {
+        //return row.account == 'admin' ? '已执行' : '未执行'
+        return row.account
+      },
+      index(val){
+        //(listQuery.page - 1) * listQuery.pageSize + scope.$index + 1
+        return (this.userData.pageNum - 1)*this.userData.pageSize + val + 1
+      },
+      handleSizeChange(val) {
+        //console.log(`每页 ${val} 条`);
+        this.userData.pageSize  =  val
+        this.getAllUserData()
+      },
+      handleCurrentChange(val) {
+        //console.log(`当前页: ${val}`);
+        this.userData.pageNum  =  val
+        this.getAllUserData()
+      },
+      getAllUserData(){
+        var _this = this
+        /*this.$axios({
+         method: 'get',
+         url: url_api + '/user/findAllUser',
+         }).then(res => {
+         console.log(res.data.data)
+         this.tableData = res.data.data.items
+         }).catch(function (err) {
+         console.log(err)
+         })*/
+
+        this.ajax_api('get',url_api + '/user/findAllUser',_this.userData,true,function (res) {
+          console.log(res.data)
+          _this.total = res.data.total
+          _this.tableData = res.data.items
         })
       },
+      childKey(childValue){
+        this.irSysOrganizationId = childValue
+      	//console.log(this.irSysOrganizationId)
+      },
+
     },
   }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .user_management_wrap
+    width 100%
+    height 100%
     .content
       display flex
+      display block\0
+      height calc(100% - 72px)
+      background white
       .content_left
-        width 300px
+        width 302px
+        height 100%
+        float left
+        border 1px solid #cae7ee
+        overflow auto
+        box-sizing border-box
       .content_right
         border 1px solid #cae7ee
-        width calc(100% - 300px)
-        border-right 1px solid #cae7ee
+        width calc(100% - 302px)
+        height 100%
+        /*border-right 1px solid #cae7ee*/
         box-sizing border-box
+        position relative
+        float left
         .right_top
+          background #cae7ee\0;
           background linear-gradient(#e3f2ee,#cae7ee)
+
           display flex
           align-items center
           height 30px
           p
+            float left
             margin-left 10px
             font-weight 600
+            line-height 30px
+          .el-input
+            float left
           ul
             display flex
             padding-left 5px
             li
+              float left
               margin 0 10px
               display flex
               align-items center
               cursor pointer
+              box-sizing border-box
+              height 30px
+              line-height 30px
               img
                 width 16px
                 height 16px
@@ -269,6 +432,14 @@
           height 30px
           line-height 30px
           padding-left 10px
+        .page_box
+          width 100%
+          position absolute
+          left 0px
+          bottom 0px
+          background #e9e9e9
+          padding 5px 10px
+          box-sizing border-box
     div>>>
       .el-dialog
         background #d7efec
@@ -297,12 +468,15 @@
             text-align right
             font-size 14px
             font-weight 600
+            display inline-block
+          .el-switch
+            display inline-block
           .must-mark
             color red
             font-size 18px
             margin-left 5px
             display inline-block
-    div>>>
+    div>>>.right_top
       .el-input
         width 220px
         .el-input__inner
@@ -323,7 +497,11 @@
       .el-dialog__headerbtn
         top 8px
         right 8px
-    div>>>
+    div>>>.el-dialog
+      .el-input
+        width 220px
+        .el-input__inner
+          border 1px solid #cae7ee
       .el-dialog__title
         display inline-block
         position absolute
@@ -331,3 +509,4 @@
         top 4px
         left 10px
 </style>
+
