@@ -2,9 +2,9 @@
 	<div class="robot_management_wrap">
     <HeaderTop :title="title"></HeaderTop>
     <div class="left">
-      <div style="width: 65%;background: #e9e9e9;display: flex">
-        <p style="height:36px;line-height: 36px;margin: 0 18px;">机器人列表：</p>
-        <el-select v-model="value" placeholder="请选择" size="medium">
+      <div style="background: #e9e9e9;display: flex">
+        <p style="height:36px;line-height: 36px;margin: 0 18px;float: left">机器人列表：</p>
+        <el-select v-model="value" placeholder="请选择" size="medium" style="float: left">
           <el-option
             v-for="item in options"
             :key="item.value"
@@ -13,7 +13,7 @@
           </el-option>
         </el-select>
       </div>
-      <div style="background:lavender">
+      <div style="background:lavender;clear: both">
         <XunjianContent></XunjianContent>
       </div>
       <taskControl style=""></taskControl>
@@ -21,13 +21,14 @@
 
     <div class="right" style="width: 35%">
       <div class="right_top">
+        <!--<Button @click="test">test</Button>-->
 
+        <!--<Button @click="test_aaa">TEST</Button>-->
+        <!--<Button @click="test_ie">IE9</Button>-->
       </div>
       <div class="right_bottom">
-        <h1>vue + websocket连接demo</h1>
-        <Button @click="test">test</Button>
-        <Button @click="testaaa">AAAA</Button>
-        <img id="chatterMessage" :src="src" style="width: 200px;height: 200px" alt="">
+        <Button @click="red_pic">红外测试</Button>
+        <img id="chatterMessage" :src="src" style="width: 100%;height: 100%" alt="">
       </div>
     </div>
 
@@ -42,6 +43,7 @@
   import TabsBottom from '../components/tabsBottom.vue'
   import XunjianContent from '../components/xunjianContent.vue'
   import taskControl from '../components/taskControl.vue'
+
 
 	export default {
     components: {
@@ -67,77 +69,72 @@
           // websocket地址
           url: "ws://192.168.1.78:9090"
         },
-        src:''
+        src:'',
+        listener:null,
       }
     },
     methods: {
-    	testaaa(){
+    	red_pic(){
     		let _this = this
         var ros = new ROSLIB.Ros({
           url : 'ws://192.168.1.78:9090'
         });
+    		//console.log(ros)
         ros.on('connection', function() {
           console.log('Connected to websocket server.');
         });
-        var cmdVel = new ROSLIB.Topic({
-          ros : ros,
-          name : '/thermal/image_proc/compressed',
-          messageType : 'sensor_msgs::CompressedImage'
-        });
-        //console.log(cmdVel)
-        var listener = new ROSLIB.Topic({
+
+        _this.listener = new ROSLIB.Topic({
           ros : ros,
           name : '/thermal/image_proc/compressed',
           messageType : 'sensor_msgs/CompressedImage'
         });
 
-        listener.subscribe(function(message) {
-          console.log('Received message on ' + listener.name + ': ' + message.data);
+        _this.listener.subscribe(function(message) {
+          console.log('Received message on ' +': ' + message.data);
           var  url = "data:image/png;base64,";
           var i = message.data
           _this.src = url+ i
-          setInterval(function () {
+          setTimeout(function () {
 
             $("#chatterMessage").src = _this.src
           },1000)
 
-          //listener.unsubscribe();
+          //_this.listener.unsubscribe();
         });
       },
-    	test_aaa(){
-        let ros = new ROSLIB.Ros()
-        ros.connect(this.wsCfg.url)
-        ros.on('error', function(event) {
-          console.log("Error connecting to ROS Bridge. Check to make sure you have launched the rosbridge server.");
-        });
-        ros.on('connection', function() {
-          console.log('Rosbridge connected.');
-          var chatterData = document.getElementById('chatterMessage');
-
-
-          var listener = new ROSLIB.Topic({
-            ros : ros,
-            name : '/thermal/image_proc/compressed',
-            messageType : 'sensor_msgs::CompressedImage'
-          });
-
-          if (1) {
-            console.log('Subscribed to ' + listener.name);
-            //chatterSubscribed = true;
-            listener.subscribe(function(msg) {
-              chatterData.innerHTML = msg.data;
-              console.log(msg)
-            });
-          }
-          else {
-            listener.unsubscribe();
-            //chatterSubscribed = false;
-            console.log('Unsubscribed from ' + listener.name);
-          }
-
-
+      test_aaa(){
+        let _this = this
+        var ros = new ROSLIB.Ros({
+          url : 'ws://192.168.1.78:9090'
         });
 
+        var listener = new ROSLIB.Topic({
+          ros : ros,
+          name : '/detect_result',
+          messageType : 'yidamsg/InspectedResult'
+        });
+
+        listener.subscribe(function(message) {
+          //console.log(message);
+          listener.unsubscribe();
+        });
+      },
+      test_ie(){
+        var ws = new WebSocket("ws://192.168.1.78:9090");
+        console.log(ws)
+        ws.onopen = function() {
+          //ws.send("Hello");  // Sends a message.
+          console.log('ie9')
+        };
+        ws.onmessage = function(e) {
+          // Receives a message.
+          alert(e.data);
+          console.log(ie9)
+        };
+        ws.onclose = function() {
+          alert("closed");
+        };
       },
       createWebSocket() {
         try {
@@ -195,8 +192,17 @@
       }
     },
     mounted() {
-      this.createWebSocket();
-    }
+      //this.createWebSocket();
+    },
+    beforeRouteLeave(to, form, next) {
+      next()
+      if(this.listener){
+        console.log('连接已断开')
+        this.listener.unsubscribe();
+      }
+
+    },
+
   }
 
 </script>
@@ -230,7 +236,7 @@
         .el-input__suffix
           .el-icon-arrow-up
 
-            -ms-transform: rotate(180deg)\0;
+            -ms-transform: rotate(180deg)
 
 
 </style>

@@ -120,18 +120,23 @@
     .right_title_tool
       width 100%
       height 30px
+      background #cae7ee\0
       background linear-gradient(#e3f2ee,#cae7ee)
       display flex
       align-items center
+      line-height 30px
       p
+        float left
         margin-left 10px
         font-weight 600
       div
+        float left
         margin-right 20px
         ul
           display flex
           padding-left 30px
           li
+            float left
             margin-right 30px
             display flex
             align-items center

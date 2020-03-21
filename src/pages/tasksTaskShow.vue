@@ -1,12 +1,11 @@
-
 <template>
   <div class="task_show_wrap">
     <HeaderTop :title="title"></HeaderTop>
     <div style="display: flex">
       <div class="task_show_wrap_left">
         <div class="task_show_top">
-          <p>任务执行时间：</p>
-          <el-date-picker size="mini" :picker-options="pickerOptions"
+          <p style="float: left">任务执行时间：</p>
+          <el-date-picker size="mini" :picker-options="pickerOptions" style="float: left"
             v-model="value_month"
             type="month"
             placeholder="选择月">
@@ -30,7 +29,7 @@
       </div>
       <div class="task_show_wrap_right">
         <div style="display: flex;padding:10px 14px 4px">
-          <p style="width: 90px;font-weight: 600">任务状态：</p>
+          <p style="width: 90px;font-weight: 600;float: left">任务状态：</p>
           <div class="task_show_right_zhuangtai">
             <el-checkbox v-model="checked1">已执行</el-checkbox>
             <el-checkbox v-model="checked2">终止</el-checkbox>
@@ -41,23 +40,23 @@
             <el-checkbox v-model="checked7">超时</el-checkbox>
           </div>
         </div>
-        <div style="display: flex;align-items: center;padding:2px 14px 4px">
-          <p style="width: 90px;font-weight: 600">开始时间：</p>
-          <el-date-picker
+        <div style="display: flex;align-items: center;padding:2px 14px 4px;overflow: hidden">
+          <p style="width: 90px;font-weight: 600;float: left">开始时间：</p>
+          <el-date-picker style="float: left"
             v-model="value1" size="mini"
             type="date"
             placeholder="选择日期">
           </el-date-picker>
-          <p style="width: 90px;font-weight: 600;margin-left: 20px">结束时间：</p>
-          <el-date-picker
+          <p style="width: 90px;font-weight: 600;margin-left: 20px;float: left">结束时间：</p>
+          <el-date-picker style="float: left"
             v-model="value1" size="mini"
             type="date"
             placeholder="选择日期">
           </el-date-picker>
         </div>
-        <div style="display: flex;align-items: center;padding:2px 14px 14px;border-bottom:2px solid #90e8c6 ">
-          <p style="width: 90px;font-weight: 600">任务名称：</p>
-          <el-input v-model="input" size="mini" placeholder="请输入内容"></el-input>
+        <div style="display: flex;align-items: center;padding:2px 14px 14px;border-bottom:2px solid #90e8c6;overflow: hidden">
+          <p style="width: 90px;font-weight: 600;float: left">任务名称：</p>
+          <el-input v-model="input" size="mini" placeholder="请输入内容" style="float: left"></el-input>
         </div>
         <div>
           <ul>
@@ -160,17 +159,21 @@
   .task_show_wrap
     .task_show_wrap_left
       width 60%
+      float left
       .task_show_top
         height 30px
+        background #cae7ee\0
         background: linear-gradient(#e3f2ee,#cae7ee);
         border-top: 1px solid #cae7ee;
         padding-left: 5px;
         display flex
         align-items center
         .el-date-editor
+          float left
           width 150px
           margin 0 20px
         .task_show_find
+          float left
           display flex
           align-items center
           img
@@ -180,6 +183,8 @@
     .task_show_wrap_right
       width 40%
       border 2px solid #90e8c6
+      float left
+      box-sizing border-box
       .el-date-editor
         width 130px
       >div
@@ -193,6 +198,7 @@
           display flex
           padding 6px 14px
           li
+            float left
             margin-right 30px
             display flex
             align-items center

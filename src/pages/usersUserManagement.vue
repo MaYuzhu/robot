@@ -15,7 +15,7 @@
             <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
             <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
             <li @click="addUser"><img src="../../static/images/add.png" alt=""><span>新增</span></li>
-            <li><img src="../../static/images/modify.png" alt=""><span>修改</span></li>
+            <li @click="updateUser"><img src="../../static/images/modify.png" alt=""><span>修改</span></li>
             <li @click="delUser"><img src="../../static/images/remove.png" alt=""><span>删除</span></li>
             <li><img src="../../static/images/init.png" alt=""><span>初始化密码</span></li>
           </ul>
@@ -81,7 +81,7 @@
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[1, 2, 3, 10]"
-            :page-size="2"
+            :page-size="10"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
           </el-pagination>
@@ -158,6 +158,77 @@
         <el-button type="primary" @click="addUserCommit">保 存</el-button>
       </span>
     </el-dialog>
+    <!--删除用户-->
+    <el-dialog title="确认" :visible.sync="dialogVisibleDelUser" class="del_user">
+      <div class="dialog_content" style="height: 60px;font-weight: 600;font-size: 16px;line-height: 40px">
+        确认删除该用户吗？
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisibleDelUser = false">取 消</el-button>
+        <el-button type="primary" @click="delUserCommit">确 认</el-button>
+      </span>
+    </el-dialog>
+
+    <!--修改用户-->
+    <el-dialog title="用户管理" :visible.sync="dialogVisibleUpdateUser">
+      <div class="dialog_content">
+        <p class="title">
+          <span>部门：</span><span>{{departmentName}}</span>
+        </p>
+        <div class="input_wrap">
+          <p>登录名：</p>
+          <el-input size="mini" v-model="update_account" disabled="true"></el-input>
+          <span class="must-mark">*</span>
+        </div>
+        <div class="input_wrap">
+          <p>工号：</p>
+          <el-input size="mini" v-model="sn"></el-input>
+          <span class="must-mark"></span>
+        </div>
+        <div class="input_wrap">
+          <p>姓名：</p>
+          <el-input size="mini" v-model="name"></el-input>
+          <span class="must-mark"></span>
+        </div>
+        <div class="input_wrap">
+          <p>手机号：</p>
+          <el-input size="mini" v-model="phone"></el-input>
+          <span class="must-mark">*</span>
+        </div>
+        <div class="input_wrap">
+          <p>有效期至：</p>
+          <el-date-picker size="mini"
+                          v-model="value_date"
+                          type="datetime"
+                          placeholder="选择日期时间">
+          </el-date-picker>
+          <span class="must-mark"></span>
+        </div>
+        <div class="input_wrap">
+          <p>短信服务：</p>
+          <el-switch
+            v-model="value_phone"
+            active-color="#13ce66"
+            inactive-color="#ff4949">
+          </el-switch>
+
+        </div>
+        <div class="input_wrap">
+          <p>角色：</p>
+          <el-checkbox v-model="checked_roles.checked_role1">管理员</el-checkbox>
+          <el-checkbox v-model="checked_roles.checked_role2">操作员</el-checkbox>
+          <el-checkbox v-model="checked_roles.checked_role3">普通用户</el-checkbox>
+          <span class="must-mark" style="margin-left: 30px">*</span>
+        </div>
+
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisibleUpdateUser = false">取 消</el-button>
+        <el-button type="primary" @click="updateUserCommit">保 存</el-button>
+      </span>
+    </el-dialog>
+
+
   </div>
 </template>
 
@@ -190,7 +261,8 @@
         input2:'',
         input3:'',
         dialogVisibleAddUser: false,
-        departmentName:'易达图灵',
+        dialogVisibleDelUser: false,
+        departmentName:'',
         value_date:'',
         value_phone:false,
         checked_roles: {
@@ -208,12 +280,16 @@
         irSysOrganizationId:'',
         total:1,
         userData : {
-          pageSize:2,
+          pageSize:10,
           pageNum:1
         },
         currentPage: 1,
         currentUserId:'',
         currentRow:null,
+        isCheckedUserId:'',
+
+        dialogVisibleUpdateUser:false,
+        update_account:'',
       }
     },
     components: {
@@ -223,7 +299,6 @@
     },
     mounted(){
     	this.getAllUserData()
-
 
     },
     methods:{
@@ -237,6 +312,18 @@
           return
         }
         _this.dialogVisibleAddUser = true
+        _this.account =''
+        _this.password = ''
+        _this.sn = ''
+        _this.name = ''
+        _this.phone= ''
+        _this.password_re = ''
+        _this.checked_roles = {
+          checked_role1:false,
+          checked_role2:false,
+          checked_role3:false
+        }
+
       },
       addUserCommit(){
     		let _this = this
@@ -300,6 +387,7 @@
               message: '操作失败，请重试',
             });
           }
+          _this.dialogVisibleAddUser = false
         })
 
         /*this.$axios({
@@ -314,17 +402,59 @@
       //删除用户
       clickChange(raw) {
       	if(raw){
-          console.log(raw.id);
+          //console.log(raw.id);
+          this.isCheckedUserId = raw.id
         }else {
-          console.log(111);
+          this.isCheckedUserId = null
         }
-
-
       },
       delUser(){
+        if(!this.isCheckedUserId){
+          this.$message({
+            message: '请选择用户',
+            duration: 2000
+          });
+          return
+        }
+        this.dialogVisibleDelUser = true
 
       },
       delUserCommit(){
+      	let _this= this
+        _this.ajax_api('DELETE',url_api + '/user/delUser/' + _this.isCheckedUserId,
+          {},
+          true, function (res) {
+          if(res.code == 200){
+            _this.$message({
+              message: '删除成功',
+              type: 'success',
+            });
+            _this.getAllUserData()
+          }else {
+            _this.$message({
+              message: '操作失败，请重试',
+            });
+          }
+        })
+        _this.dialogVisibleDelUser = false
+      },
+      //修改用户
+      updateUser(){
+        let _this = this
+        if(!_this.isCheckedUserId){
+          this.$message({
+            message: '请选择用户',
+            duration: 2000
+          });
+          return
+        }
+        _this.dialogVisibleUpdateUser = true
+        _this.ajax_api('get',url_api + '/user/info/' + _this.isCheckedUserId, {}, true, function (res) {
+          console.log(res)
+          _this.update_account = res.data.account
+        })
+      },
+      updateUserCommit(){
 
       },
 
@@ -359,14 +489,14 @@
          })*/
 
         this.ajax_api('get',url_api + '/user/findAllUser',_this.userData,true,function (res) {
-          console.log(res.data)
+          //console.log(res.data)
           _this.total = res.data.total
           _this.tableData = res.data.items
         })
       },
       childKey(childValue){
-        this.irSysOrganizationId = childValue
-      	//console.log(this.irSysOrganizationId)
+        this.irSysOrganizationId = childValue.id
+        this.departmentName = childValue.name
       },
 
     },
@@ -398,7 +528,7 @@
         position relative
         float left
         .right_top
-          background #cae7ee\0;
+          background #cae7ee\0
           background linear-gradient(#e3f2ee,#cae7ee)
 
           display flex
@@ -440,6 +570,8 @@
           background #e9e9e9
           padding 5px 10px
           box-sizing border-box
+
+
     div>>>
       .el-dialog
         background #d7efec
@@ -508,5 +640,10 @@
         font-size 14px
         top 4px
         left 10px
+    .del_user /deep/ .el-dialog
+        background #d7efec
+        width: 20%;
+        min-width: 180px;
+        padding-bottom: 6px;
 </style>
 

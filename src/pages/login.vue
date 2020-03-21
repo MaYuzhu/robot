@@ -114,6 +114,12 @@
           });
         }
       },*/
+      test(){
+      	let that = this
+        this.$message({
+          message: '登录成功1111',
+        });
+      },
 
       login(){
       	var _this = this

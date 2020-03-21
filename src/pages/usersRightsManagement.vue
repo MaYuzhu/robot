@@ -22,7 +22,7 @@
       <div class="content_right">
         <div class="right_top">
           <p>名称：</p>
-          <el-input v-model="input" placeholder="请输入内容" style="width: 180px" size="mini"></el-input>
+          <el-input v-model="input" placeholder="请输入内容" style="width: 180px;float: left" size="mini"></el-input>
           <ul>
             <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
             <li><img src="../../static/images/save.png" alt=""><span>保存</span></li>
@@ -137,9 +137,12 @@
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .management_wrap
+    width 100%
     .management_content
+      width 100%
       display flex
       .content_left
+        float left
         width 300px
         height 668px
         border 1px solid #cae7ee
@@ -147,14 +150,19 @@
         .left_top
           height 30px
           display flex
+          background #cae7ee\0
           background linear-gradient(#e3f2ee,#cae7ee)
           align-items center
           padding-left 10px
           box-sizing border-box
+          p
+            float left
           ul
+            float left
             display flex
             padding-left 5px
             li
+              float left
               margin 0 30px
               display flex
               align-items center
@@ -165,6 +173,7 @@
                 margin-right 4px
 
         .left_content
+          float left
           ul
             li
               display flex
@@ -176,19 +185,25 @@
                 margin-right 4px
 
       .content_right
-        width calc(100% - 300px)
+        width calc(100% - 302px)
+        float left
         .right_top
           width 100%
           height 30px
           display flex
+          background #cae7ee\0
           background linear-gradient(#e3f2ee,#cae7ee)
           align-items center
           padding-left 10px
           box-sizing border-box
+          p
+            float left
           ul
+            float left
             display flex
             padding-left 5px
             li
+              float left
               margin 0 30px
               display flex
               align-items center

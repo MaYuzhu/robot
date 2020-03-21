@@ -9,6 +9,12 @@ import qs from 'qs'
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
+import { message } from './utils/resetMessage'
+
+Vue.use(ElementUI)
+// 命名根据需要，DonMessage只是在文章中使用
+Vue.prototype.$message = message
+
 //import store from './store'
 
 import "babel-polyfill"  //兼容IE9
@@ -81,7 +87,6 @@ axios.defaults.headers.post['Content-Type'] = 'application/json;charset=UTF-8'
   // return Promise.reject(err);
 });*/
 
-Vue.use(ElementUI)
 
 /* eslint-disable no-new */
 new Vue({

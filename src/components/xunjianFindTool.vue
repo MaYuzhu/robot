@@ -30,20 +30,24 @@
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .xunjian_find_wrap
+    background #cae7ee\0
     background: linear-gradient(#e3f2ee,#cae7ee);
     border-top: 1px solid #cae7ee;
     padding-left 10px
     div>>>
       height 30px
       .el-input
+        float left
         width 180px
         .el-input__inner
           height 30px
           line-height 30px
       ul
+        float left
         display flex
         padding-left 30px
         li
+          float left
           margin-right 30px
           display flex
           align-items center

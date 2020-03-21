@@ -63,6 +63,7 @@
       display flex
       height 30px
       >li
+        float left
         margin 0 16px
         >button
           color white

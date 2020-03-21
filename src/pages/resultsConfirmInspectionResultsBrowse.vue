@@ -5,7 +5,7 @@
       <p>点位类型：</p>
       <div class="all_content">
         <el-checkbox style="float: left" :indeterminate="isIndeterminatePoint" v-model="checkAllPoint" @change="handleCheckAllChangePoint">全部</el-checkbox>
-        <el-checkbox-group v-model="checkedPoints" @change="handleCheckedCitiesChangePoint">
+        <el-checkbox-group style="float: left" v-model="checkedPoints" @change="handleCheckedCitiesChangePoint">
           <el-checkbox v-for="pointWeizhi in pointsArr" :label="pointWeizhi" :key="pointWeizhi">{{pointWeizhi}}</el-checkbox>
         </el-checkbox-group>
       </div>
@@ -26,7 +26,7 @@
                           type="date"
                           placeholder="选择日期">
           </el-date-picker>
-          <el-radio v-model="radio" label="1">已审核</el-radio>
+          <el-radio style="line-height: 27px" v-model="radio" label="1">已审核</el-radio>
           <el-radio v-model="radio" label="2">未审核</el-radio>
           <div>
             <ul>
@@ -134,39 +134,53 @@
       display flex
       align-items center
       p
+        float left
         font-weight 600
         margin 0 50px 0 40px
+        line-height 28px
       .all_content
+        float left
         display flex
+        height 28px
+        line-height 28px
         div
           margin 0 30px
     .results_browse_content
       display flex
       .results_browse_left
         background white
+        float left
       .results_browse_right
         border 1px solid #cae7ee
-        width 100%
+        width calc(100% - 310px)
         background white
+        float left
         .right_title_tool
           width 100%
           height 30px
+          background #cae7ee\0
           background linear-gradient(#e3f2ee,#cae7ee)
           display flex
           align-items center
           p
+            float left
             margin-left 10px
             font-weight 600
+            line-height 28px
           div
+            float left
             margin-right 20px
             ul
+              float left
               display flex
               padding-left 30px
               li
+                float left
                 margin-right 30px
                 display flex
                 align-items center
                 cursor pointer
+                line-height 30px
                 img
                   width 16px
                   height 16px

@@ -53,19 +53,23 @@
   .alarm_query_wrap
     .tools_query
       height 30px
+      background #cae7ee\0
       background: linear-gradient(#e3f2ee,#cae7ee);
       border-top: 1px solid #cae7ee;
       display flex
       align-items center
       p
+        float left
         margin-left 10px
         font-weight 600
       div
+        float left
         margin-right 20px
         ul
           display flex
           padding-left 30px
           li
+            float left
             margin-right 30px
             display flex
             align-items center

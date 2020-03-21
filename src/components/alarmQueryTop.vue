@@ -108,19 +108,22 @@
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .alarm_query_wrap
     margin 20px 20px 20px 5px
+    overflow hidden
     .li_xunjian_title
       margin 10px 0
       display flex
+      overflow hidden
       .el-radio
         width 210px
         margin-left 10px
-
+        float left
       p
         font-size 14px
         font-weight 600
         width 120px
         text-align right
         margin-right 20px
+        float left
       .all_content
         width: calc(100% - 380px);
         float: left;

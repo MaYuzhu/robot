@@ -1,6 +1,6 @@
 <template>
 	<div style="width: 300px;height: 668px;border:1px solid #cae7ee">
-    <p style="padding-left:5px;height:30px;line-height:30px;background:linear-gradient(#e3f2ee,#cae7ee);">设备树</p>
+    <p class="dev_tree_p" style="padding-left:5px;height:30px;line-height:30px;background:linear-gradient(#e3f2ee,#cae7ee);">设备树</p>
     <div>
       <el-tree
         :data="data"
@@ -90,6 +90,9 @@
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
+  .dev_tree_p{
+    background #ddece8
+  }
   .custom-tree-node {
     flex: 1;
     display: flex;

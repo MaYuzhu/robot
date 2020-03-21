@@ -12,13 +12,13 @@
         </el-option>
       </el-select>
       <p>开始时间：</p>
-      <el-date-picker size="mini" style="width: 160px"
+      <el-date-picker size="mini" style="width: 160px;float: left"
                       v-model="value1"
                       type="date"
                       placeholder="选择日期">
       </el-date-picker>
       <p>结束时间：</p>
-      <el-date-picker size="mini" style="width: 160px"
+      <el-date-picker size="mini" style="width: 160px;float: left"
                       v-model="value2"
                       type="date"
                       placeholder="选择日期">
@@ -118,12 +118,19 @@
       align-items center
       height 32px
       p
+        float left
         margin-left 10px
         font-weight 600
+      .el-select
+        float left
+      div>>>el-date-picker
+        float left
       ul
+        float left
         display flex
         padding-left 5px
         li
+          float left
           margin 0 10px
           display flex
           align-items center
@@ -136,6 +143,7 @@
     .log_title
       height 30px
       line-height 30px
+      background #e3f2ee\0
       background linear-gradient(#e3f2ee,#cae7ee)
       padding-left 10px
 </style>

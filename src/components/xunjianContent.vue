@@ -29,12 +29,19 @@
       justify-content space-around
       background #e3f2ee
       padding 8px
+      overflow hidden
+      box-sizing border-box
     >:nth-child(1)
       >p
+        float left
         width 33%
-        margin 3px
+        margin 0px
+        box-sizing border-box
     >:nth-child(2),:nth-child(3)
       >p
+        float left
         width 33%
-        margin 3px
+        margin 0px
+        box-sizing border-box
+
 </style>

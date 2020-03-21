@@ -2,16 +2,16 @@
   <div class="monitors_robot_wrap">
     <HeaderTop :title="title"></HeaderTop>
     <div style="display: flex">
-      <div style="width: 55%;">
+      <div style="width: 55%;float: left">
         <XunjianContent></XunjianContent>
         <taskControl></taskControl>
       </div>
-      <div style="width: 45%;height: 100%">
+      <div style="width: 45%;height: 100%;float: left">
         <img src="../../static/bbb.jpg" style="width: 100%;height:432px" alt="">
       </div>
     </div>
     <div style="display: flex;">
-      <div style="width: 55%; height: 300px;background: white">
+      <div style="width: 55%; height: 300px;background: white;float: left">
         <TabsBottom></TabsBottom>
       </div>
       <div class="control_wrap">
@@ -44,7 +44,7 @@
             <div class="control_title">
               <div>
                 <el-select v-model="value" placeholder="请选择" size="mini"
-                           style="width: 50px;">
+                           style="width: 50px;float: left">
                   <el-option
                     v-for="item in options"
                     :key="item.value"
@@ -53,7 +53,7 @@
                   </el-option>
                 </el-select>
               </div>
-              <span>车体控制</span>
+              <span style="float: left">车体控制</span>
               <el-button type="info" size="mini" class="xunhuan_button">循环</el-button>
             </div>
             <div class="car-direction">
@@ -177,6 +177,8 @@
         width 45%
         height 300px
         border 1px solid #c6cdd3
+        float left
+        box-sizing border-box
         .control_header
           height 80px
           background linear-gradient(#e3f2ee,#cae7ee)
@@ -184,10 +186,12 @@
           padding-top 6px
           box-sizing border-box
           >.control_header_left
+            float left
             display flex
             width 310px
             flex-wrap wrap
             .button_control_header
+              float left
               width 60px
               height 26px
               background #1e1e1e
@@ -198,12 +202,17 @@
               justify-content center
               img
                 width 36%
+                display block
+                margin 0 auto
           >.control_header_right
+            float left
             display flex
             flex-wrap wrap
             width 240px
             margin-left 40px
+            box-sizing border-box
             >p
+              float left
               width 100px
               height 27px
               border-radius 3px
@@ -212,18 +221,22 @@
               line-height 27px
               text-align center
               margin 0 10px
+              margin-bottom 8px
         .control_content
           display flex
           justify-content space-between
           .control_content_box
+            float left
             width 33.3%
             height 218px
             border 1px solid #bae9d8
             background white
+            box-sizing border-box
             .control_title
               height 26px
               line-height 26px
               text-align center
+              background #cae7ee\0
               background linear-gradient(#e3f2ee,#cae7ee)
               display flex
               justify-content space-around

@@ -8,13 +8,13 @@
                 :label="item.label"
                 :value="item.value"></el-radio>
       <p>开始时间：</p>
-      <el-date-picker size="mini" style="width: 160px"
+      <el-date-picker size="mini" style="width: 160px;float: left"
                       v-model="value1"
                       type="date"
                       placeholder="选择日期">
       </el-date-picker>
       <p>结束时间：</p>
-      <el-date-picker size="mini" style="width: 160px"
+      <el-date-picker size="mini" style="width: 160px;float: left"
                       v-model="value2"
                       type="date"
                       placeholder="选择日期">
@@ -62,17 +62,21 @@
     .systems_outlier_top
       display flex
       height 30px
+      background #cae7ee\0
       background linear-gradient(#e3f2ee,#cae7ee)
       align-items center
       .el-radio,>p
         margin 0 20px
+        float left
       >p
         margin-left  30px
         font-weight 600
       ul
+        float left
         display flex
         padding-left 30px
         li
+          float left
           margin-right 30px
           display flex
           align-items center

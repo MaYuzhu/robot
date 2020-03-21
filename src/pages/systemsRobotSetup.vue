@@ -270,7 +270,9 @@
       display flex
       min-height 100%
       .left ,.right
+        float left
         width 50%
+        height 700px
         .left_title ,.right_title
           height 50px
           font-size 20px
@@ -296,13 +298,16 @@
             color #109cb4
             >div
               >div
+                height 30px
                 display flex
                 align-items center
                 margin 14px auto 14px 40px
                 >p
+                  float left
                   width 120px
                   text-align right
                 .el-input
+                  float left
                   width 200px
                 div>>>
                   .el-input__inner
@@ -314,9 +319,13 @@
               display flex
               align-items center
               justify-content center
+              height 50px
               >p
+                margin-left 10px
+                float left
                 text-align right
               >div
+                float left
                 width 180px
                 margin 10px 20px 10px
               div>>>
@@ -332,6 +341,7 @@
             align-items center
             margin 44px auto
             >p
+              float left
               font-size 14px
               color #109cb4
               width 120px

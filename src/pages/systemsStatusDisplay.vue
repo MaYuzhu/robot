@@ -188,9 +188,13 @@
     .systems_content
       display flex
       height 100%
+      overflow hidden
       .left,.right
+        float left
         border 1px solid #cbeeca
         width 50%
+        border-bottom-color transparent
+        box-sizing border-box
         .left_top,.right_top
           height: 39px;
           font-size: 17px;
@@ -263,6 +267,7 @@
               align-items center
               margin 28px
               >p
+                float left
                 width 200px
                 text-align right
           div>>>.el-switch__core

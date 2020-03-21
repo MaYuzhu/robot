@@ -191,11 +191,13 @@
         let that = this
         that.checkedNameList.push.apply(that.checkedNameList,that.chapterNameList)
         that.chapterNameList = []
+        that.isLeftActive = -1
       },
       allLeft(){
         let that = this
         that.chapterNameList.push.apply(that.chapterNameList,that.checkedNameList)
         that.checkedNameList = []
+        that.isRightActive = -1
       },
       upTop(){
         let indexNum = 0;
@@ -250,22 +252,28 @@
   .reports_wrap
     .reports_tools
       height 30px
+      background #cae7ee\0
       background linear-gradient(#e3f2ee,#cae7ee)
       display flex
       align-items center
+      line-height 30px
       p
+        float left
         margin-left 10px
         font-weight 600
       div
+        float left
         margin-right 20px
         ul
           display flex
           padding-left 30px
           li
+            float left
             margin-right 30px
             display flex
             align-items center
             cursor pointer
+            line-height 30px
             img
               width 16px
               height 16px
@@ -284,7 +292,9 @@
       .my_transfer
         display flex
         justify-content space-around
+        height 400px
         ul
+          float left
           width 200px
           height 360px
           border 1px solid #d3d3d3
@@ -298,9 +308,11 @@
 
 
         .but_left_box
+          float left
           display flex
           flex-direction column
           justify-content center
+          margin 0 20px
           .but_left
             border: 1px solid gray;
             padding: 2px 25px;
@@ -317,9 +329,11 @@
             align-items center
 
         .but_right_box
+          float left
           display flex
           flex-direction column
           justify-content center
+          margin 0 20px
           .but_right
             border: 1px solid gray;
             padding: 2px 25px;

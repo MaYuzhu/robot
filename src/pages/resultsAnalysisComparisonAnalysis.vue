@@ -12,20 +12,20 @@
         </div>
       </div>
       <div class="analysis_content">
-        <div>
+        <div style="float: left">
           <DevTree></DevTree>
         </div>
         <div class="center">
           <div class="center_top">
             <div class="top1">
               <p>开始时间：</p>
-              <el-date-picker size="mini" style="width: 160px"
+              <el-date-picker size="mini" style="width: 160px;float: left"
                               v-model="value1"
                               type="date"
                               placeholder="选择日期">
               </el-date-picker>
               <p>结束时间：</p>
-              <el-date-picker size="mini" style="width: 160px"
+              <el-date-picker size="mini" style="width: 160px;float: left"
                               v-model="value2"
                               type="date"
                               placeholder="选择日期">
@@ -167,7 +167,9 @@
       margin 10px 0
       display flex
       align-items center
+      overflow hidden
       p
+        float left
         font-size 14px
         font-weight 600
         width 120px
@@ -185,13 +187,17 @@
       .center
         width 760px
         border 1px solid #cae7ee
+        float left
         .center_top
+          background #cae7ee\0
           background linear-gradient(#e3f2ee,#cae7ee);
           .top1, .top2
             display flex
             align-items center
             height 30px
+            line-height 30px
             p
+              float left
               margin-left 10px
               font-weight 600
         .top3
@@ -201,6 +207,7 @@
             display flex
             padding-left 30px
             li
+              float left
               margin-right 30px
               display flex
               align-items center
@@ -212,11 +219,14 @@
 
 
       .right
-        width calc(100% - 1060px)
+        width calc(100% - 1064px)
         border 1px solid #cae7ee
+        float left
+        box-sizing border-box
         .right_top
           height 30px
           padding 7px 0 0 10px
+          background #cae7ee\0
           background linear-gradient(#e3f2ee,#cae7ee);
           box-sizing border-box
 </style>

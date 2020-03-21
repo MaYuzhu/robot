@@ -116,7 +116,10 @@
       //node-click节点点击事件
       nodeClick(){
       	//console.log(this.$refs.tree.getCurrentKey())
-        this.$emit('childKey', this.$refs.tree.getCurrentKey())
+        this.$emit('childKey', {
+        	id:this.$refs.tree.getCurrentKey(),
+          name:this.$refs.tree.getCurrentNode().name
+        })
       }
 
     },

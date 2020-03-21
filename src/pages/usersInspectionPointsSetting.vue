@@ -14,7 +14,7 @@
       </el-select>
     </div>
     <div class="point_setting_tools">
-      <el-input v-model="input" placeholder="请输入内容" style="width: 180px" size="mini"></el-input>
+      <el-input v-model="input" placeholder="请输入内容" style="width: 180px;float: left" size="mini"></el-input>
       <ul>
         <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
         <li><img src="../../static/images/add.png" alt=""><span>添加</span></li>
@@ -64,17 +64,20 @@
       align-items center
       padding 0 0 0 70px
       p
+        float left
         font-weight 600
         font-size 14px
     .point_setting_tools
       width 100%
       height 30px
       display flex
+      background  #cae7ee\0
       background linear-gradient(#e3f2ee,#cae7ee)
       align-items center
       padding-left 10px
       box-sizing border-box
       ul
+        float left
         display flex
         padding-left 5px
         li
@@ -82,6 +85,7 @@
           display flex
           align-items center
           cursor pointer
+          float left
           img
             width 16px
             height 16px

@@ -1,6 +1,6 @@
 <template>
 	<div class="xunjian_wrap">
-    <div class="li_xunjian_title">
+    <div class="li_xunjian_title" style="height: 50px">
       <p>巡检类型：</p>
       <div class="all_content">
         <el-radio v-model="radio" v-for="item in radio_items"
@@ -100,11 +100,13 @@
     .li_xunjian_title
       margin 10px 0
       display flex
+      overflow hidden
       .el-radio
         width 210px
         margin-left 10px
-
+        float left
       p
+        float left
         font-size 14px
         font-weight 600
         width 120px

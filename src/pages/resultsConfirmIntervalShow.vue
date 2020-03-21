@@ -72,12 +72,14 @@
   .interval_show_wrap
     .interval_show_top
       height 30px
+      background #e3f2ee\0
       background: linear-gradient(#e3f2ee,#cae7ee);
       border-top: 1px solid #cae7ee;
       display flex
       align-items center
       padding-left 30px
       p
+        float left
         margin 0 10px
         display flex
         align-items center
@@ -92,6 +94,8 @@
       .interval_show_content_left
         width 300px
         border 1px solid #cae7ee
+        float left
+        box-sizing border-box
         .left-item
           width: 260px;
           height: 80px;
@@ -104,8 +108,10 @@
         .is-checked
           background-color: #cdc0e5;
       .interval_show_content_right
-        width calc(100% - 320px)
+        width calc(100% - 302px)
         border 1px solid #cae7ee
+        float left
+        box-sizing border-box
         ul
           margin: 10px;
           padding: 3px;

@@ -67,30 +67,43 @@
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .user_structure_wrap
+    height 100%
     .content
       display flex
+      height calc(100% - 72px)
+      background white
       .content_left
-        background white
+        width 302px
+        height 100%
+        float left
+        border 1px solid #cae7ee
+        overflow auto
+        box-sizing border-box
       .content_right
         border 1px solid #cae7ee
-        width calc(100% - 300px)
-        border-right 1px solid #cae7ee
+        width calc(100% - 302px)
+        height 100%
         box-sizing border-box
-        background white
+        position relative
+        float left
         .right_top
+          background #cae7ee\0;
           background linear-gradient(#e3f2ee,#cae7ee)
           display flex
           align-items center
           height 30px
           p
+            float left
             margin-left 10px
             font-weight 600
           ul
+            float left
             display flex
             padding-left 5px
             li
               margin 0 10px
               display flex
+              float left
               align-items center
               cursor pointer
               img
@@ -98,6 +111,7 @@
                 height 16px
                 margin-right 4px
         .right_title
+          background #d5f2f9 \0;
           background linear-gradient(#e3f2ee,#cae7ee)
           height 56px
           padding: 5px 5px 5px 10px;
@@ -126,9 +140,11 @@
                 width 260px
                 line-height 36px
                 text-align right
+                float left
               >:nth-child(2)
                 border 1px solid #bbb
                 background #fff
-                width calc(100% - 260px)
+                width calc(100% - 280px)
                 line-height 36px
+                float left
 </style>

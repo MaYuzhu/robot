@@ -116,6 +116,10 @@
           justify-content center
           align-items center
           box-sizing border-box
+          line-height 36px
+          span
+            display inline-block
+            margin 0 10px
           .green
             display inline-block
             width 16px
