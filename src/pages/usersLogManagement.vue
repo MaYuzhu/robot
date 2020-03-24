@@ -28,38 +28,49 @@
       </ul>
     </div>
     <div class="log_title">日志列表</div>
-    <div>
+    <div class="table_box">
       <el-table size="mini"
         :data="tableData"
         border
         style="width: 100%">
         <el-table-column
-          prop="date"
+          type="index" :index="index"
           label="序号"
-          width="180">
+          width="50">
         </el-table-column>
         <el-table-column
-          prop="name"
-          label="日志类型">
+          prop="type"
+          label="日志类型" :formatter="formatStatus">
         </el-table-column>
         <el-table-column
-          prop="address"
+          prop="content"
           label="日志内容">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="createTime"
           label="日志时间">
         </el-table-column>
         <el-table-column
-          prop="address"
+          prop="user.name"
           label="创建者">
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="content"
           label="变电站">
         </el-table-column>
 
       </el-table>
+      <div class="page_box">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[1, 2, 3, 10]"
+          :page-size="10"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total">
+        </el-pagination>
+      </div>
     </div>
   </div>
 </template>
@@ -73,7 +84,8 @@
         title:'系统设置 > 日志管理',
         value1:'',
         value2:'',
-        options: [{
+        options: [
+        	{
           value: '选项1',
           label: '系统'
         }, {
@@ -84,7 +96,8 @@
           label: '客户端'
         }],
         value: '',
-        tableData: [{
+        tableData: [
+        	{
           date: '1',
           name: '123',
           address: ' 1518 '
@@ -100,18 +113,57 @@
           date: '4',
           name: '1002',
           address: ' 1516 '
-        }]
+        }],
+
+        total:1,
+        logData : {
+          pageSize:10,
+          pageNum:1
+        },
+        currentPage: 1,
       }
     },
     components: {
       HeaderTop,
 
     },
+    mounted(){
+      this.getLogList()
+    },
+    methods:{
+    	getLogList(){
+    		let _this = this
+        this.ajax_api('get',url_api + '/operation-log/logList',_this.logData,true,function (res) {
+          //console.log(res)
+          _this.total = res.data.total
+          _this.tableData = res.data
+        })
+
+      },
+      formatStatus(row, column) {
+        return row.type == 0 ? '系统' : row.type == 1 ? '机器人' : '客户端'
+      },
+      index(val){
+        //(listQuery.page - 1) * listQuery.pageSize + scope.$index + 1
+        return (this.logData.pageNum - 1)*this.logData.pageSize + val + 1
+      },
+      handleSizeChange(val) {
+        //console.log(`每页 ${val} 条`);
+        this.logData.pageSize  =  val
+        this.getLogList()
+      },
+      handleCurrentChange(val) {
+        //console.log(`当前页: ${val}`);
+        this.logData.pageNum  =  val
+        this.getLogList()
+      },
+    },
   }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .log_management_wrap
+    height 100%
     .log_top
       background linear-gradient(#e3f2ee,#cae7ee)
       display flex
@@ -146,4 +198,13 @@
       background #e3f2ee\0
       background linear-gradient(#e3f2ee,#cae7ee)
       padding-left 10px
+    .table_box
+      height calc(100% - 170px)
+      border 1px solid #cae7ee
+      position relative
+      background white
+      .page_box
+        width 100%
+        position absolute
+        bottom 0
 </style>

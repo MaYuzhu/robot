@@ -63,7 +63,7 @@ exports.install = function (Vue, options) {
       }
     })
     function dataType(data) {
-      if(type=='post'){
+      if(type=='post' || type=='put'){
         return JSON.stringify(data)
       }else {
         return data

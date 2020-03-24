@@ -214,11 +214,11 @@
     .left
       width 65%
       float left
-      height calc(100% - 70px)
+      height calc(100% - 270px)
       overflow hidden
     .right
       width 35%
-      height calc(100% - 70px)
+      height calc(100% - 270px)
       //border 2px solid red
       box-sizing border-box
       float left

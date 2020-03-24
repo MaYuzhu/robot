@@ -1,22 +1,24 @@
 <template>
-	<div style="width: 300px;height: 668px;border:1px solid #cae7ee">
+	<div style="width:100%;height:100%;border:1px solid #cae7ee;background: #fff">
     <p class="dev_tree_p" style="padding-left:5px;height:30px;line-height:30px;background:linear-gradient(#e3f2ee,#cae7ee);">设备树</p>
-    <div>
+    <div style="max-height: calc(100% - 30px);overflow: auto">
       <el-tree
         :data="data"
         show-checkbox
-        default-expand-all
+        :default-expand-all="false"
         node-key="id"
         ref="tree"
         highlight-current
         :props="defaultProps">
-      <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span class="custom-tree-node" slot-scope="{ node, data }">
 
-        <!--<span style="width: 10px;height:10px;background: red;display: inline-block"></span>-->
-        <span><i :class="data.icon"></i>
-          <span style="width: 13px;height:13px;background:#329632;display: inline-block"></span>
-          {{ node.label }}</span>
-      </span>
+          <!--<span style="width: 10px;height:10px;background: red;display: inline-block"></span>-->
+          <span>
+            <i :class="node.data.children?'el-icon-s-cooperation':'el-icon-s-order'"></i>
+            <span style="width: 13px;height:13px;background:#329632;display: inline-block"></span>
+            {{ node.data.name }}
+          </span>
+        </span>
 
       </el-tree>
 
@@ -35,29 +37,6 @@
 
 <script>
 	export default {
-    methods: {
-      getCheckedNodes() {
-        console.log(this.$refs.tree.getCheckedNodes());
-      },
-      getCheckedKeys() {
-        console.log(this.$refs.tree.getCheckedKeys());
-      },
-      setCheckedNodes() {
-        this.$refs.tree.setCheckedNodes([{
-          id: 5,
-          label: '二级 2-1'
-        }, {
-          id: 9,
-          label: '三级 1-1-1'
-        }]);
-      },
-      setCheckedKeys() {
-        this.$refs.tree.setCheckedKeys([3]);
-      },
-      resetChecked() {
-        this.$refs.tree.setCheckedKeys([]);
-      }
-    },
 
     data() {
       return {
@@ -85,7 +64,48 @@
           label: 'label'
         }
       };
-    }
+    },
+
+    mounted(){
+      this.getAllDev()
+    },
+
+    methods: {
+    	getAllDev(){
+    		let _this = this
+        _this.ajax_api('get',url_api + '/point/tree',
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res)
+              _this.data = res.data
+            }
+          })
+      },
+
+      getCheckedNodes() {
+        console.log(this.$refs.tree.getCheckedNodes());
+      },
+      getCheckedKeys() {
+        console.log(this.$refs.tree.getCheckedKeys());
+      },
+      setCheckedNodes() {
+        this.$refs.tree.setCheckedNodes([{
+          id: 5,
+          label: '二级 2-1'
+        }, {
+          id: 9,
+          label: '三级 1-1-1'
+        }]);
+      },
+      setCheckedKeys() {
+        this.$refs.tree.setCheckedKeys([3]);
+      },
+      resetChecked() {
+        this.$refs.tree.setCheckedKeys([]);
+      }
+    },
   }
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-  <div style="width: 300px;height: 668px;">
+  <div style="width: 100%;height: 668px;">
     <p class="user_tree_title" style="padding-left:5px;height:30px;line-height:30px;background:linear-gradient(#e3f2ee,#cae7ee);">组织结构</p>
     <div>
       <el-tree
@@ -109,7 +109,8 @@
 
       getTreeData(){
         var _this = this
-        _this.ajax_api('get',url_api + '/organization/tree', null, true, function (res) {
+        _this.ajax_api('get',url_api + '/organization/tree' + '?&_t=' + new Date().getTime(), null,
+          true, function (res) {
           _this.data = res.data
         })
       },

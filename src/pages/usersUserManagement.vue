@@ -177,28 +177,28 @@
         </p>
         <div class="input_wrap">
           <p>登录名：</p>
-          <el-input size="mini" v-model="update_account" disabled="true"></el-input>
+          <el-input size="mini" v-model="update_account" :disabled="true"></el-input>
           <span class="must-mark">*</span>
         </div>
         <div class="input_wrap">
           <p>工号：</p>
-          <el-input size="mini" v-model="sn"></el-input>
+          <el-input size="mini" v-model="update_sn"></el-input>
           <span class="must-mark"></span>
         </div>
         <div class="input_wrap">
           <p>姓名：</p>
-          <el-input size="mini" v-model="name"></el-input>
+          <el-input size="mini" v-model="update_name"></el-input>
           <span class="must-mark"></span>
         </div>
         <div class="input_wrap">
           <p>手机号：</p>
-          <el-input size="mini" v-model="phone"></el-input>
+          <el-input size="mini" v-model="update_phone"></el-input>
           <span class="must-mark">*</span>
         </div>
         <div class="input_wrap">
           <p>有效期至：</p>
           <el-date-picker size="mini"
-                          v-model="value_date"
+                          v-model="update_value_date"
                           type="datetime"
                           placeholder="选择日期时间">
           </el-date-picker>
@@ -207,7 +207,7 @@
         <div class="input_wrap">
           <p>短信服务：</p>
           <el-switch
-            v-model="value_phone"
+            v-model="update_value_phone"
             active-color="#13ce66"
             inactive-color="#ff4949">
           </el-switch>
@@ -215,9 +215,9 @@
         </div>
         <div class="input_wrap">
           <p>角色：</p>
-          <el-checkbox v-model="checked_roles.checked_role1">管理员</el-checkbox>
-          <el-checkbox v-model="checked_roles.checked_role2">操作员</el-checkbox>
-          <el-checkbox v-model="checked_roles.checked_role3">普通用户</el-checkbox>
+          <el-checkbox v-model="update_checked_roles.checked_role1">管理员</el-checkbox>
+          <el-checkbox v-model="update_checked_roles.checked_role2">操作员</el-checkbox>
+          <el-checkbox v-model="update_checked_roles.checked_role3">普通用户</el-checkbox>
           <span class="must-mark" style="margin-left: 30px">*</span>
         </div>
 
@@ -290,6 +290,16 @@
 
         dialogVisibleUpdateUser:false,
         update_account:'',
+        update_name:'',
+        update_sn:'',
+        update_phone:'',
+        update_value_phone:false,
+        update_value_date:'',
+        update_checked_roles: {
+          checked_role1:false,
+          checked_role2:false,
+          checked_role3:false
+        },
       }
     },
     components: {
@@ -450,12 +460,57 @@
         }
         _this.dialogVisibleUpdateUser = true
         _this.ajax_api('get',url_api + '/user/info/' + _this.isCheckedUserId, {}, true, function (res) {
-          console.log(res)
+          //console.log(res)//irSysOrganizationId
+          _this.irSysOrganizationId = res.data.irSysOrganizationId
           _this.update_account = res.data.account
+          _this.update_name = res.data.name,
+          _this.update_sn = res.data.sn,
+          _this.update_phone = res.data.phone,
+          _this.update_value_phone = false,
+          _this.update_value_date = res.data.createTime,
+          _this.update_checked_roles= {
+            checked_role1:false,
+            checked_role2:false,
+            checked_role3:false
+          }
         })
       },
       updateUserCommit(){
-
+      	let _this = this
+        let roleIds = ''
+        for (var Key in _this.update_checked_roles){
+          roleIds += _this.update_checked_roles[Key]?Key.substr(Key.length-1,1)+',':''
+        }
+        roleIds = roleIds.substring(0, roleIds.length - 1);
+        let updateUser = {
+          irSysOrganizationId: _this.irSysOrganizationId,
+          sn: _this.update_sn,
+          name:_this.update_name,
+          roleIds:roleIds,
+          account: _this.update_account,
+          password:"123456",
+        }
+        if(roleIds==''){
+          _this.$message({
+            message: '请选择角色',
+          });
+          return
+        }
+        _this.ajax_api('put',url_api + '/user/updUser/' + _this.isCheckedUserId,
+          updateUser,
+          true, function (res) {
+            if(res.code == 200){
+              _this.$message({
+                message: '修改成功',
+                type: 'success',
+              });
+              _this.getAllUserData()
+            }else {
+              _this.$message({
+                message: '操作失败，请重试',
+              });
+            }
+          })
       },
 
       formatStatus(row, column) {
@@ -513,7 +568,7 @@
       height calc(100% - 72px)
       background white
       .content_left
-        width 302px
+        width 300px
         height 100%
         float left
         border 1px solid #cae7ee

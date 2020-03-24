@@ -21,8 +21,12 @@
       </div>
     </div>
     <div class="threshold_content">
-      <div class="content_left"><DevTree></DevTree></div>
-      <div class="content_right"></div>
+      <div class="content_left">
+        <DevTree></DevTree>
+      </div>
+      <div class="content_right">
+
+      </div>
     </div>
   </div>
 </template>
@@ -49,6 +53,7 @@
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .threshold_wrap
+    height calc(100% - 70px)
     .threshold_top
       display flex
       height 30px
@@ -103,4 +108,9 @@
               height 16px
               margin-right 4px
 
+    .threshold_content
+      height calc(100% - 30px)
+      .content_left
+        width 300px
+        height calc(100% - 10px)
 </style>

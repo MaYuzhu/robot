@@ -7,12 +7,12 @@
           <div class="items">
             <div>
               <p>系统名称：</p>
-              <el-input size="mini"></el-input>
+              <el-input size="mini" v-model="companyName"></el-input>
               <span>*</span>
             </div>
             <div>
               <p>系统区域：</p>
-              <el-input size="mini"></el-input>
+              <el-input size="mini" v-model="companyArea"></el-input>
               <span>*</span>
             </div>
             <div style="align-items: flex-start">
@@ -29,7 +29,7 @@
               </el-upload>
               <span>*</span>
             </div>
-            <el-button class="update_img" size="mini">保存</el-button>
+            <el-button @click="setCompanyName" class="update_img" size="mini">保存</el-button>
           </div>
         </el-tab-pane>
         <el-tab-pane label="系统基本信息">
@@ -129,7 +129,13 @@
         title:'软件设置 > 软件设置',
         imageUrl: '',
 
+        companyName: '',
+        companyArea: '',
+
       }
+    },
+    mounted(){
+    	this.getCompanyName()
     },
     methods: {
       handleAvatarSuccess(res, file) {
@@ -146,7 +152,94 @@
           this.$message.error('上传图片大小不能超过 2MB!');
         }
         return isJPG && isLt2M;
-      }
+      },
+
+      getCompanyName(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/system-setting',
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data.items)
+              let items = res.data.items
+              let company_name = items.filter(item =>{
+              	return item.name == "company_name"
+              })
+              let company_area = items.filter(item=>{
+              	return item.name == "company_area"
+              })
+              let logo = items.filter(item=>{
+                return item.name == "logo"
+              })
+              _this.companyName = company_name[0].value
+              _this.companyArea = company_area[0].value
+              _this.imageUrl = logo[0].value
+
+            }
+        })
+      },
+
+      setCompanyName(){
+      	let _this = this
+        /*{
+          "systemSettingRequests":[
+          {
+            "name":"logo",
+            "displayName":"logo图标",
+            "value":"https://gss2.bdstatic.com/9fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike150%2C5%2C5%2C150%2C50/sign=b30eadd0267f9e2f6438155a7e598241/21a4462309f790528aa758080df3d7ca7bcbd54f.jpg"
+          },
+          {
+            "name":"company_name",
+            "displayName":"企业名称",
+            "value":"泉城变电站管理系统"
+          },
+          {
+            "name":"company_area",
+            "displayName":"企业区域",
+            "value":"北京地区"
+          },
+          {
+            "name":"author",
+            "displayName":"name",
+            "value":"cuim"
+          }
+        ]
+        }*/
+      	let setCompanyData = {
+          systemSettingRequests:[
+            {
+              name: "logo",
+              displayName: "logo图标",
+              value: _this.imageUrl
+            },
+            {
+              name:"company_name",
+              displayName:"企业名称",
+              value:_this.companyName
+            },
+            {
+              name:"company_area",
+              displayName:"企业区域",
+              value:_this.companyArea
+            }
+          ]
+        }
+        //console.log(setCompanyData)
+        _this.ajax_api('put',url_api + '/system-setting/batch',
+          setCompanyData,
+          true,
+          function (res) {
+            if(res.code == 200){
+              _this.$message({
+                message: '保存成功',
+                type: 'success',
+              });
+              _this.getCompanyName()
+            }
+          })
+
+      },
     },
     components: {
       HeaderTop,
@@ -162,7 +255,7 @@
     background white
     .software_content
       width 100%
-      height 100%
+      height calc(100% - 70px)
       background white
       div>>>
         .el-tabs__header
