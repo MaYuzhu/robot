@@ -113,12 +113,14 @@
         <el-button type="primary" @click="delCommit">确 认</el-button>
       </span>
     </el-dialog>
+    <menuBottom></menuBottom>
   </div>
 </template>
 
 <script>
   import HeaderTop from '../components/headerTop.vue'
   import UsersTree from '../components/usersTree.vue'
+  import menuBottom from '../components/menuBottom.vue'
 
   export default {
     data(){
@@ -149,8 +151,8 @@
     },
     components: {
       HeaderTop,
-      UsersTree
-
+      UsersTree,
+      menuBottom
     },
     mounted(){
 

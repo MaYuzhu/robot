@@ -12,7 +12,8 @@
     <div class="li_xunjian_title">
       <p>设备区域：</p>
       <div class="all_content all_content_quyu">
-        <el-checkbox style="float: left" :indeterminate="isIndeterminate" v-model="checkAll" @change="handleCheckAllChange">全部</el-checkbox>
+        <el-checkbox style="float: left" :indeterminate="isIndeterminate" v-model="checkAll"
+                     @change="handleCheckAllChange">全部</el-checkbox>
         <el-checkbox-group v-model="checkedCities" @change="handleCheckedCitiesChange">
           <el-checkbox v-for="city in cities" :label="city" :key="city">{{city}}</el-checkbox>
         </el-checkbox-group>

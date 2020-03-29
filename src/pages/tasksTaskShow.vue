@@ -104,7 +104,7 @@
 
       </div>
     </div>
-
+    <menuBottom></menuBottom>
   </div>
 </template>
 
@@ -112,6 +112,7 @@
   import HeaderTop from '../components/headerTop.vue'
   import XunjianTopBox from '../components/xunjianTopBox.vue'
   import XunjianFindTool from '../components/xunjianFindTool.vue'
+  import menuBottom from '../components/menuBottom.vue'
   export default {
     data(){
       return{
@@ -144,7 +145,7 @@
     },
     components: {
       HeaderTop,
-
+      menuBottom
     },
     methods:{
       dealDisabledDate(time) {

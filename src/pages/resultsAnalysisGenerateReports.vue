@@ -69,11 +69,12 @@
         <el-button type="primary" @click="jumpPage('merge','','')">确 定</el-button>
       </span>
     </el-dialog>
-
+    <menuBottom></menuBottom>
   </div>
 </template>
 
 <script>
+  import menuBottom from '../components/menuBottom.vue'
   import HeaderTop from '../components/headerTop.vue'
   import XunjianTopBox from '../components/xunjianTopBox.vue'
   import myTransfer from '../components/myTransfer.vue'
@@ -136,7 +137,8 @@
       HeaderTop,
       XunjianTopBox,
       myTransfer,
-      CustomTransfer
+      CustomTransfer,
+      menuBottom
     },
     methods:{
       alertBox(){

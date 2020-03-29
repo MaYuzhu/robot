@@ -47,10 +47,10 @@ import systemsStatusDisplay from '@/pages/systemsStatusDisplay'
 Vue.use(Router)
 
 const router = new Router({
+  //mode: 'history',
   routes: [
     {
       path: '/',
-      name: 'monitorsInspectionMonitoring',
       component: monitorsInspectionMonitoring
     },
     {
@@ -61,177 +61,280 @@ const router = new Router({
     {
       path: '/robots/robot-management',  //robots/robot-management
       name: 'robotManagement',
-      component: robotManagement
+      component: robotManagement,
+      meta:{
+        name:'机器人管理'
+      }
     },
     {
       path: '/tasks/comprehensive-inspection',
       name: 'tasksComprehensiveInspection',
-      component: tasksComprehensiveInspection
+      component: tasksComprehensiveInspection,
+      meta:{
+        name:'全面巡检'
+      }
     },
     {
       path: '/tasks/routine-inspection',
       name: 'tasksRoutineInspection',
-      component: tasksRoutineInspection
+      component: tasksRoutineInspection,
+      meta:{
+        name:'例行巡检'
+      }
     },
     {
       path: '/tasks/infrared-temperature',
       name: 'tasksInfraredTemperature',
-      component: tasksInfraredTemperature
+      component: tasksInfraredTemperature,
+      meta:{
+        name:'红外测温'
+      }
     },
     {
       path: '/tasks/oil-transcribe',
       name: 'tasksOilTranscribe',
-      component: tasksOilTranscribe
+      component: tasksOilTranscribe,
+      meta:{
+        name:'油位油温表抄录'
+      }
     },
     {
       path: '/tasks/arrester-transcribe',
       name: 'tasksArresterTranscribe',
-      component: tasksArresterTranscribe
+      component: tasksArresterTranscribe,
+      meta:{
+        name:'避雷器表抄录'
+      }
     },
     {
       path: '/tasks/pressure-transcribe',
       name: 'tasksPressureTranscribe',
-      component: tasksPressureTranscribe
+      component: tasksPressureTranscribe,
+      meta:{
+        name:'SF6压力表抄录'
+      }
     },
     {
       path: '/tasks/hydraulic-transcribe',
       name: 'tasksHydraulicTranscribe',
-      component: tasksHydraulicTranscribe
+      component: tasksHydraulicTranscribe,
+      meta:{
+        name:'液压表抄录'
+      }
     },
     {
       path: '/tasks/position-status',
       name: 'tasksPositionStatus',
-      component: tasksPositionStatus
+      component: tasksPositionStatus,
+      meta:{
+        name:'位置状态识别'
+      }
     },
     {
       path: '/tasks/bad-weather',
       name: 'tasksBadWeather',
-      component: tasksBadWeather
+      component: tasksBadWeather,
+      meta:{
+        name:'恶劣天气'
+      }
     },
     {
       path: '/tasks/defect-tracking',
       name: 'tasksDefectTracking',
-      component: tasksDefectTracking
+      component: tasksDefectTracking,
+      meta:{
+        name:'缺陷跟踪'
+      }
     },
     {
       path: '/tasks/multispectral-inspection',
       name: 'tasksMultispectralInspection',
-      component: tasksMultispectralInspection
+      component: tasksMultispectralInspection,
+      meta:{
+        name:'多光谱巡检'
+      }
     },
     {
       path: '/tasks/custom-task',
       name: 'tasksCustomTask',
-      component: tasksCustomTask
+      component: tasksCustomTask,
+      meta:{
+        name:'自定义任务'
+      }
     },
     {
       path: '/tasks/task-show',
       name: 'tasksTaskShow',
-      component: tasksTaskShow
+      component: tasksTaskShow,
+      meta:{
+        name:'任务展示'
+      }
     },
 
     {
       path: '/monitors/inspection-monitoring',
       name: 'monitorsInspectionMonitoring',
-      component: monitorsInspectionMonitoring
+      component: monitorsInspectionMonitoring,
+      meta:{
+        name:'巡检监控'
+      }
     },
     {
       path: '/monitors/robot-control',
       name: 'monitorsRobotControl',
-      component: monitorsRobotControl
+      component: monitorsRobotControl,
+      meta:{
+        name:'机器人遥控'
+      }
+
     },
 
     {
       path: '/resultsConfirm/alarm-query',
       name: 'resultsConfirmAlarmQuery',
-      component: resultsConfirmAlarmQuery
+      component: resultsConfirmAlarmQuery,
+      meta:{
+        name:'设备告警信息确认'
+      }
     },
     {
       path: '/resultsConfirm/interval-show',
       name: 'resultsConfirmIntervalShow',
-      component: resultsConfirmIntervalShow
+      component: resultsConfirmIntervalShow,
+      meta:{
+        name:'间隔展示'
+      }
     },
     {
       path: '/resultsConfirm/inspection-results-browse',
       name: 'resultsConfirmInspectionResultsBrowse',
-      component: resultsConfirmInspectionResultsBrowse
+      component: resultsConfirmInspectionResultsBrowse,
+      meta:{
+        name:'巡检结果浏览'
+      }
     },
     {
       path: '/resultsConfirm/inspection-task-audit',
       name: 'resultsConfirmInspectionTaskAudit',
-      component: resultsConfirmInspectionTaskAudit
+      component: resultsConfirmInspectionTaskAudit,
+      meta:{
+        name:'巡检任务审核'
+      }
     },
     {
       path: '/resultsConfirm/inspection-report-generate',
       name: 'resultsConfirmInspectionReportGenerate',
-      component: resultsConfirmInspectionReportGenerate
+      component: resultsConfirmInspectionReportGenerate,
+      meta:{
+        name:'巡检报告生成'
+      }
     },
 
     {
       path: '/resultsAnalysis/comparison-analysis',
       name: 'resultsAnalysisComparisonAnalysis',
-      component: resultsAnalysisComparisonAnalysis
+      component: resultsAnalysisComparisonAnalysis,
+      meta:{
+        name:'对比分析'
+      }
     },
     {
       path: '/resultsAnalysis/generate-reports',
       name: 'resultsAnalysisGenerateReports',
-      component: resultsAnalysisGenerateReports
+      component: resultsAnalysisGenerateReports,
+      meta:{
+        name:'生成报表'
+      }
     },
 
     {
       path: '/users/threshold-setting',
       name: 'usersThresholdSetting',
-      component: usersThresholdSetting
+      component: usersThresholdSetting,
+      meta:{
+        name:'告警阈值设置'
+      }
     },
     {
       path: '/users/rights-management',
       name: 'usersRightsManagement',
-      component: usersRightsManagement
+      component: usersRightsManagement,
+      meta:{
+        name:'权限设置'
+      }
     },
     {
       path: '/users/inspection-points-setting',
       name: 'usersInspectionPointsSetting',
-      component: usersInspectionPointsSetting
+      component: usersInspectionPointsSetting,
+      meta:{
+        name:'巡检点位设置'
+      }
     },
     {
       path: '/users/user-management',
       name: 'usersUserManagement',
-      component: usersUserManagement
+      component: usersUserManagement,
+      meta:{
+        name:'用户管理'
+      }
     },
     {
       path: '/users/organizational-structure',
       name: 'usersOrganizationalStructure',
-      component: usersOrganizationalStructure
+      component: usersOrganizationalStructure,
+      meta:{
+        name:'组织结构'
+      }
     },
     {
       path: '/users/log-management',
       name: 'usersLogManagement',
-      component: usersLogManagement
+      component: usersLogManagement,
+      meta:{
+        name:'日志管理'
+      }
     },
 
     {
       path: '/systems/software-settings',
       name: 'systemsSoftwareSettings',
-      component: systemsSoftwareSettings
+      component: systemsSoftwareSettings,
+      meta:{
+        name:'软件设置'
+      }
     },
     {
       path: '/systems/robot-setup',
       name: 'systemsRobotSetup',
-      component: systemsRobotSetup
+      component: systemsRobotSetup,
+      meta:{
+        name:'机器人设置'
+      }
     },
     {
       path: '/systems/robot-alarm-query',
       name: '/systemsRobotAlarmQuery',
-      component: systemsRobotAlarmQuery
+      component: systemsRobotAlarmQuery,
+      meta:{
+        name:'机器人告警查询'
+      }
     },
     {
       path: '/systems/outlier-query',
       name: 'systemsOutlierQuery',
-      component: systemsOutlierQuery
+      component: systemsOutlierQuery,
+      meta:{
+        name:'设备异常点查询'
+      }
     },
     {
       path: '/systems/status-display',
       name: 'systemsStatusDisplay',
-      component: systemsStatusDisplay
+      component: systemsStatusDisplay,
+      meta:{
+        name:'机器人状态显示'
+      }
     },
 
   ]
@@ -250,9 +353,24 @@ router.beforeEach((to, from, next) => {
       next('/login');
     } else {
       next();
+      //console.log(next)
+      routersArr.push(to)
+      routersArr = unique(routersArr)
+      //console.log(routersArr)
     }
   }
 });
+
+function unique(arr) {
+  var obj = {};
+  var result = arr.reduce(function(item, next) {
+    obj[next.name] ? '' : obj[next.name] = true && item.push(next);
+    return item;
+  }, []);
+  return result
+}
+
+
 
 const routerPush = Router.prototype.push
 Router.prototype.push = function push(location) {

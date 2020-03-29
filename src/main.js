@@ -24,6 +24,8 @@ import ros from '../static/js/roslib.min.js'
 Vue.use(ros)
 import base from './base'
 Vue.use(base)
+/*import table2excel from './excel'
+Vue.use(table2excel)*/
 
 Vue.config.productionTip = false
 

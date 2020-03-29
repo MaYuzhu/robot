@@ -70,11 +70,13 @@
         </div>
       </div>
     </div>
+    <menuBottom></menuBottom>
   </div>
 </template>
 
 <script>
   import HeaderTop from '../components/headerTop.vue'
+  import menuBottom from '../components/menuBottom.vue'
 
   export default {
     data(){
@@ -93,7 +95,7 @@
     },
     components: {
       HeaderTop,
-
+      menuBottom
     },
     mounted(){
     	this.getAllPermission()

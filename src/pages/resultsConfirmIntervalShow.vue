@@ -21,12 +21,14 @@
     </div>
     <ShowAlertBox :dialogVisible="show_box_visible" @childVisible="isVisible"
                   :title_dev="title_dev"></ShowAlertBox>
+    <menuBottom></menuBottom>
   </div>
 </template>
 
 <script>
   import HeaderTop from '../components/headerTop.vue'
   import ShowAlertBox from '../components/intervalShowAlertBox.vue'
+  import menuBottom from '../components/menuBottom.vue'
 
   export default {
     data(){
@@ -43,7 +45,8 @@
     },
     components: {
       HeaderTop,
-      ShowAlertBox
+      ShowAlertBox,
+      menuBottom
     },
     methods:{
       queryRightContent(index){

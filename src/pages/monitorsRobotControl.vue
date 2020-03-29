@@ -137,11 +137,12 @@
         </div>
       </div>
     </div>
-
+    <menuBottom></menuBottom>
   </div>
 </template>
 
 <script>
+  import menuBottom from '../components/menuBottom.vue'
   import HeaderTop from '../components/headerTop.vue'
   import TabsBottom from '../components/tabsBottom.vue'
   import XunjianContent from '../components/xunjianContent.vue'
@@ -165,7 +166,8 @@
       HeaderTop,
       TabsBottom,
       XunjianContent,
-      taskControl
+      taskControl,
+      menuBottom
     },
   }
 </script>

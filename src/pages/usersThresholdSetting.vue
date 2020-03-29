@@ -28,12 +28,14 @@
 
       </div>
     </div>
+    <menuBottom></menuBottom>
   </div>
 </template>
 
 <script>
   import HeaderTop from '../components/headerTop.vue'
   import DevTree from '../components/devTree.vue'
+  import menuBottom from '../components/menuBottom.vue'
 
   export default {
     data(){
@@ -46,7 +48,8 @@
     },
     components: {
       HeaderTop,
-      DevTree
+      DevTree,
+      menuBottom
     },
   }
 </script>

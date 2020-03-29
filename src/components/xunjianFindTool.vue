@@ -4,7 +4,7 @@
       <el-input v-model="input_find" placeholder="请输入内容"></el-input>
       <ul>
         <li @click="open1"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
-        <li><img src="../../static/images/save.png" alt=""><span>保存</span></li>
+        <li @click="save"><img src="../../static/images/save.png" alt=""><span>保存</span></li>
         <li><img src="../../static/images/remove.png" alt=""><span>删除</span></li>
         <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
       </ul>
@@ -16,12 +16,15 @@
 	export default {
     data() {
       return {
-        input_find: '123'
+        input_find: ''
       }
     },
     methods:{
       open1() {
         this.$message('这是一条消息提示');
+      },
+      save(){
+
       },
     },
 

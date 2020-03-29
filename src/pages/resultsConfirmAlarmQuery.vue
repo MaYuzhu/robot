@@ -26,10 +26,12 @@
         </ul>
       </div>
     </div>
+    <menuBottom></menuBottom>
   </div>
 </template>
 
 <script>
+  import menuBottom from '../components/menuBottom.vue'
   import HeaderTop from '../components/headerTop.vue'
   import AlarmQueryTop from '../components/alarmQueryTop.vue'
 
@@ -43,8 +45,8 @@
     },
     components: {
       HeaderTop,
-      AlarmQueryTop
-
+      AlarmQueryTop,
+      menuBottom
     },
   }
 </script>

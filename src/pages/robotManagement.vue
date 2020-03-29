@@ -33,7 +33,7 @@
     </div>
 
     <TabsBottom class="tabs_bottom"></TabsBottom>
-
+    <menuBottom></menuBottom>
 	</div>
 </template>
 
@@ -43,6 +43,7 @@
   import TabsBottom from '../components/tabsBottom.vue'
   import XunjianContent from '../components/xunjianContent.vue'
   import taskControl from '../components/taskControl.vue'
+  import menuBottom from '../components/menuBottom.vue'
 
 
 	export default {
@@ -50,7 +51,8 @@
       HeaderTop,
       TabsBottom,
       XunjianContent,
-      taskControl
+      taskControl,
+      menuBottom
     },
     data() {
       return {

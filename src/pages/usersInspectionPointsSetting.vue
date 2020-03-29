@@ -25,12 +25,14 @@
         <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
       </ul>
     </div>
+    <menuBottom></menuBottom>
   </div>
 </template>
 
 <script>
   import HeaderTop from '../components/headerTop.vue'
   import XunjianTopBox from '../components/xunjianTopBox.vue'
+  import menuBottom from '../components/menuBottom.vue'
 
   export default {
     data(){
@@ -50,8 +52,8 @@
     },
     components: {
       HeaderTop,
-      XunjianTopBox
-
+      XunjianTopBox,
+      menuBottom
     },
   }
 </script>

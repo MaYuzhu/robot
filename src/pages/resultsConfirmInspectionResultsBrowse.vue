@@ -87,11 +87,12 @@
         </div>
       </div>
     </div>
-
+    <menuBottom></menuBottom>
   </div>
 </template>
 
 <script>
+  import menuBottom from '../components/menuBottom.vue'
   import HeaderTop from '../components/headerTop.vue'
   import DevTree from '../components/devTree.vue'
 
@@ -110,8 +111,8 @@
     },
     components: {
       HeaderTop,
-      DevTree
-
+      DevTree,
+      menuBottom
     },
     methods:{
       handleCheckAllChangePoint(val){

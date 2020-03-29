@@ -80,7 +80,7 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[1, 2, 3, 10]"
+            :page-sizes="[1, 5, 10, 20]"
             :page-size="10"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
@@ -228,13 +228,14 @@
       </span>
     </el-dialog>
 
-
+    <menuBottom></menuBottom>
   </div>
 </template>
 
 <script>
   import HeaderTop from '../components/headerTop.vue'
   import UsersTree from '../components/usersTree.vue'
+  import menuBottom from '../components/menuBottom.vue'
 
   export default {
     data(){
@@ -305,7 +306,7 @@
     components: {
       HeaderTop,
       UsersTree,
-
+      menuBottom
     },
     mounted(){
     	this.getAllUserData()
@@ -543,7 +544,7 @@
          console.log(err)
          })*/
 
-        this.ajax_api('get',url_api + '/user/findAllUser',_this.userData,true,function (res) {
+        _this.ajax_api('get',url_api + '/user/findAllUser',_this.userData,true,function (res) {
           //console.log(res.data)
           _this.total = res.data.total
           _this.tableData = res.data.items
