@@ -411,6 +411,7 @@
                 width calc(100% - 280px)
                 line-height 36px
                 float left
+                box-sizing border-box
 
     div>>>
       .el-dialog

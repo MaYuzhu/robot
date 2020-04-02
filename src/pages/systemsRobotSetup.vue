@@ -10,7 +10,7 @@
             <div>
               <div>
                 <p>告警后执行机制: </p>
-                <el-select v-model="value1" placeholder="请选择" size="mini">
+                <el-select v-model="alarm_after" placeholder="请选择" size="mini">
                   <el-option
                     v-for="item in options1"
                     :key="item.value"
@@ -21,7 +21,7 @@
               </div>
               <div>
                 <p>中断后执行机制: </p>
-                <el-select v-model="value2" placeholder="请选择" size="mini">
+                <el-select v-model="interrupt_after" placeholder="请选择" size="mini">
                   <el-option
                     v-for="item in options2"
                     :key="item.value"
@@ -35,23 +35,23 @@
             <div style="border:1px dashed;border-left: none;border-right: none">
               <div>
                 <p>机器人行进速度: </p>
-                <el-input size="mini"></el-input>
+                <el-input v-model="body_speed" size="mini"></el-input>
                 <span>m/s</span>
               </div>
               <div>
                 <p>雷达报警距离: </p>
-                <el-input size="mini"></el-input>
+                <el-input v-model="alarm_distance" size="mini"></el-input>
                 <span>m</span>
               </div>
               <div>
                 <p>电池容量报警: </p>
-                <el-input size="mini"></el-input>
+                <el-input v-model="battery_capacity" size="mini"></el-input>
                 <span>%</span>
               </div>
             </div>
             <div style="display: flex;justify-content: space-around;padding: 16px 10px;">
-              <el-button type="primary" icon="el-icon-refresh" size="mini">重置</el-button>
-              <el-button type="primary" icon="el-icon-success" size="mini">确定</el-button>
+              <el-button @click="init" type="primary" icon="el-icon-refresh" size="mini">重置</el-button>
+              <el-button @click="setOne" type="primary" icon="el-icon-success" size="mini">确定</el-button>
             </div>
           </div>
           <p>云控制台</p>
@@ -63,23 +63,23 @@
               color: #f00">云台初始化位置</p>
             <div class="yun_item">
               <p>X:</p>
-              <el-input size="mini"></el-input>
+              <el-input v-model="x_x" size="mini"></el-input>
               <p>Y:</p>
-              <el-input size="mini"></el-input>
+              <el-input v-model="y_y" size="mini"></el-input>
             </div>
             <div style="border:1px dashed;border-left: none;border-right: none">
               <div>
                 <p>云台水平偏移量: </p>
-                <el-input size="mini"></el-input>
+                <el-input v-model="yun_x" size="mini"></el-input>
               </div>
               <div>
                 <p>云台垂直偏移量: </p>
-                <el-input size="mini"></el-input>
+                <el-input v-model="yun_y" size="mini"></el-input>
               </div>
             </div>
             <div style="display: flex;justify-content: space-around;padding: 16px 10px;">
-              <el-button type="primary" icon="el-icon-refresh" size="mini">重置</el-button>
-              <el-button type="primary" icon="el-icon-success" size="mini">确定</el-button>
+              <el-button @click="init2" type="primary" icon="el-icon-refresh" size="mini">重置</el-button>
+              <el-button @click="setTwo" type="primary" icon="el-icon-success" size="mini">确定</el-button>
             </div>
           </div>
         </div>
@@ -188,28 +188,26 @@
         title:'机器人设置 > 机器人设置',
         options1: [
         	{
-          value: '选项1',
+          value: '1',
           label: '自动返航'
         }, {
-          value: '选项2',
+          value: '2',
           label: '待选1'
         }, {
-          value: '选项3',
+          value: '3',
           label: '待选2'
         }],
-        value1: '',
         options2: [
-        	{
-          value: '选项1',
-          label: '自动返航'
-        }, {
-          value: '选项2',
-          label: '待选1'
-        }, {
-          value: '选项3',
-          label: '待选2'
-        }],
-        value2: '',
+          {
+            value: '1',
+            label: '自动返航'
+          }, {
+            value: '2',
+            label: '待选1'
+          }, {
+            value: '3',
+            label: '待选2'
+          }],
         options3: [
         	{
           value: '选项1',
@@ -255,7 +253,182 @@
         value_switch7:true,
         value_switch8:true,
 
+        alarm_after: '1',
+        interrupt_after: '1',
+        body_speed:'',
+        alarm_distance:'',
+        battery_capacity:'',
+        x_x:'',
+        y_y:'',
+        yun_x:'',
+        yun_y:'',
+
       }
+    },
+    mounted(){
+      this.init()
+      this.init2()
+    },
+    methods:{
+      init(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
+          {irBaseRobotId:1,size:100,page:1,},
+          true, function (res) {
+            //console.log(res.data)
+            let alarm_after = res.data.items.filter(item => {
+              return item.name == 'alarm-after-execute'
+            })
+            let interrupt_after = res.data.items.filter(item => {
+              return item.name == 'interrupt-after-execute'
+            })
+            let speed = res.data.items.filter(item => {
+              return item.name == 'speed'
+            })
+            let alarm_distance = res.data.items.filter(item => {
+              return item.name == 'alarm_distance'
+            })
+            let battery_capacity = res.data.items.filter(item => {
+              return item.name == 'battery_capacity'
+            })
+            _this.alarm_after = alarm_after[0].value
+            _this.interrupt_after = interrupt_after[0].value
+            _this.body_speed = speed[0].value
+            _this.alarm_distance = alarm_distance[0].value
+            _this.battery_capacity = battery_capacity[0].value
+
+          })
+      },
+      init2(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
+          {irBaseRobotId:1,size:100,page:1,},
+          true, function (res) {
+            //console.log(res.data)
+            let x_x = res.data.items.filter(item => {
+              return item.name == 'x-value'
+            })
+            let y_y = res.data.items.filter(item => {
+              return item.name == 'y-value'
+            })
+            let yun_x = res.data.items.filter(item => {
+              return item.name == 'Horizonta-offset'
+            })
+            let yun_y = res.data.items.filter(item => {
+              return item.name == 'Vertical-offset'
+            })
+
+            _this.x_x = x_x[0].value
+            _this.y_y = y_y[0].value
+            _this.yun_x = yun_x[0].value
+            _this.yun_y = yun_y[0].value
+
+          })
+      },
+      setOne(){
+        let _this = this
+        /*{
+          "irBaseRobotId": 0,
+          "robotParamRequests": [
+          {
+            "displayName": "string",
+            "name": "string",
+            "value": "string"
+          }
+        ],
+          "type": "string"
+        }*/
+        let setData = {
+          irBaseRobotId:1,
+          robotParamRequests:[],
+          type: "1"
+        }
+        setData.robotParamRequests.push({
+          name:'alarm-after-execute',
+          displayName: "告警后执行机制",
+          value: _this.alarm_after
+        })
+        setData.robotParamRequests.push({
+          name:'interrupt-after-execute',
+          displayName: "中断后执行机制",
+          value: _this.interrupt_after
+        })
+        setData.robotParamRequests.push({
+          name:'speed',
+          displayName: "机器人行进速度",
+          value: _this.body_speed
+        })
+        setData.robotParamRequests.push({
+          name:'alarm_distance',
+          displayName: "雷达报警距离",
+          value: _this.alarm_distance
+        })
+        setData.robotParamRequests.push({
+          name:'battery_capacity',
+          displayName: "电池容量报警",
+          value: _this.battery_capacity
+        })
+        _this.ajax_api('put',url_api + '/robot-param/batch',
+          setData,
+          true, function (res) {
+        	  if(res.code == 200){
+              _this.$message({
+                message: '设置成功',
+                type: 'success',
+              });
+            }else {
+              _this.$message({
+                message: '设置失败，请稍后重试',
+              });
+            }
+            //console.log(res.data)
+          })
+      },
+      setTwo(){
+        let _this = this
+        let setData = {
+          irBaseRobotId:1,
+          robotParamRequests:[],
+          type: "1"
+        }
+        setData.robotParamRequests.push({
+          name:'x-value',
+          displayName: "x",
+          value: _this.x_x
+        })
+        setData.robotParamRequests.push({
+          name:'y-value',
+          displayName: "y",
+          value: _this.y_y
+        })
+        setData.robotParamRequests.push({
+          name:'Horizonta-offset',
+          displayName: "云台水平偏移量",
+          value: _this.yun_x
+        })
+        setData.robotParamRequests.push({
+          name:'Vertical-offset',
+          displayName: "云台垂直偏移量",
+          value: _this.yun_y
+        })
+        _this.setOne()
+
+        _this.ajax_api('put',url_api + '/robot-param/batch',
+          setData,
+          true, function (res) {
+            if(res.code == 200){
+              _this.$message({
+                message: '设置成功',
+                type: 'success',
+              });
+            }else {
+              _this.$message({
+                message: '设置失败，请稍后重试',
+              });
+            }
+            //console.log(res.data)
+          })
+      },
     },
     components: {
       HeaderTop,

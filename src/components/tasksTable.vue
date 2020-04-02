@@ -285,8 +285,8 @@
         currentPage: 1,
         total:0,
         taskData : {
-          pageSize:10,
-          pageNum:1,
+          size:10,
+          page:1,
         },
         dialogVisible: false,
         dialogVisibleFix: false,
@@ -426,16 +426,16 @@
 
       index(val){
         //(listQuery.page - 1) * listQuery.pageSize + scope.$index + 1
-        return (this.taskData.pageNum - 1)*this.taskData.pageSize + val + 1
+        return (this.taskData.page - 1)*this.taskData.size + val + 1
       },
       handleSizeChange(val) {
         //console.log(`每页 ${val} 条`);
-        this.taskData.pageSize = val
+        this.taskData.size = val
         this.getTableData()
       },
       handleCurrentChange(val) {
         //console.log(`当前页: ${val}`);
-        this.taskData.pageNum = val
+        this.taskData.page = val
         this.getTableData()
       },
     },
@@ -462,7 +462,7 @@
       padding 0
     .page
       position absolute
-      bottom 0
+      bottom 20px
     div>>>
       .el-dialog
         background #d7efec

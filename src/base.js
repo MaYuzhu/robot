@@ -71,50 +71,6 @@ exports.install = function (Vue, options) {
     }
   };
 
-  Vue.prototype.ajax_api_get_body = function (type, url, data, body, async, succFunc){
-    jQuery.support.cors = true;
-    let _this = this
-    $.ajax({
-      headers: {
-        'token': localStorage.getItem('token'),
-      },
-      type: type,
-      async: async,
-      cache:true,
-      url: url,
-      data: dataType(data),
-      dataType: 'json',
-      contentType: 'application/json;charset=utf-8',
-      body:dataType(body),
-      /*xhrFields:{
-       withCredentials:true
-       },*/
-      //traditional: true,
-      crossDomain: true,
-      success: function (res) {
-        if(res.code == 401){
-          _this.$message({
-            message: '登录过期，请重新登录',
-          });
-          _this.$router.push('/login');
-          localStorage.setItem("token",null);
-          return
-        }
-        succFunc(res);
-      },
-      error: function (err) {
-        console.log(err)
-      }
-    })
-    function dataType(data) {
-      if(type=='post' || type=='put'){
-        return JSON.stringify(data)
-      }else {
-        return JSON.stringify(data)
-      }
-    }
-  };
-
 
   Vue.prototype.my_ajax =  function (options){
     options = options ||{};  //调用函数时如果options没有指定，就给它赋值{},一个空的Object

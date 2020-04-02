@@ -47,7 +47,9 @@
   .menu_bottom_wrap
     width 100%
     position fixed
+    z-index 9999
     bottom 0
+    background #f0f0f0
     .on
       background #77cccb
       color white

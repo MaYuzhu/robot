@@ -7,11 +7,11 @@
         <div class="left_content">
           <p>运行状态信息</p>
           <div class="yunxing_info">
-            <div><p>机身温度: <span>0</span></p></div>
-            <div><p>云台水平位置: <span>0</span></p></div>
-            <div><p>运行速度: <span>0</span></p></div>
-            <div><p>云台垂直位置: <span>0</span></p></div>
-            <div><p>相机倍数: <span>0</span></p></div>
+            <div><p>机身温度: <span>{{body_wendu}}</span></p></div>
+            <div><p>云台水平位置: <span>{{yun_x}}</span></p></div>
+            <div><p>运行速度: <span>{{body_speed}}</span></p></div>
+            <div><p>云台垂直位置: <span>{{yun_y}}</span></p></div>
+            <div><p>相机倍数: <span>{{zoom}}</span></p></div>
           </div>
           <p>通讯状态信息</p>
           <div class="tong_info">
@@ -175,6 +175,29 @@
             label: '待选2'
           }],
         value5: '',
+
+        body_wendu: '',
+        yun_x: '',
+        body_speed: '',
+        yun_y: '',
+        zoom: '',
+      }
+    },
+    mounted(){
+      this.init()
+    },
+    methods:{
+    	init(){
+    		let _this = this
+        _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
+          {irBaseRobotId:1,size:20,page:1,},
+          true, function (res) {
+            //console.log(res.data)
+
+            _this.yun_x = 1
+            _this.yun_y = 1
+            _this.body_speed = 1
+          })
       }
     },
     components: {

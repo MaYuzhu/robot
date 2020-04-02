@@ -65,7 +65,7 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
-          :page-sizes="[1, 2, 3, 10]"
+          :page-sizes="[1, 5, 10, 20]"
           :page-size="10"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total">
@@ -119,8 +119,8 @@
 
         total:1,
         logData : {
-          pageSize:10,
-          pageNum:1
+          size:10,
+          page:1
         },
         currentPage: 1,
       }
@@ -138,7 +138,7 @@
         this.ajax_api('get',url_api + '/operation-log/logList',_this.logData,true,function (res) {
           //console.log(res)
           _this.total = res.data.total
-          _this.tableData = res.data
+          _this.tableData = res.data.items
         })
 
       },
@@ -146,17 +146,17 @@
         return row.type == 0 ? '系统' : row.type == 1 ? '机器人' : '客户端'
       },
       index(val){
-        //(listQuery.page - 1) * listQuery.pageSize + scope.$index + 1
-        return (this.logData.pageNum - 1)*this.logData.pageSize + val + 1
+        //(listQuery.page - 1) * listQuery.size + scope.$index + 1
+        return (this.logData.page - 1)*this.logData.size + val + 1
       },
       handleSizeChange(val) {
         //console.log(`每页 ${val} 条`);
-        this.logData.pageSize  =  val
+        this.logData.size  =  val
         this.getLogList()
       },
       handleCurrentChange(val) {
         //console.log(`当前页: ${val}`);
-        this.logData.pageNum  =  val
+        this.logData.page  =  val
         this.getLogList()
       },
     },

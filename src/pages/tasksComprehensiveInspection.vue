@@ -77,7 +77,7 @@
     <XunjianFindTool></XunjianFindTool>
     <div class="content">
       <div class="left">
-        <devTree></devTree>
+        <devTree :toTreeData="toTreeData"></devTree>
       </div>
       <div class="right">
         <taskTable :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"></taskTable>
@@ -160,6 +160,14 @@
 
         irBaseRobotId:1,
         irBaseInspectTypeId:1,
+
+        toTreeData:{
+  				quyu:[],
+          type:[],
+          recon:[],
+          meter:[],
+          face:[]
+        },
       }
     },
     components: {
@@ -220,15 +228,16 @@
           //console.log(res.data)
           let inspect = res.data.items
           _this.listFaceType = inspect
+          //console.log(inspect)
         })
 
       },
 
       handleSizeChange(val) {
-        console.log(`每页 ${val} 条`);
+        //console.log(`每页 ${val} 条`);
       },
       handleCurrentChange(val) {
-        console.log(`当前页: ${val}`);
+        //console.log(`当前页: ${val}`);
       },
 
       handleCheckAllChange(val) {
@@ -315,6 +324,34 @@
           $('.all_content_face_type').height('20px')
         }
       },
+    },
+    watch:{
+
+      checkedQuyu:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.quyu = newVal
+      },
+      checkedDevType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.type = newVal
+      },
+      checkedReconType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.recon = newVal
+      },
+      checkedMeterType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.meter = newVal
+      },
+      checkedFaceType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.face = newVal
+      }
     },
 
   }

@@ -51,7 +51,10 @@ const router = new Router({
   routes: [
     {
       path: '/',
-      component: monitorsInspectionMonitoring
+      component: monitorsInspectionMonitoring,
+      meta:{
+        name:'巡检监控'
+      }
     },
     {
       path: '/login',

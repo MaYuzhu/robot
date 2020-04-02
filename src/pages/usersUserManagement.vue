@@ -8,11 +8,11 @@
       <div class="content_right">
         <div class="right_top">
           <p>工号：</p>
-          <el-input v-model="input2" placeholder="请输入内容" style="width: 180px" size="mini"></el-input>
+          <el-input v-model="input2_sn" placeholder="请输入内容" style="width: 180px" size="mini"></el-input>
           <p>姓名：</p>
-          <el-input v-model="input3" placeholder="请输入内容" style="width: 180px" size="mini"></el-input>
+          <el-input v-model="input3_name" placeholder="请输入内容" style="width: 180px" size="mini"></el-input>
           <ul>
-            <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
+            <li @click="queryUser"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
             <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
             <li @click="addUser"><img src="../../static/images/add.png" alt=""><span>新增</span></li>
             <li @click="updateUser"><img src="../../static/images/modify.png" alt=""><span>修改</span></li>
@@ -21,11 +21,11 @@
           </ul>
         </div>
         <p class="right_title">用户操作</p>
-        <div>
+        <div class="right_table">
           <el-table highlight-current-row ref="singleTable"
             :data="tableData" @current-change="clickChange"
             border
-            style="width: 100%">
+            style="width: 100%;height: 100%;overflow-y: auto">
             <el-table-column
               type="index" :index="index"
               label="序号"
@@ -41,7 +41,7 @@
               :formatter="formatStatus">
             </el-table-column>
             <el-table-column
-              prop="name"
+              prop="organization.name"
               label="所属部门">
             </el-table-column>
             <el-table-column
@@ -49,27 +49,27 @@
               label="姓名">
             </el-table-column>
             <el-table-column
-              prop="name"
+              prop="mobile"
               label="电话">
             </el-table-column>
             <el-table-column
-              prop="validityTime"
+              prop="lastLoginTime"
               label="最后一次登录时间">
             </el-table-column>
             <el-table-column
-              prop="name"
+              prop="loginIp"
               label="登录IP">
             </el-table-column>
             <el-table-column
-              prop="address"
+              prop="isOpenSms" :formatter="isOpenSms"
               label="是否开启短信提醒功能">
             </el-table-column>
             <el-table-column
-              prop="name"
+              prop="validityTime"
               label="有效期">
             </el-table-column>
             <el-table-column
-              prop="address"
+              prop="roles" :formatter="roles"
               label="角色">
             </el-table-column>
 
@@ -90,7 +90,7 @@
       </div>
     </div>
 
-
+    <!--增加用户-->
     <el-dialog title="用户管理" :visible.sync="dialogVisibleAddUser">
       <div class="dialog_content">
         <p class="title">
@@ -138,7 +138,7 @@
         <div class="input_wrap">
           <p>短信服务：</p>
           <el-switch
-            v-model="value_phone"
+            v-model="is_sms"
             active-color="#13ce66"
             inactive-color="#ff4949">
           </el-switch>
@@ -259,13 +259,13 @@
           name: '1002',
           address: ' 1516 '
         }],
-        input2:'',
-        input3:'',
+        input2_sn:'',
+        input3_name:'',
         dialogVisibleAddUser: false,
         dialogVisibleDelUser: false,
         departmentName:'',
         value_date:'',
-        value_phone:false,
+        is_sms:false,
         checked_roles: {
           checked_role1:false,
           checked_role2:false,
@@ -281,8 +281,8 @@
         irSysOrganizationId:'',
         total:1,
         userData : {
-          pageSize:10,
-          pageNum:1
+          size:10,
+          page:1
         },
         currentPage: 1,
         currentUserId:'',
@@ -343,7 +343,6 @@
           roleIds += _this.checked_roles[Key]?Key.substr(Key.length-1,1)+',':''
         }
         roleIds = roleIds.substring(0, roleIds.length - 1);
-
         let addUserData = {
           account:this.account,
           password:this.password,
@@ -351,9 +350,11 @@
           name:this.name,
           phone:this.phone,
           irSysOrganizationId:this.irSysOrganizationId,
-          roleIds:roleIds
+          roleIds:roleIds,
+          isOpenSms:Number(_this.is_sms),
+          validityTime: _this.value_date
         }
-
+        console.log(addUserData)
         if(!addUserData.account){
           _this.$message({
             message: '请输入用户名',
@@ -386,7 +387,8 @@
         }
 
 
-        _this.ajax_api('post',url_api + '/user/addUser', addUserData, true, function (res) {
+        _this.ajax_api('post',url_api + '/user/addUser', addUserData, true,
+          function (res) {
           if(res.code == 200){
             _this.$message({
               message: '新增成功',
@@ -513,23 +515,42 @@
             }
           })
       },
+      //条件查询
+      queryUser(){
+      	let _this = this
+        _this.userData.sn = _this.input2_sn
+        _this.userData.name = _this.input3_name
+        _this.getAllUserData()
+      },
 
       formatStatus(row, column) {
         //return row.account == 'admin' ? '已执行' : '未执行'
         return row.account
       },
+      isOpenSms(row, column){
+        return row.isOpenSms// == 0 ? '未开通' : '已开通'
+      },
+      roles(row){
+      	let roles = []
+        if(row.roles){
+          for(let i=0;i<row.roles.length;i++){
+            roles.push(row.roles[i].displayName)
+          }
+        }
+        return roles.toString()
+      },
       index(val){
         //(listQuery.page - 1) * listQuery.pageSize + scope.$index + 1
-        return (this.userData.pageNum - 1)*this.userData.pageSize + val + 1
+        return (this.userData.page - 1)*this.userData.size + val + 1
       },
       handleSizeChange(val) {
         //console.log(`每页 ${val} 条`);
-        this.userData.pageSize  =  val
+        this.userData.size  =  val
         this.getAllUserData()
       },
       handleCurrentChange(val) {
         //console.log(`当前页: ${val}`);
-        this.userData.pageNum  =  val
+        this.userData.page  =  val
         this.getAllUserData()
       },
       getAllUserData(){
@@ -544,7 +565,7 @@
          console.log(err)
          })*/
 
-        _this.ajax_api('get',url_api + '/user/findAllUser',_this.userData,true,function (res) {
+        _this.ajax_api('get',url_api + '/user/userList',_this.userData,true,function (res) {
           //console.log(res.data)
           _this.total = res.data.total
           _this.tableData = res.data.items
@@ -618,11 +639,16 @@
           height 30px
           line-height 30px
           padding-left 10px
+        .right_table
+          height calc(100% - 120px)
+          .el-table::before
+            height 0
+
         .page_box
           width 100%
           position absolute
           left 0px
-          bottom 0px
+          bottom 20px
           background #e9e9e9
           padding 5px 10px
           box-sizing border-box

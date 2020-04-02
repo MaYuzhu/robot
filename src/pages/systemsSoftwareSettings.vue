@@ -214,6 +214,7 @@
               name: "logo",
               displayName: "logo图标",
               value: _this.imageUrl
+              //value:'https://gss2.bdstatic.com/9fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike150%2C5%2C5%2C150%2C50/sign=b30eadd0267f9e2f6438155a7e598241/21a4462309f790528aa758080df3d7ca7bcbd54f.jpg'
             },
             {
               name:"company_name",

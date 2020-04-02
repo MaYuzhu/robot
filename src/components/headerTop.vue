@@ -283,7 +283,7 @@
                     </div>
                   </dd>
                 </dl>
-                <dl>
+                <!--<dl>
                   <dt>点位设置</dt>
                   <span>|</span>
                   <dd>
@@ -292,7 +292,7 @@
                       <span>|</span>
                     </div>
                   </dd>
-                </dl>
+                </dl>-->
                 <dl>
                   <dt>系统设置</dt>
                   <span>|</span>
