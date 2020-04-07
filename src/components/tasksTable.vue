@@ -28,7 +28,7 @@
         label="操作" align="center"
         width="260">
         <template slot-scope="scope">
-          <el-button @click="handleClick(scope.row)" type="text" size="small">立即执行</el-button>
+          <el-button @click="handleClickGo(scope.row)" type="text" size="small">立即执行</el-button>
           <el-button @click="fixDate" type="text" size="small">定期执行</el-button>
           <el-button @click="cycleDate" type="text" size="small">周期执行</el-button>
         </template>
@@ -361,7 +361,7 @@
         })
       },
 
-      handleClick(row) {
+      handleClickGo(row) {
         //console.log(row);
         this.dialogVisible = true
       },
@@ -462,7 +462,7 @@
       padding 0
     .page
       position absolute
-      bottom 20px
+      bottom 0px
     div>>>
       .el-dialog
         background #d7efec

@@ -1,6 +1,7 @@
 <template>
   <div class="software_setting_wrap">
-    <HeaderTop :title="title"></HeaderTop>
+    <HeaderTop :title="title" v-if="DestroyIncomeStatistics == true"
+               ref="IncomeStatisticsChild"></HeaderTop>
     <div class="software_content">
       <el-tabs tab-position="left" style="height: 100%;" type="card">
         <el-tab-pane label="系统名称设置">
@@ -130,6 +131,7 @@
       return{
         title:'软件设置 > 软件设置',
         imageUrl: '',
+        DestroyIncomeStatistics:true,
 
         companyName: '',
         companyArea: '',
@@ -208,6 +210,24 @@
           }
         ]
         }*/
+        if(!_this.imageUrl){
+          _this.$message({
+            message: '请上传图片',
+          });
+          return
+        }
+        if(!_this.companyName){
+          _this.$message({
+            message: '请填写企业名称',
+          });
+          return
+        }
+        if(!_this.companyArea){
+          _this.$message({
+            message: '请填写企业区域',
+          });
+          return
+        }
       	let setCompanyData = {
           systemSettingRequests:[
             {
@@ -239,6 +259,14 @@
                 type: 'success',
               });
               _this.getCompanyName()
+              _this.DestroyIncomeStatistics = false;
+// 然后你的方法成功后
+// Vue 实现响应式并不是数据发生变化之后 DOM 立即变化，而是按一定的策略进行 DOM 的更新。
+// 在vue的深入响应式原理中有解释：
+// $nextTick 是在下次 DOM 更新循环结束之后执行延迟回调，在修改数据之后使用 $nextTick，则可以在回调中获取更新后的 DOM
+              _this.$nextTick(() => {
+                _this.DestroyIncomeStatistics = true;
+              });
             }
           })
 

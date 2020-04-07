@@ -74,13 +74,15 @@
       </div>
 
     </div>
-    <XunjianFindTool></XunjianFindTool>
+    <XunjianFindTool :saveData="saveData"></XunjianFindTool>
     <div class="content">
       <div class="left">
-        <devTree :toTreeData="toTreeData"></devTree>
+        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTree>
       </div>
       <div class="right">
-        <taskTable :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"></taskTable>
+        <taskTable :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"
+
+        ></taskTable>
       </div>
     </div>
     <menuBottom></menuBottom>
@@ -167,6 +169,14 @@
           recon:[],
           meter:[],
           face:[]
+        },
+        saveData:{
+          description:'',
+          irBaseInspectTypeId:'1',
+          irBaseRobotId:1,
+          isCustom:'0',
+          name:'全面巡检',
+          points:'',
         },
       }
     },
@@ -324,6 +334,11 @@
           $('.all_content_face_type').height('20px')
         }
       },
+
+      treeCheck(data){
+        //console.log(data)
+        this.saveData.points = data.toString()
+      }
     },
     watch:{
 
@@ -351,6 +366,14 @@
         let _this = this
         //console.log(newVal,oldVal)
         _this.toTreeData.face = newVal
+      },
+
+      saveData:{
+        handler(newVal,oldVal){
+          console.log(newVal.points)
+        },
+        immediate: true,
+        deep: true
       }
     },
 

@@ -367,7 +367,7 @@ router.beforeEach((to, from, next) => {
 function unique(arr) {
   var obj = {};
   var result = arr.reduce(function(item, next) {
-    obj[next.name] ? '' : obj[next.name] = true && item.push(next);
+    obj[next.component] ? '' : obj[next.component] = true && item.push(next);
     return item;
   }, []);
   return result

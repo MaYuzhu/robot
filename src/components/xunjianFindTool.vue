@@ -16,15 +16,19 @@
 	export default {
     data() {
       return {
-        input_find: ''
+        input_find: '',
       }
     },
+    props:[
+      'saveData',
+    ],
     methods:{
       open1() {
         this.$message('这是一条消息提示');
       },
       save(){
-
+      	let _this = this
+        console.log(_this.saveData)
       },
     },
 

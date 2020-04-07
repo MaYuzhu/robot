@@ -46,9 +46,9 @@
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .menu_bottom_wrap
     width 100%
-    position fixed
+    /*position absolute
     z-index 9999
-    bottom 0
+    bottom 0*/
     background #f0f0f0
     .on
       background #77cccb

@@ -21,10 +21,9 @@
 
     <div class="right" style="width: 35%">
       <div class="right_top">
-        <!--<Button @click="test">test</Button>-->
-
-        <!--<Button @click="test_aaa">TEST</Button>-->
         <!--<Button @click="test_ie">IE9</Button>-->
+        <Button @click="test_login" style="position: absolute;z-index: 99999">可见光</Button>
+        <div id="divPlugin" style="width: 100%;height: 100%;"></div>
       </div>
       <div class="right_bottom">
         <Button @click="red_pic">红外测试</Button>
@@ -73,6 +72,7 @@
         },
         src:'',
         listener:null,
+        hkUrl:'192.168.1.13'
       }
     },
     methods: {
@@ -191,9 +191,101 @@
         // 给服务器发送一个字符串:
         // ws.send("Hello!");
         socket.send("Hello!");
+      },
+
+      //可见光
+      test_login(){
+      	let _this = this
+
+        var iRet = WebVideoCtrl.I_Login(_this.hkUrl, 1, 80, 'admin', '1234asdf', {
+            success: function (xmlDoc) {
+              console.log(" 登录成功！");
+
+              /*$("#ip").prepend("<option value='" + szIP + "'>" + szIP + "</option>");
+              setTimeout(function () {
+                $("#ip").val(szIP);
+                getChannelInfo();
+              }, 100);*/
+              _this.clickStartRealPlay()
+
+            },
+            error: function () {
+              console.log(" 登录失败！");
+            }
+          });
+        if (-1 == iRet) {
+          _this.clickStartRealPlay()
+        }
+
+
+      },
+      clickStartRealPlay() {
+        let _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        szIP = _this.hkUrl,//$("#ip").val(),
+        iStreamType = 1,//parseInt($("#streamtype").val(), 10),
+        iChannelID = 1,//parseInt($("#channels").val(), 10),
+        bZeroChannel = false,//$("#channels option").eq($("#channels").get(0).selectedIndex).attr("bZero") == "true" ? true : false,
+        szInfo = "";
+
+        if ("" == szIP) {
+          return;
+        }
+
+        if (oWndInfo != null) {// 已经在播放了，先停止
+          WebVideoCtrl.I_Stop();
+          console.log('已经在播放了，先停止');
+        }
+
+        var iRet = WebVideoCtrl.I_StartRealPlay(szIP, {
+          iStreamType: iStreamType,
+          iChannelID: iChannelID,
+          bZeroChannel: bZeroChannel
+        });
+
+        if (0 == iRet) {
+          szInfo = "开始预览成功！";
+        } else {
+          szInfo = "开始预览失败！";
+        }
+
+        console.log(szIP + " " + szInfo);
+      },
+      // 获取窗口尺寸
+      getWindowSize() {
+        var nWidth = $(this).width() + $(this).scrollLeft(),
+        nHeight = $(this).height() + $(this).scrollTop();
+
+        return {width: nWidth, height: nHeight};
       }
+
     },
     mounted() {
+    	let _this = this
+      // 初始化插件参数及插入插件
+      WebVideoCtrl.I_InitPlugin('100%', '100%', {
+        iWndowType: 1,
+        cbSelWnd: function (xmlDoc) {
+          let g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
+          var szInfo = "当前选择的窗口编号：" + g_iWndIndex;
+          console.log(szInfo);
+        }
+      });
+      WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
+      // 窗口事件绑定
+      $(window).bind({
+        resize: function () {
+          var $Restart = $("#restartDiv");
+          if ($Restart.length > 0) {
+            var oSize = _this.getWindowSize();
+            $Restart.css({
+              width: oSize.width + "px",
+              height: oSize.height + "px"
+            });
+          }
+        }
+      });
+
       //this.createWebSocket();
     },
     beforeRouteLeave(to, form, next) {

@@ -373,8 +373,8 @@
       <div class="top_logo"><img src="../../static/images/logo.jpg" alt=""></div>
       <span class="divide-line"></span>
       <div class="top_text">
-        <span>泉州变电站管理系统</span>
-        <span>北京地区</span>
+        <span>{{companyName}}</span>
+        <span>{{companyArea}}</span>
       </div>
     </div>
   </div>
@@ -388,9 +388,14 @@
     data () {
       return {
         menu_show:false,
-        username: localStorage.getItem("username")
+        username: localStorage.getItem("username"),
+        companyName:'',
+        companyArea:'',
       }
 
+    },
+    mounted(){
+    	this.getCompanyName()
     },
     props:['title'],
     methods: {
@@ -439,6 +444,32 @@
       //首页
       goHome(){
         this.$router.push('/monitors/inspection-monitoring');
+      },
+      //系统名称
+      getCompanyName(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/system-setting',
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data.items)
+              let items = res.data.items
+              let company_name = items.filter(item =>{
+                return item.name == "company_name"
+              })
+              let company_area = items.filter(item=>{
+                return item.name == "company_area"
+              })
+              let logo = items.filter(item=>{
+                return item.name == "logo"
+              })
+              _this.companyName = company_name[0].value
+              _this.companyArea = company_area[0].value
+              _this.imageUrl = logo[0].value
+
+            }
+          })
       },
     }
   }

@@ -8,7 +8,7 @@
         show-checkbox :default-expanded-keys="idArr"
         :default-expand-all="false"
         node-key="id"
-        ref="tree"
+        ref="tree" @check="checkedNode"
         highlight-current
         :props="defaultProps">
         <span class="custom-tree-node" slot-scope="{ node, data }">
@@ -71,7 +71,7 @@
         },
         getTreeData:{},
         idArr:[],
-
+        checkedId:[],
       };
     },
     props:['toTreeData'],
@@ -150,7 +150,17 @@
       },
       resetChecked() {
         this.$refs.tree.setCheckedKeys([]);
-      }
+      },
+      checkedNode(data,isCheck){
+        this.checkedId = []
+        this.checkedId.push(isCheck.checkedKeys)
+        //console.log(data,isCheck)
+        this.checkedId = distinct(this.checkedId)
+        this.$emit('devTreeKey', this.checkedId)
+        function distinct(arr) {
+          return Array.from(new Set(arr))
+        }
+      },
     },
     watch:{
       /*toTreeData:function (val,old) {

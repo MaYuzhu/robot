@@ -15,7 +15,7 @@
       </el-date-picker>
       <p>结束时间：</p>
       <el-date-picker size="mini" style="width: 160px"
-                      v-model="value1"
+                      v-model="value2"
                       type="date"
                       placeholder="选择日期">
       </el-date-picker>
@@ -98,7 +98,9 @@
       return{
         title:'巡检结果浏览 > 巡检任务审核',
         checked1: true,
-        checked2: false
+        checked2: false,
+        value1:'',
+        value2:'',
       }
     },
     components: {
