@@ -7,7 +7,7 @@
         :data="dataTree"
         show-checkbox :default-expanded-keys="idArr"
         :default-expand-all="false"
-        node-key="id"
+        node-key="id" :default-checked-keys="checkedIdArr"
         ref="tree" @check="checkedNode"
         highlight-current
         :props="defaultProps">
@@ -69,12 +69,22 @@
           children: 'children',
           label: 'label'
         },
-        getTreeData:{},
+        getTreeDataDev:{},
         idArr:[],
         checkedId:[],
+        checkedIdArr:[],
+        taskId:'',
       };
     },
     props:['toTreeData'],
+    created() {
+      this.$root.eventHub.$on('eventName',(target) => {
+        this.findNewTree(target)
+      });
+      this.$root.eventHub.$on('editTaskDbl',(target) => {
+        this.editTaskId(target)
+      });
+    },
 
     mounted(){
     	let _this = this
@@ -94,7 +104,7 @@
     	getAllDev(){
     		let _this = this
         _this.ajax_api('get',url_api + '/point/tree',
-          _this.getTreeData,
+          _this.getTreeDataDev,
           true,
           function (res) {
             if(res.code == 200){
@@ -111,6 +121,7 @@
                     let li = _this.dataTreeAll[0].children.filter(item => {
                       return item.id == _this.toTreeData.quyu[i].id
                     })
+                    //console.log(li)
                     newDataQuyu.push(li[0])
                   }
 
@@ -124,6 +135,11 @@
                   parentId: 3,
                   children:newDataQuyu
                 }]
+              }
+
+              //回显任务包含的points
+              if(_this.taskId){
+                _this.showTaskPoint()
               }
 
             }
@@ -161,6 +177,32 @@
           return Array.from(new Set(arr))
         }
       },
+      findNewTree(target) {
+        //console.log(target);
+        this.getTreeDataDev.devName = target
+        this.getAllDev()
+      },
+      editTaskId(target){
+        this.taskId = target
+        this.getAllDev()
+      },
+      showTaskPoint(){
+      	let _this = this //GET /ui/task/{id}/points
+        _this.ajax_api('get',url_api + '/task/'+_this.taskId+'/points',
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //_this.checkedIdArr = res.data
+              var newArr = []
+              for(var item in res.data) {
+                newArr.push(res.data[item].irProjPointId)
+              }
+              //console.log(newArr)
+              _this.checkedIdArr = newArr
+            }
+          })
+      }
     },
     watch:{
       /*toTreeData:function (val,old) {
@@ -195,12 +237,11 @@
                 children:newDataQuyu
               }]
             }
-          }else if(n.quyu.length==0){
+          }else if(n.quyu.length<1){
             _this.dataTree = _this.dataTreeAll
           }
 
           if(_this.dataTreeAll.length<1){
-
             _this.getAllDev()
           }else {
             let typeIds = []
@@ -219,10 +260,10 @@
             n.face.forEach(m=>{
               faceTypeIds.push(m.id)
             })
-            _this.getTreeData.devTypeIds = typeIds.toString()
-            _this.getTreeData.reconTypeIds = reconTypeIds.toString()
-            _this.getTreeData.meterTypeIds = meterTypeIds.toString()
-            _this.getTreeData.faceTypeIds = faceTypeIds.toString()
+            _this.getTreeDataDev.devTypeIds = typeIds.toString()
+            _this.getTreeDataDev.reconTypeIds = reconTypeIds.toString()
+            _this.getTreeDataDev.meterTypeIds = meterTypeIds.toString()
+            _this.getTreeDataDev.faceTypeIds = faceTypeIds.toString()
 
             _this.getAllDev()
           }

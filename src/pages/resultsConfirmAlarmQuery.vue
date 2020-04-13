@@ -2,6 +2,7 @@
   <div class="alarm_query_wrap">
     <HeaderTop :title="title"></HeaderTop>
     <AlarmQueryTop></AlarmQueryTop>
+
     <div class="tools_query">
       <p>开始时间：</p>
       <el-date-picker size="mini" style="width: 160px"

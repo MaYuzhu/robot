@@ -364,13 +364,17 @@ router.beforeEach((to, from, next) => {
   }
 });
 
-function unique(arr) {
+/*function unique(arr) {
   var obj = {};
   var result = arr.reduce(function(item, next) {
     obj[next.component] ? '' : obj[next.component] = true && item.push(next);
     return item;
   }, []);
   return result
+}*/
+function unique(arr1) {
+  const res = new Map();
+  return arr1.filter((a) => !res.has(a.meta.name) && res.set(a.meta.name, 1))
 }
 
 

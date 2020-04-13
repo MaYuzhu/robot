@@ -3,6 +3,12 @@
     <HeaderTop :title="title"></HeaderTop>
     <div class="xunjian_wrap">
       <div class="li_xunjian_title" style="height:auto">
+        <p style="line-height: 28px">任务名称：</p>
+        <el-input v-model="input_task_name" placeholder="请输入内容" size="mini" style="width: 190px"></el-input>
+        <p style="line-height: 28px;margin-left: 20px">自定义任务描述：</p>
+        <el-input v-model="input_content" placeholder="请输入内容" size="mini" style="width: 290px"></el-input>
+      </div>
+      <div class="li_xunjian_title" style="height:auto">
         <p>巡检类型：</p>
         <div class="all_content">
           <el-radio v-model="radio" v-for="item in radio_items"
@@ -77,16 +83,68 @@
       </div>
 
     </div>
-    <XunjianFindTool></XunjianFindTool>
+    <XunjianFindTool @xunjianFind="xunjianFind" :saveData="saveData" :savePutData="savePutData"
+                     @importBox='importBox' :importImg="true"></XunjianFindTool>
     <div class="content">
       <div class="left">
-        <devTree></devTree>
+        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTree>
       </div>
       <div class="right">
-        <taskTable :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"></taskTable>
+        <taskTable :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"
+                   v-if="taskTableReset" :customTaskTable="customTaskTable"
+        ></taskTable>
       </div>
     </div>
     <menuBottom></menuBottom>
+    <el-dialog title="任务导入" :visible.sync="dialogVisibleImport" class="huizong_dialog">
+      <div class="dialog_content">
+        <div>
+          <span>任务编制时间：</span>
+          <el-date-picker size="mini" format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"
+                          v-model="value_time_import1" type="datetime"
+                          placeholder="" style="width: 180px">
+          </el-date-picker>
+          <span>结束时间：</span>
+          <el-date-picker size="mini" format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"
+                          v-model="value_time_import2"  type="datetime"
+                          placeholder="" style="width: 180px">
+          </el-date-picker>
+          <span>任务名称：</span>
+          <el-input v-model="input_task_name_import" placeholder="请输入内容" size="mini"
+                    style="width: 150px"></el-input>
+          <p @click="queryImport" style="display:inline-block;cursor:pointer;">
+            <img style="width: 16px;height: 16px;vertical-align: middle" src="../../static/images/query.png" alt="">
+            <span style="vertical-align: middle">查询</span>
+          </p>
+
+        </div>
+        <div style="margin-top: 10px" class="huizong_table">
+          <p style="background: #d7efec;height:26px;line-height:26px;padding-left:8px;">任务编制列表</p>
+          <el-table stripe
+                    :data="tableDataImport"
+                    border @selection-change="changeFun"
+                    style="width: 100%">
+            <el-table-column
+              prop="executTime" label=""
+              align="center" type="selection">
+            </el-table-column>
+            <el-table-column
+              prop="name" label="任务名称"
+              align="center">
+            </el-table-column>
+            <el-table-column
+              prop="createTime" label="编制时间"
+              align="center">
+            </el-table-column>
+
+          </el-table>
+        </div>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisibleImport = false">取 消</el-button>
+        <el-button type="primary" @click="importPrimary">确 认</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -143,7 +201,35 @@
         moreFaceType:false,
 
         irBaseRobotId:1,
-        irBaseInspectTypeId:2,
+        irBaseInspectTypeId:-1,
+
+        toTreeData:{
+          quyu:[],
+          type:[],
+          recon:[],
+          meter:[],
+          face:[]
+        },
+        saveData:{
+          description:'',
+          irBaseInspectTypeId:'',
+          irBaseRobotId:1,
+          isCustom:'1',
+          name:'自定义任务',
+          points:'',
+        },
+        savePutData:{},
+        taskTableReset:true,
+        input_task_name:'',
+        input_content:'',
+        dialogVisibleImport:false,
+        value_time_import1:'',
+        value_time_import2:'',
+        input_task_name_import:'',
+        tableDataImport:[],
+        queryImportData:{},
+        checkedTaskArr:[],
+        customTaskTable:[],
 
       }
     },
@@ -197,8 +283,8 @@
                 })
               }
               //console.log(choose_id_arr)
-              _this.checkedQuyu = choose_id_arr
-              _this.isIndeterminateQuyu = true
+              //_this.checkedQuyu = choose_id_arr
+              //_this.isIndeterminateQuyu = true
             })
 
         })
@@ -225,8 +311,8 @@
                 })
               }
               //console.log(choose_id_arr)
-              _this.checkedDevType = choose_id_arr
-              _this.isIndeterminateDevType = true
+              //_this.checkedDevType = choose_id_arr
+              //_this.isIndeterminateDevType = true
             })
         })
 
@@ -249,8 +335,8 @@
                 })
               }
               //console.log(choose_id_arr)
-              _this.checkedReconType = choose_id_arr
-              _this.isIndeterminateReconType = true
+              //_this.checkedReconType = choose_id_arr
+              //_this.isIndeterminateReconType = true
             })
         })
 
@@ -273,8 +359,8 @@
                 })
               }
               //console.log(choose_id_arr)
-              _this.checkedMeterType = choose_id_arr
-              _this.isIndeterminateMeterType = true
+              //_this.checkedMeterType = choose_id_arr
+              //_this.isIndeterminateMeterType = true
             })
         })
 
@@ -297,8 +383,8 @@
                 })
               }
               //console.log(choose_id_arr)
-              _this.checkedFaceType = choose_id_arr
-              _this.isIndeterminateFaceType = true
+              //_this.checkedFaceType = choose_id_arr
+              //_this.isIndeterminateFaceType = true
             })
         })
 
@@ -396,6 +482,105 @@
           $('.all_content_face_type').height('20px')
         }
       },
+      treeCheck(data){
+        //console.log(data)
+        this.saveData.points = data.toString()
+        this.savePutData.points = data.toString()
+      },
+      //刷新任务列表
+      xunjianFind(){
+        this.taskTableReset= false;
+        this.$nextTick(() => {
+          this.taskTableReset= true;
+        });
+      },
+      importBox(){
+      	let _this = this
+        _this.dialogVisibleImport = true
+        _this.getImportDataTable()
+      },
+      queryImport(){
+        /*value_time_import1:'',
+          value_time_import2:'',
+          input_task_name_import:'',*/
+        let  _this = this
+        _this.queryImportData = {
+        	startTime:_this.value_time_import1,
+          endTime:_this.value_time_import2,
+          taskName:_this.input_task_name_import
+        }
+        _this.getImportDataTable()
+      },
+      getImportDataTable(){
+      	let _this = this
+        _this.ajax_api('get',url_api + '/task/taskList',
+          _this.queryImportData,true,
+          function (res) {
+            if(res.code == 200){
+            	//console.log(res.data.items)
+              _this.tableDataImport = res.data.items
+            }
+          })
+      },
+      changeFun(val){
+        this.checkedTaskArr = []
+        for(var key in val){
+          this.checkedTaskArr.push(val[key])
+        }
+      },
+      importPrimary(){
+      	let _this = this
+        _this.dialogVisibleImport = false
+        _this.customTaskTable = _this.checkedTaskArr
+        //console.log(this.customTaskTable)
+        this.taskTableReset= false;
+        this.$nextTick(() => {
+          this.taskTableReset= true;
+        });
+      },
+    },
+    watch:{
+
+      checkedQuyu:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.quyu = newVal
+      },
+      checkedDevType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.type = newVal
+      },
+      checkedReconType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.recon = newVal
+      },
+      checkedMeterType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.meter = newVal
+      },
+      checkedFaceType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.face = newVal
+      },
+
+      saveData:{
+        handler(newVal,oldVal){
+          //console.log(newVal.points)
+        },
+        immediate: true,
+        deep: true
+      },
+      savePutData:{
+        handler(newVal,oldVal){
+          //console.log(newVal.points)
+        },
+        immediate: true,
+        deep: true
+      },
     },
   }
 </script>
@@ -446,4 +631,57 @@
         width calc(100% - 300px)
         height 100%
 
+    div>>>
+      .el-dialog
+        background #d7efec
+        width: 90%;
+        min-width: 1000px;
+        padding-bottom: 6px;
+        .el-dialog__header
+          padding 10px 10px 5px
+          position relative
+          height 16px
+          .el-dialog__title
+            display inline-block
+            position absolute
+            font-size 14px
+            top 4px
+            left 10px
+          .el-dialog__headerbtn
+            top 8px
+            right 8px
+        .el-dialog__body
+          padding 0px 8px
+          .dialog_content
+            background white
+            padding 10px 10px
+            border 1px solid #90e8c6
+            .add
+              font-size 14px
+              p
+                float left
+                height 18px
+                line-height 18px
+                margin-right 18px
+                margin-bottom 8px
+                cursor pointer
+                img
+                  width 16px
+                  height 16px
+                  vertical-align: middle;
+                span
+                  vertical-align: middle;
+
+        .el-dialog__footer
+          background #fff
+          border 1px solid #90e8c6
+          border-top none
+          margin 1px 8px 5px
+          padding 5px 10px
+          .el-button
+            padding 8px 22px
+        .huizong_table /deep/ .el-table th
+          padding 4px 0
+        .huizong_table /deep/ .el-table td
+          padding 4px 0
 </style>

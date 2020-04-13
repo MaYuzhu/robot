@@ -28,7 +28,7 @@ exports.install = function (Vue, options) {
     })
   };
 
-  Vue.prototype.ajax_api = function (type,url, data, async, succFunc){
+  Vue.prototype.ajax_api = function (type, url, data, async, succFunc){
     jQuery.support.cors = true;
     let _this = this
     $.ajax({

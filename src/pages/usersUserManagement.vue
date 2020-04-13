@@ -354,7 +354,7 @@
           isOpenSms:Number(_this.is_sms),
           validityTime: _this.value_date
         }
-        console.log(addUserData)
+        //console.log(addUserData)
         if(!addUserData.account){
           _this.$message({
             message: '请输入用户名',
@@ -528,7 +528,7 @@
         return row.account
       },
       isOpenSms(row, column){
-        return row.isOpenSms// == 0 ? '未开通' : '已开通'
+        return row.isOpenSms == 0 ? '未开通' : '已开通'
       },
       roles(row){
       	let roles = []

@@ -97,5 +97,8 @@ new Vue({
   //store,
   components: { App },
   template: '<App/>',
-  render: h => h(App)
+  render: h => h(App),
+  data: {
+    eventHub: new Vue()
+  }
 })

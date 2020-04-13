@@ -74,14 +74,14 @@
       </div>
 
     </div>
-    <XunjianFindTool :saveData="saveData"></XunjianFindTool>
+    <XunjianFindTool @xunjianFind="xunjianFind" :saveData="saveData" :savePutData="savePutData"></XunjianFindTool>
     <div class="content">
       <div class="left">
         <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTree>
       </div>
       <div class="right">
         <taskTable :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"
-
+                   v-if="taskTableReset"
         ></taskTable>
       </div>
     </div>
@@ -178,6 +178,8 @@
           name:'全面巡检',
           points:'',
         },
+        savePutData:{},
+        taskTableReset:true,
       }
     },
     components: {
@@ -338,7 +340,15 @@
       treeCheck(data){
         //console.log(data)
         this.saveData.points = data.toString()
-      }
+        this.savePutData.points = data.toString()
+      },
+      //刷新任务列表
+      xunjianFind(){
+        this.taskTableReset= false;
+        this.$nextTick(() => {
+          this.taskTableReset= true;
+        });
+      },
     },
     watch:{
 
@@ -370,11 +380,18 @@
 
       saveData:{
         handler(newVal,oldVal){
-          console.log(newVal.points)
+          //console.log(newVal.points)
         },
         immediate: true,
         deep: true
-      }
+      },
+      savePutData:{
+        handler(newVal,oldVal){
+          //console.log(newVal.points)
+        },
+        immediate: true,
+        deep: true
+      },
     },
 
   }

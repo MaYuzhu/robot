@@ -73,13 +73,13 @@
       </div>
 
     </div>
-    <XunjianFindTool></XunjianFindTool>
+    <XunjianFindTool @xunjianFind="xunjianFind" :saveData="saveData" :savePutData="savePutData"></XunjianFindTool>
     <div class="content">
       <div class="left">
-        <devTree></devTree>
+        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTree>
       </div>
       <div class="right">
-        <taskTable :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"></taskTable>
+        <taskTable v-if="taskTableReset" :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"></taskTable>
       </div>
     </div>
     <menuBottom></menuBottom>
@@ -158,7 +158,24 @@
         moreFaceType:false,
 
         irBaseRobotId:1,
-        irBaseInspectTypeId:1,
+        irBaseInspectTypeId:2,
+        toTreeData:{
+          quyu:[],
+          type:[],
+          recon:[],
+          meter:[],
+          face:[]
+        },
+        saveData:{
+          description:'',
+          irBaseInspectTypeId:'2',
+          irBaseRobotId:1,
+          isCustom:'0',
+          name:'例行巡检',
+          points:'',
+        },
+        savePutData:{},
+        taskTableReset:true,
       }
     },
     components: {
@@ -200,7 +217,7 @@
               })
               let choose_id_arr = []
               for(let i=0;i<result_choose.length;i++){
-                //choose_id_arr.push(result_choose[i].chooseId)
+                //choose_id_arr.push({id:result_choose[i].chooseId})
                 choose_id_arr = _this.citiesQuyu.filter(item =>{
                     return item.id == 6917
                   })
@@ -404,6 +421,62 @@
         }else {
           $('.all_content_face_type').height('20px')
         }
+      },
+
+      treeCheck(data){
+        //console.log(data)
+        this.saveData.points = data.toString()
+        this.savePutData.points = data.toString()
+      },
+      //刷新任务列表
+      xunjianFind(){
+        this.taskTableReset= false;
+        this.$nextTick(() => {
+          this.taskTableReset= true;
+        });
+      },
+    },
+    watch:{
+
+      checkedQuyu:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.quyu = newVal
+      },
+      checkedDevType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.type = newVal
+      },
+      checkedReconType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.recon = newVal
+      },
+      checkedMeterType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.meter = newVal
+      },
+      checkedFaceType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.face = newVal
+      },
+
+      saveData:{
+        handler(newVal,oldVal){
+          //console.log(newVal.points)
+        },
+        immediate: true,
+        deep: true
+      },
+      savePutData:{
+        handler(newVal,oldVal){
+          //console.log(newVal.points)
+        },
+        immediate: true,
+        deep: true
       },
     },
   }

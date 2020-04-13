@@ -2,19 +2,19 @@
 	<div class="tasks_table_wrap">
     <p class="title">任务编制列表</p>
     <el-table class="table"
-      :data="tableData"
-      border
+      :data="tableData" @current-change="taskCurrentChange"
+      border highlight-current-row @row-dblclick="editTaskTable"
       style="width: 100%">
       <el-table-column
         type="index" :index="index"
         label="序号" align="center"
         width="50">
       </el-table-column>
-      <el-table-column
+      <!--<el-table-column
         type="selection"
         align="center"
         width="50">
-      </el-table-column>
+      </el-table-column>-->
       <el-table-column
         prop="name" align="center"
         label="任务名称">
@@ -27,10 +27,10 @@
       <el-table-column
         label="操作" align="center"
         width="260">
-        <template slot-scope="scope">
+        <template slot-scope="scope" v-if="templateShow">
           <el-button @click="handleClickGo(scope.row)" type="text" size="small">立即执行</el-button>
-          <el-button @click="fixDate" type="text" size="small">定期执行</el-button>
-          <el-button @click="cycleDate" type="text" size="small">周期执行</el-button>
+          <el-button @click="fixDate(scope.row)" type="text" size="small">定期执行</el-button>
+          <el-button @click="cycleDate(scope.row)" type="text" size="small">周期执行</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -52,7 +52,7 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="">确 认</el-button>
+        <el-button type="primary" @click="atOnce">确 认</el-button>
       </span>
     </el-dialog>
     <!--定期执行-->
@@ -63,7 +63,7 @@
             <img src="../../static/images/add.png" alt="">
             <span>新增</span>
           </p>
-          <p>
+          <p @click="addSaveFixTime">
             <img src="../../static/images/save.png" alt="">
             <span>保存</span>
           </p>
@@ -81,9 +81,10 @@
             prop="time" label="开始时间"
             align="center">
             <template slot-scope="scope">
-              <el-date-picker size="mini"
-                v-model="scope.row.time"
-                type="datetime"
+              <el-date-picker size="mini" style="width: 300px"
+                v-model="scope.row.createTime"
+                type="datetime" format="yyyy 年 MM 月 dd 日 HH时 mm分 ss秒"
+                              value-format="yyyy-MM-dd HH:mm:ss"
                 placeholder="选择日期时间">
               </el-date-picker>
             </template>
@@ -96,7 +97,9 @@
             </template>
           </el-table-column>
         </el-table>
+
       </div>
+
       <span slot="footer" class="dialog-footer" style="display: none">
         <el-button @click="dialogVisibleFix = false">取 消</el-button>
         <el-button type="primary" @click="">确 认</el-button>
@@ -113,21 +116,22 @@
                 <p class="cycle_top_p">
                   <span>月：</span>
                   <el-checkbox-group v-model="checkMonth" style="display: inline-block">
-                    <el-checkbox v-for="(item,index) in month" :key="index" :label="item.name">
-                    </el-checkbox>
+                    <el-checkbox v-for="(item,index) in month" :key="index" :label="item.num">
+                    {{item.name}}</el-checkbox>
                   </el-checkbox-group>
                 </p>
                 <p class="cycle_top_p">
                   <span>周：</span>
                   <el-checkbox-group v-model="checkWeek" style="display: inline-block">
-                    <el-checkbox v-for="(item,index) in week" :key="index" :label="item.name">
-                    </el-checkbox>
+                    <el-checkbox v-for="(item,index) in week" :key="index" :label="item.num">
+                      {{item.name}}</el-checkbox>
                   </el-checkbox-group>
                 </p>
                 <p class="cycle_top_p">
                   <span>开始时间：</span>
                   <el-time-picker size="mini"
-                    v-model="value_time1"
+                    v-model="value_time1" format="HH时 mm分 ss秒"
+                                  value-format="HH:mm:ss"
                     placeholder="">
                   </el-time-picker>
                 </p>
@@ -148,17 +152,19 @@
                 </p>
                 <p class="cycle_top_p">
                   <span>开始时间：</span>
-                  <el-time-picker size="mini"
-                                  v-model="value_time2"
-                                  placeholder="">
-                  </el-time-picker>
+                  <el-date-picker size="mini"
+                    v-model="value_time2" format="yyyy-MM-dd HH:mm:ss"
+                    type="datetime" value-format="yyyy-MM-dd HH:mm:ss"
+                    placeholder="选择日期时间">
+                  </el-date-picker>
                 </p>
                 <p class="cycle_top_p">
                   <span>结束时间：</span>
-                  <el-time-picker size="mini"
-                                  v-model="value_time3"
-                                  placeholder="">
-                  </el-time-picker>
+                  <el-date-picker size="mini"
+                    v-model="value_time3" format="yyyy-MM-dd HH:mm:ss"
+                    type="datetime"  value-format="yyyy-MM-dd HH:mm:ss"
+                    placeholder="选择日期时间">
+                  </el-date-picker>
                 </p>
 
               </div>
@@ -187,16 +193,16 @@
                     width="50">
                   </el-table-column>
                   <el-table-column
-                    prop="time_name" label="名称"
+                    prop="name" label="名称"
                     align="center">
                   </el-table-column>
                   <el-table-column
-                    prop="time_s" label="开始时间"
-                    align="center" width="120">
+                    prop="startTime" label="开始时间"
+                    align="center" width="220">
                   </el-table-column>
                   <el-table-column
-                    prop="time_e" label="结束时间"
-                    align="center" width="120">
+                    prop="endTime" label="结束时间"
+                    align="center" width="220">
                   </el-table-column>
                   <el-table-column
                     label="操作" align="center"
@@ -227,16 +233,16 @@
       <div class="dialog_content">
         <div>
           <span>开始时间：</span>
-          <el-time-picker size="mini"
-                          v-model="value_time_huizong1"
+          <el-date-picker size="mini" format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"
+                          v-model="value_time_huizong1" type="datetime"
                           placeholder="">
-          </el-time-picker>
+          </el-date-picker>
           <span>结束时间：</span>
-          <el-time-picker size="mini"
-                          v-model="value_time_huizong2"
+          <el-date-picker size="mini" format="yyyy-MM-dd HH:mm:ss" value-format="yyyy-MM-dd HH:mm:ss"
+                          v-model="value_time_huizong2"  type="datetime"
                           placeholder="">
-          </el-time-picker>
-          <p style="display:inline-block;cursor:pointer;">
+          </el-date-picker>
+          <p @click="queryHuizong" style="display:inline-block;cursor:pointer;">
             <img style="width: 16px;height: 16px;vertical-align: middle" src="../../static/images/query.png" alt="">
             <span style="vertical-align: middle">查询</span>
           </p>
@@ -248,7 +254,7 @@
                     border
                     style="width: 100%">
             <el-table-column
-              prop="time" label="执行时间"
+              prop="executTime" label="执行时间"
               align="center">
             </el-table-column>
 
@@ -268,18 +274,18 @@
       return {
         tableData: [],
         tableDataFix:[
-          {
+          /*{
           	id:0,
           	time:'2020-09-01 00:00:00'
-          }
+          }*/
         ],
         tableDataCycle:[
-          {
+          /*{
           	id:0,
             time_name:'每天',
             time_s:'12:55',
             time_e:'18:00',
-          }
+          }*/
         ],
         tableDataHuizong:[{time:'2020-01-01 12:00:00'},{time:'2020-01-01 12:00:00'},{time:'2020-01-01 12:00:00'}],
         currentPage: 1,
@@ -311,13 +317,13 @@
           {num:12,name:'十二月'},
         ],
         week:[
-          {num:1,name:'周一'},
-          {num:2,name:'周二'},
-          {num:3,name:'周三'},
-          {num:4,name:'周四'},
-          {num:5,name:'周五'},
-          {num:6,name:'周六'},
-          {num:7,name:'周日'},
+          {num:2,name:'周一'},
+          {num:3,name:'周二'},
+          {num:4,name:'周三'},
+          {num:5,name:'周四'},
+          {num:6,name:'周五'},
+          {num:7,name:'周六'},
+          {num:1,name:'周日'},
         ],
         value_time1:'',
         value_time2:'',
@@ -325,61 +331,150 @@
         num:1,
         options_cycle_day: [
         	{
-            value: '选项1',
+            value: '2',
             label: '天'
           }, {
-            value: '选项2',
+            value: '1',
             label: '时'
           }, {
-            value: '选项3',
+            value: '0',
             label: '分钟'
           }
         ],
-        cycle_day:'选项1',
+        cycle_day:'2',
         addCycleIdNum:0,
         dialogVisibleHuizong:false,
         value_time_huizong1:'',
         value_time_huizong2:'',
+        irProjTaskId:'',
+        templateShow:true,
       }
     },
 
-    props:["irBaseRobotId", "irBaseInspectTypeId"],
+    //props:["irBaseRobotId", "irBaseInspectTypeId"],
+    props:{
+      irBaseRobotId:{
+        required: false
+      },
+      irBaseInspectTypeId:{
+        required: false
+      },
+      customTaskTable:{
+        type: null,
+        default: ()=>{ return []}
+      }
+
+    },
     mounted(){
       this.getTableData()
+      this.value_time2 = this.getdatatime()
+      this.value_time_huizong1 = this.getdatatime()
+      this.value_time_huizong2 = this.getdatatime10()
     },
 
     methods: {
 
     	getTableData(){
         let _this = this
+        _this.tableData = [{name:'数据加载中'}]
         _this.taskData.irBaseRobotId = _this.irBaseRobotId
-        _this.taskData.irBaseInspectTypeId = 1//_this.irBaseInspectTypeId
+        _this.taskData.irBaseInspectTypeId = _this.irBaseInspectTypeId
+        //console.log(_this.customTaskTable)
+        if(_this.customTaskTable.length>0){
+          _this.tableData = _this.customTaskTable
+          _this.templateShow = false
+          return
+        }
         _this.ajax_api('get',url_api + '/task/taskList',_this.taskData,true,function (res) {
           //console.log(res.data.items)
           _this.total = res.data.total
           _this.tableData = res.data.items
         })
+
       },
 
       handleClickGo(row) {
         //console.log(row);
         this.dialogVisible = true
       },
-      fixDate(){
+      //定期执行
+      fixDate(row){
+    		let _this = this
+        _this.irProjTaskId = row.id
+        _this.dialogVisibleFix = true
+        _this.ajax_api('get',url_api + '/task-regular/taskRegularList',
+        {
+          page:1,
+          size:100,
+          irBaseRobotId:1,
+          irProjTaskId:row.id
+        },
+        true,
+        function (res) {
+          //console.log(res.data)
+          _this.tableDataFix = res.data.items
 
-        this.dialogVisibleFix = true
+        })
+
       },
-      cycleDate(){
-        this.dialogVisibleCycle = true
+      //周期执行
+      cycleDate(row){
+        let _this = this
+        _this.checkMonth = []
+        _this.checkWeek = []
+        _this.value_time1 = ''
+        _this.irProjTaskId = row.id
+        _this.dialogVisibleCycle = true
+        _this.ajax_api('get',url_api + '/task-cycle/taskCycleList',
+          {
+            page:1,
+            size:100,
+            irBaseRobotId:1,
+            irProjTaskId:row.id
+          },
+          true,
+          function (res) {
+            //console.log(res.data)
+            _this.tableDataCycle = res.data.items
+
+          })
+
       },
 
+      //增加定期执行时间表
       addFixTime(){
       	let _this = this
         _this.addFixIdNum++
         _this.tableDataFix.push({
-          id:_this.addFixIdNum,
-          time:''
+          id:_this.addFixIdNum+'my',
+          createTime:''
         })
+      },
+      //保存定期执行时间表
+      addSaveFixTime(){
+        let _this = this
+        let addSaveFixTimeData = {
+          irBaseRobotId:1,
+          irProjTaskId:_this.irProjTaskId,
+          taskRegularRequests:[]
+        }
+        for(var item in _this.tableDataFix){
+          addSaveFixTimeData.taskRegularRequests.push({
+            executeTime:_this.getTimeMy(_this.tableDataFix[item].createTime)
+          })
+        }
+        //console.log(addSaveFixTimeData)
+        _this.ajax_api('put',url_api + '/task-regular/batch',
+          addSaveFixTimeData,true,function (res) {
+          //console.log(res.data.items)
+          if(res.code==200){
+            _this.$message({
+              message: '新增成功',
+              type: 'success',
+            });
+          }
+        })
+
       },
 
       delFixTime(x){
@@ -393,7 +488,7 @@
         //console.log(tab, event);
       },
       handleChangeNum(value) {
-        console.log(value);
+        //console.log(value);
       },
       clearInput(){
         this.value_time1 = ''
@@ -402,26 +497,161 @@
         this.checkMonth = []
         this.checkWeek = []
         this.num = 1
-        this.cycle_day = '选项1'
+        this.cycle_day = '2'
       },
       saveCycle(){
-      	this.addCycleIdNum++
+      	let _this = this
+      	/*this.addCycleIdNum++
       	this.tableDataCycle.push({
           id:this.addCycleIdNum++,
-          time_name:'每天',
-          time_s:'12:55',
-          time_e:'18:00',
-        })
+          name:'每天',
+          startTime:'12:55',
+          endTime:'18:00',
+        })*/
+        /*
+        * {
+         "endTime": "2020-04-09T01:40:54.917Z",
+         "executeTime": "string",
+         "executeType": "string",
+         "intervalTime": 0,
+         "intervalUnit": "string",
+         "irBaseRobotId": 0,
+         "irProjTaskId": 0,
+         "month": "string",
+         "name": "string",
+         "startTime": "2020-04-09T01:40:54.917Z",
+         "week": "string"
+         }*/
+        /*
+        * ProjTaskCycleRequest {
+         endTime (string, optional): 结束时间 ,
+         executeTime (string, optional): 执行时间 ,
+         executeType (string, optional): 执行类型，0：周期执行，1：间隔执行 ,
+         intervalTime (integer, optional): 间隔时间 ,
+         intervalUnit (string, optional): 间隔单位，0：分，1：时，2：天 ,
+         irBaseRobotId (integer, optional): 机器人编号 ,
+         irProjTaskId (integer, optional): 任务编号 ,
+         month (string, optional): 月， 多个以逗号隔开 ,
+         name (string, optional): 任务周期/间隔名称 ,
+         startTime (string, optional): 开始时间 ,
+         week (string, optional): 周， 多个以逗号隔开
+         }*/
+        let addSaveCycleData = {}
+        if(_this.radio == 1){
+          addSaveCycleData.irBaseRobotId = 1
+          addSaveCycleData.irProjTaskId = _this.irProjTaskId
+          addSaveCycleData.executeType = '0'
+          addSaveCycleData.month = _this.checkMonth.length>0 ? _this.checkMonth.toString() : '1,2,3,4,5,6,7,8,9,10,11,12'
+          addSaveCycleData.week =  _this.checkWeek.length>0 ? _this.checkWeek.toString() : '1,2,3,4,5,6,7'
+          addSaveCycleData.executeTime = _this.value_time1 ? _this.value_time1 : '00:00:00'
+          addSaveCycleData.name = '任务周期'
+        }else if(_this.radio == 2){
+          addSaveCycleData.irBaseRobotId = 1
+          addSaveCycleData.irProjTaskId = _this.irProjTaskId
+          addSaveCycleData.executeType = '1'
+          addSaveCycleData.intervalUnit = _this.cycle_day
+          addSaveCycleData.intervalTime = _this.num
+          addSaveCycleData.startTime = _this.value_time2
+          addSaveCycleData.endTime = _this.value_time3
+          addSaveCycleData.name = '间隔任务'
+        }
+        //console.log(addSaveCycleData)//POST /ui/task-cycle/addTaskCycle
+        _this.ajax_api('post',url_api + '/task-cycle/addTaskCycle',
+          addSaveCycleData,true,function (res) {
+            //console.log(res.data.items)
+            if(res.code==200){
+              _this.$message({
+                message: '新增成功',
+                type: 'success',
+              });
+              _this.cycleDate({id:_this.irProjTaskId})
+            }
+          })
+
+
       },
       delCycleTime(x){
         let _this = this
-        //console.log(x)
-        _this.tableDataCycle = _this.tableDataCycle.filter(item => {
+        //console.log(x.id)//DELETE /ui/task-cycle/delTaskCycle/{id}
+        /*_this.tableDataCycle = _this.tableDataCycle.filter(item => {
           return item.id != x.id
-        })
+        })*/
+        _this.$confirm('是否删除?', '确认', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          _this.ajax_api('delete',url_api + '/task-cycle/delTaskCycle/' + x.id,
+            null,true,function (res) {
+              //console.log(res.data.items)
+              if(res.code==200){
+                _this.$message({
+                  message: '删除成功',
+                  type: 'success',
+                });
+                _this.cycleDate({id:_this.irProjTaskId})
+              }
+            })
+        }).catch(() => {
+          _this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });
+        });
+
+
       },
       poolCycle(){
-        this.dialogVisibleHuizong = true
+      	let _this = this
+        _this.dialogVisibleHuizong = true
+        let taskExecutePlanData = {
+          irBaseRobotId:_this.irBaseRobotId,
+          startTime:_this.value_time_huizong1,
+          endTime:_this.value_time_huizong2
+        }
+        _this.ajax_api('get',url_api + '/task/execute-plan',
+          taskExecutePlanData,
+          true, function (res) {
+            if(res.code == 200){
+              _this.tableDataHuizong = res.data
+            }
+          })
+
+      },
+      queryHuizong(){
+        let _this = this
+        let taskExecutePlanData = {
+          irBaseRobotId:_this.irBaseRobotId,
+          startTime:_this.value_time_huizong1,
+          endTime:_this.value_time_huizong2
+        }
+        _this.ajax_api('get',url_api + '/task/execute-plan',
+          taskExecutePlanData,
+          true, function (res) {
+            if(res.code == 200){
+              _this.tableDataHuizong = res.data
+            }
+          })
+      },
+
+      taskCurrentChange(row){
+      	//console.log(row.id)
+        this.$root.eventHub.$emit('currentChange', row.id);
+      },
+      editTaskTable(row){
+        //console.log(row.id)
+        let _this = this  //GET /ui/task/{id}/editStatus
+        _this.ajax_api('get',url_api + '/task/'+ row.id +'/editStatus',{},true,function (res) {
+          //console.log(res.data)
+          if(!res.data.editStatus){
+            _this.$message({
+              message: '该任务不可编辑',
+            });
+            return
+          }
+          _this.$root.eventHub.$emit('editTaskDbl', row.id);
+        })
+
       },
 
       index(val){
@@ -438,6 +668,54 @@
         this.taskData.page = val
         this.getTableData()
       },
+
+      //立即执行
+      atOnce(){
+      	let _this = this
+        _this.dialogVisible = false
+      },
+
+      //时间格式转换
+      getTimeMy(time){
+        //var time="2018-05-19T08:04:52.000+0000";
+        var d = new Date(time);
+
+        var times=d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds();
+        return times
+        //输出 2018-05-19 15:59:10
+      },
+      getdatatime(){ //默认显示今天
+        var Da = new Date();
+        //var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var ss = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
+        //return y + "-" + m + "-" + d
+      },
+      getdatatime10(){
+        var Da = new Date();
+        Da = new Date(Da.getTime() + 24 * 60 * 60 * 1000 * 10);
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var ss = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
+      },
+
     },
 
     computed: {

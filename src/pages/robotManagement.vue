@@ -20,7 +20,7 @@
     </div>
 
     <div class="right" style="width: 35%">
-      <div class="right_top">
+      <div class="right_top" @dblclick="bigDiv">
         <!--<Button @click="test_ie">IE9</Button>-->
         <Button @click="test_login" style="position: absolute;z-index: 99999">可见光</Button>
         <div id="divPlugin" style="width: 100%;height: 100%;"></div>
@@ -257,7 +257,14 @@
         nHeight = $(this).height() + $(this).scrollTop();
 
         return {width: nWidth, height: nHeight};
-      }
+      },
+      bigDiv(){
+        clickFullScreen()
+        // 全屏
+        function clickFullScreen() {
+          WebVideoCtrl.I_FullScreen(true);
+        }
+      },
 
     },
     mounted() {
@@ -319,6 +326,7 @@
       .right_top
         height 50%
         border 2px solid
+        position relative
       .right_bottom
         height 50%
         border 2px solid
