@@ -9,18 +9,20 @@
     <div class="interval_show_content">
       <div class="interval_show_content_left">
         <ul>
-          <li v-for="(item,index) in leftOptions" :key="index"  class="left-item" :class="{'is-checked':index==indexIschenked}"
-              @click="queryRightContent(index)">{{item}}</li>
+          <li v-for="(item,index) in leftOptions" :key="index"  class="left-item"
+              :class="{'is-checked':item.id==indexIschenked}"
+              @click="queryRightContent(item.id)">{{item.name}}</li>
         </ul>
       </div>
-      <div class="interval_show_content_right">
+      <div class="interval_show_content_right" v-loading="loading">
         <ul>
-          <li @click="dialogVisible()" v-for="(item,index) in rightContent"  class="right-item">{{item}}</li>
+          <li @click="dialogVisible(item.id,item.name)" v-for="(item,index) in rightContent"
+              class="right-item" :class="'alarm'+item.alarmLevel">{{item.name}}</li>
         </ul>
       </div>
     </div>
     <ShowAlertBox :dialogVisible="show_box_visible" @childVisible="isVisible"
-                  :title_dev="title_dev"></ShowAlertBox>
+                  :title_dev="title_dev" :title_dev_id="title_dev_id"></ShowAlertBox>
     <menuBottom></menuBottom>
   </div>
 </template>
@@ -35,12 +37,13 @@
       return{
         title:'设备告警信息确认 > 间隔展示',
         show_box_visible:false,
-        title_dev:'110kV',
+        title_dev:'',
+        title_dev_id:'',
         input:'',
-        indexIschenked:0,
-        leftOptions: ['110kV', '主变', '35kV', '330kV', '330KV', '张掖330kV','1号主变','2号主变' ],
-        rightContent: ['1111','1112','110kV','乙母PT','1113','1114','1115','1号主变','1101','1116','1117','1118','2号主变','1102',
-        '110kV甲母PT','1119','1120','110kV','母联','1100','1121','1号主变','2号主变'],
+        indexIschenked:6917,
+        leftOptions: [],
+        rightContent: [],
+        loading:true,
       }
     },
     components: {
@@ -48,20 +51,39 @@
       ShowAlertBox,
       menuBottom
     },
+    mounted(){
+    	this.init()
+    },
     methods:{
-      queryRightContent(index){
-      	//console.log(index)
-        this.indexIschenked = index
-        if(index==1){
-      		this.rightContent = ['1号主变111','2222','3333','1117','1118','2号主变','1102',
-            '110kV甲母PT','1119','1120','110kV','母联','1100','1121','1号主变','2号主变']
-        }else {
-          this.rightContent = ['1111','1112','110kV','乙母PT','1113','1114','1115','1号主变','1101','1116','1117','1118','2号主变','1102',
-            '110kV甲母PT','1119','1120','110kV','母联','1100','1121','1号主变','2号主变']
-        }
+    	init(){
+    		let _this = this
+        _this.ajax_api('get',url_api + '/device/region',null,true,function (res) {
+          //console.log(res.data)
+          if(res.code == 200){
+            _this.leftOptions = res.data
+            _this.queryRightContent(6917)
+          }
+        })
       },
-      dialogVisible(){
+      queryRightContent(index){
+        let _this = this
+        _this.loading = true
+        _this.indexIschenked = index
+        _this.ajax_api('get',url_api + '/device/intervals',
+          {deviceRegionId:index},
+          true,function (res) {
+          //console.log(res.data)
+          if(res.code == 200){
+            _this.rightContent = res.data
+            _this.loading = false
+          }
+        })
+
+      },
+      dialogVisible(id,name){
       	this.show_box_visible = true
+        this.title_dev = name
+        this.title_dev_id = id
       },
       isVisible: function (childValue) {
         // childValue就是子组件传过来的值
@@ -73,6 +95,7 @@
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .interval_show_wrap
+    height 100%
     .interval_show_top
       height 30px
       background #e3f2ee\0
@@ -94,8 +117,11 @@
     .interval_show_content
       display flex
       border 1px solid #cae7ee
+      height calc(100% - 124px)
       .interval_show_content_left
         width 300px
+        min-height 500px
+        overflow-y auto
         border 1px solid #cae7ee
         float left
         box-sizing border-box
@@ -119,19 +145,31 @@
           margin: 10px;
           padding: 3px;
           background-color: #d2e9e5;
+          overflow hidden
           .right-item
+            float left
             height: 30px;
             min-width: 160px;
             margin: 6px;
-            display: inline-block;
+            display: block;
             /*background-color: #78ee88;*/
-            background : #00ff00;
             text-align: center;
             font-size: 15px;
             line-height: 30px;
             border-radius: 5px;
             -webkit-box-shadow: 0 0 3px 1px rgba(48,53,54,.3);
             box-shadow: 0 0 3px 1px rgba(48,53,54,.3);
+            cursor pointer
+          .alarm0
+            background : #00f100;
+          .alarm1
+            background : #447bff;
+          .alarm2
+            background : #fdff59;
+          .alarm3
+            background : #ffaf43;
+          .alarm4
+            background : #ff3d14;
 
 
 

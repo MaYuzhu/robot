@@ -165,11 +165,12 @@
         radio_items:[
           {
             value:1,
-            label:'全面巡检1'
+            label:'1'
           },
         ],
         radio_items_infrared:[],
         radio_infrared:5,
+
         checkAllQuyu: false,
         checkedQuyu: [],
         citiesQuyu: [],

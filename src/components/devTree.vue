@@ -1,5 +1,6 @@
 <template>
-	<div style="width:100%;height:100%;border:1px solid #cae7ee;background: #fff">
+	<div style="width:100%;height:100%;border:1px solid #cae7ee;
+	      overflow-x: auto;background: #fff;box-sizing: border-box">
     <!--<p>{{treeQuery}}</p>-->
     <p class="dev_tree_p" style="padding-left:5px;height:30px;line-height:30px;background:linear-gradient(#e3f2ee,#cae7ee);">设备树</p>
     <div style="max-height: calc(100% - 30px);overflow: auto">
@@ -289,5 +290,11 @@
     font-size: 14px;
     padding-right: 8px;
   }
+
+  div>>>.el-tree .el-tree-node__content
+    display flex!important
+  div>>>.el-tree .el-tree-node .el-tree-node__children
+    overflow visible!important
+
 
 </style>

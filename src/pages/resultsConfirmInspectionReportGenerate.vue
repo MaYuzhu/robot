@@ -2,32 +2,42 @@
   <div class="generate_wrap">
     <HeaderTop :title="title"></HeaderTop>
     <div class="generate_top_checked">
-      <AlarmQueryTop></AlarmQueryTop>
+      <!--<AlarmQueryTop></AlarmQueryTop>-->
+      <p style="display: inline-block">巡检类型：</p>
+      <div class="all_content" style="display:inline-block;width:900px">
+        <el-checkbox style="float:left;margin-right:20px" :indeterminate="isIndeterminate" v-model="checkAll"
+                     @change="handleCheckAllChange">全部</el-checkbox>
+        <el-checkbox-group v-model="checkedCities" @change="handleCheckedCitiesChange">
+          <el-checkbox v-for="(task_type,index) in taskTypeData" :label="task_type" :key="index">{{task_type.name}}</el-checkbox>
+        </el-checkbox-group>
+      </div>
     </div>
     <div class="right_title_tool">
       <p>开始时间：</p>
       <el-date-picker size="mini" style="width: 160px"
-                      v-model="value1"
-                      type="date"
+                      v-model="value_start"
+                      type="date" format="yyyy-MM-dd"
+                      value-format="yyyy-MM-dd"
                       placeholder="选择日期">
       </el-date-picker>
       <p>结束时间：</p>
       <el-date-picker size="mini" style="width: 160px"
-                      v-model="value2"
-                      type="date"
+                      v-model="value_end"
+                      type="date" format="yyyy-MM-dd"
+                      value-format="yyyy-MM-dd"
                       placeholder="选择日期">
       </el-date-picker>
       <div>
         <ul>
-          <li @click="aaa">123</li>
-          <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
+          <li @click="aaa">test</li>
+          <li @click="queryInit"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
           <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
           <li @click="exportExcel"><img src="../../static/images/export.png" alt=""><span>导出报告</span></li>
         </ul>
       </div>
     </div>
     <div class="right_title">巡检报告生成</div>
-    <div>
+    <div class="table_wrap">
       <el-table size="mini" id="outInspectionReport"
                 :data="tableData"
                 border
@@ -98,6 +108,17 @@
         </el-table-column>
 
       </el-table>
+      <div class="page">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[1, 10, 20, 50]"
+          :page-size="10"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total">
+        </el-pagination>
+      </div>
     </div>
     <menuBottom></menuBottom>
   </div>
@@ -117,7 +138,6 @@
     data(){
       return{
         title:'巡检报告生成 > 巡检报告生成',
-
         tableData: [
         	{
           date: '2016-05-03',
@@ -144,20 +164,28 @@
           date: '2016-05-06',
           name: '王小虎',
           address: '上海市普陀区金沙江路 1518 弄'
-        }, {
-          date: '2016-05-07',
-          name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
         }],
-
-        value1:'',
-        value2:''
+        value_start:'',
+        value_end:'',
+        checkAll: false,
+        taskTypeData:[
+          {name:'全面巡视',id:0},{name:'例行巡视',id:1},{name:'专项巡视',id:2},{name:'特殊巡视',id:3},
+          /*{name:'紧急任务',id:4},{name:'多光谱任务',id:5},*/
+        ],
+        isIndeterminate: false,
+        checkedCities:[],
+        currentPage:1,
+        total:1,
       }
     },
     components: {
       HeaderTop,
       AlarmQueryTop,
       menuBottom
+    },
+    mounted(){
+      this.value_end = this.getDateTime()
+      this.value_start = this.convertToLateDate()
     },
     methods:{
       index(val){
@@ -188,7 +216,6 @@
         }
         return wbout;
       },
-
 
       aaa(){
         const column = [
@@ -222,14 +249,81 @@
         table2excel(column, data, excelName)
       },
 
+      queryInit(){
+        let _this = this
+        let queryData = {
+          startTime: _this.value_start,
+          endTime: _this.value_end,
+        }
+        console.log(queryData)
+      },
+
+      handleCheckAllChange(val) {
+      	//console.log(val)
+        this.checkedCities = val ? this.taskTypeData : [];
+        this.isIndeterminate = false;
+      },
+      handleCheckedCitiesChange(value) {
+        let checkedCount = value.length;
+        this.checkAll = checkedCount === this.taskTypeData.length;
+        this.isIndeterminate = checkedCount > 0 && checkedCount < this.taskTypeData.length;
+      },
+      handleSizeChange(val) {
+        //console.log(`每页 ${val} 条`);
+      },
+      handleCurrentChange(val) {
+        //console.log(`当前页: ${val}`);
+      },
+      convertToLateDate(){
+        var data = new Date();
+        var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
+        // 以上两行代码为关键代码，若想要返回一天后的时间，则可以将第二行代码更换为下面代码
+        // var Da = new Date(data.getTime() + 24 * 60 * 60 * 1000);
+        // 若是想要返回值为当前时间，则上面两行代码可以直接修改为下面代码即可。
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var ss = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
+        //return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
+        return y + "-" + m + "-" + d
+      },
+      getDateTime(){ //默认显示今天
+        var Da = new Date();
+        //var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var ss = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
+        //return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
+        return y + "-" + m + "-" + d
+      },
+
     }
   }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .generate_wrap
+    height 100%
     .generate_top_checked
       background #efefef
+      padding 20px 16px 18px
     .right_title_tool
       width 100%
       height 30px
@@ -268,4 +362,12 @@
       background #d7f4fb \0
       background linear-gradient(#e3f2ee,#cae7ee)
       padding-left 12px
+      box-sizing border-box
+    .table_wrap
+      height calc(100% - 208px)
+      position relative
+      background white
+      .page
+        position absolute
+        bottom 0
 </style>

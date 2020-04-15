@@ -9,7 +9,7 @@
         <span class="title_dev">{{title_dev}}</span>
         <ul>
           <li v-for="(item, index) in items">
-            <span :class="[item.type=='green'?'green':'red']"></span>
+            <span :class="[item.type=='green'?'green':'green']"></span>
             <span>{{item.name}}</span>
           </li>
         </ul>
@@ -27,60 +27,25 @@
     data() {
       return {
         dialogVisible_: this.show_box_visible,
-        items:[
-          {
-          	name:'开关',
-            type:'green'
-          },
-          {
-            name:'电流互感器C相',
-            type:'red'
-          },
-          {
-            name:'开关',
-            type:'green'
-          },
-          {
-            name:'电流互感器C相',
-            type:'red'
-          },
-          {
-            name:'开关',
-            type:'green'
-          },
-          {
-            name:'电流互感器C相',
-            type:'red'
-          },
-          {
-            name:'开关',
-            type:'green'
-          },
-          {
-            name:'电流互感器C相',
-            type:'red'
-          },
-          {
-            name:'开关',
-            type:'green'
-          },
-          {
-            name:'电流互感器C相',
-            type:'red'
-          },
-          {
-            name:'开关',
-            type:'green'
-          },
-          {
-            name:'电流互感器C相',
-            type:'red'
-          },
-        ]
+        items:[]
       };
     },
-    props:['dialogVisible','title_dev'],
+    props:['dialogVisible','title_dev','title_dev_id'],
+    mounted(){
+    	this.getContentAlarm()
+    },
     methods: {
+    	getContentAlarm(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/device/interval-devices',
+          {intervalId:_this.title_dev_id},
+          true,function (res) {
+            //console.log(_this.title_dev_id)
+            if(res.code == 200){
+              _this.items = res.data
+            }
+          })
+      },
       handleClose(done) {
         /*this.$confirm('确认关闭？')
           .then(_ => {
@@ -90,7 +55,14 @@
         this.dialogVisible_ = false
         this.$emit('childVisible', this.dialogVisible_)
       }
-    }
+    },
+    watch:{
+      title_dev_id:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal)
+        _this.getContentAlarm()
+      },
+    },
   };
 </script>
 
