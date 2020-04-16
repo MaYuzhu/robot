@@ -430,7 +430,7 @@
       },
       dblBoxShow(row){
       	let _this = this
-      	console.log(row.id)
+      	//console.log(row.id)
         _this.dialogVisibleAlarm= true
       },
       radioResultChange(val){

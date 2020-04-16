@@ -93,13 +93,13 @@
         placeholder="选择日期">
       </el-date-picker>
       <el-radio v-model="radio" label="1">已审核</el-radio>
-      <el-radio v-model="radio" label="2">未审核</el-radio>
+      <el-radio v-model="radio" label="0">未审核</el-radio>
       <div>
         <ul>
           <li @click="queryList"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
-          <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
+          <li @click="resetList"><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
           <li><img src="../../static/images/export.png" alt=""><span>导出</span></li>
-          <li><img src="../../static/images/confirm.png" alt=""><span>批量确认</span></li>
+          <li @click="dialogVisibleMoreCheckShow"><img src="../../static/images/confirm.png" alt=""><span>批量确认</span></li>
         </ul>
       </div>
     </div>
@@ -109,51 +109,56 @@
       </div>
       <div class="right">
         <p>设备告警查询确认</p>
-        <el-table class="table_alarm"
-                  :data="tableDataAlarm" @current-change=""
-                  border highlight-current-row @row-dblclick=""
+        <el-table class="table_alarm" :row-class-name="tableRowClassName"
+                  :data="tableDataAlarm" @selection-change="handleSelectionChangeTable"
+                  border highlight-current-row @row-dblclick="dblBoxShow"
                   style="width: 100%">
           <el-table-column
             type="index" :index="index"
             label="序号" align="center"
             width="50">
           </el-table-column>
+          <!--<el-table-column
+            prop="id"
+            label="id" align="center"
+            width="50">
+          </el-table-column>-->
           <el-table-column
 						type="selection"
 						align="center"
 						width="50">
 					</el-table-column>
           <el-table-column
-            prop="name" align="center"
-            label="识别类型">
+            prop="reconType.name" align="center"
+            label="识别类型" width="100">
           </el-table-column>
           <el-table-column
-            prop="createTime"
+            prop="point.displayName"
             label="点位名称" align="center"
-            width="220">
+            width="">
           </el-table-column>
           <el-table-column
-            prop="createTime"
+            prop="resultStatus"
             label="识别结果" align="center"
             width="120">
           </el-table-column>
           <el-table-column
-            prop="createTime"
+            prop="alarmLevel" :formatter="alarmLevelShow"
             label="告警等级" align="center"
             width="120">
           </el-table-column>
           <el-table-column
-            prop="createTime"
+            prop="alarmType.name"
             label="告警类型" align="center"
             width="120">
           </el-table-column>
           <el-table-column
-            prop="createTime"
+            prop="reconTime"
             label="告警时间" align="center"
-            width="220">
+            width="280">
           </el-table-column>
           <el-table-column
-            prop="createTime"
+            prop=""
             label="采集信息" align="center"
             width="120">
           </el-table-column>
@@ -164,7 +169,7 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[1, 10, 20, 50]"
+            :page-sizes="[5, 10, 20]"
             :page-size="10"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
@@ -179,7 +184,7 @@
         <div class="dialog_content">
           <div class="dialog_left">
             <div style="background: #D9ECEA;height: 26px;line-height: 26px">
-              <p style="margin-left: 10px;cursor: pointer">上一页</p>
+              <p @click="prevData" style="margin-left: 10px;cursor: pointer">上一页</p>
             </div>
             <div style="height: 26px;line-height: 26px;padding-left: 8px">
               <span>点位信息：</span>
@@ -226,14 +231,14 @@
           <div class="dialog_right">
             <div style="background: #D9ECEA;height: 26px;line-height: 26px;padding: 0 10px;">
               <p style="float: left">识别结果</p>
-              <p style="float: right;cursor: pointer">下一页</p>
+              <p @click="nextData" style="float: right;cursor: pointer">下一页</p>
             </div>
             <div style="padding:10px">
               <p style="margin-bottom:10px">结果：</p>
-              <p><el-radio @change="radioResultChange" v-model="radio_result" label="1">正常</el-radio></p>
+              <p><el-radio @change="radioResultChange" v-model="radio_result" label="0">正常</el-radio></p>
               <div style="height: 120px;">
-                <el-radio @change="radioResultChange" v-model="radio_result" label="2" style="margin: 0">异常：</el-radio>
-                <el-select size="mini" v-model="value_type" multiple :disabled="disabled_option"
+                <el-radio @change="radioResultChange" v-model="radio_result" label="1" style="margin: 0">异常：</el-radio>
+                <el-select size="mini" v-model="value_type" multiple
                            placeholder="请选择" style="width: 220px">
                   <el-option
                     v-for="item in alarm_type_option"
@@ -245,7 +250,7 @@
               </div>
               <div style="height: 80px">
                 <span>告警等级：</span>
-                <el-select size="mini" v-model="value_level"
+                <el-select size="mini" v-model="value_level" :disabled="disabled_option"
                            placeholder="请选择" style="width: 220px;margin-left:-4px">
                   <el-option
                     v-for="item in alarm_level_option"
@@ -257,10 +262,11 @@
               </div>
               <div style="height: 100px">
                 <p style="margin-bottom:10px">实际值：</p>
-                <p><el-radio @change="" v-model="radio_value" label="1">识别正确</el-radio></p>
+                <p><el-radio @change="radioValueChange" v-model="radio_value" label="0">识别正确</el-radio></p>
                 <p>
-                  <el-radio @change="" v-model="radio_value" label="2">识别错误</el-radio>
-                  <el-input v-model="input_value_wrong" size="mini" style="width: 150px"></el-input>
+                  <el-radio @change="radioValueChange" v-model="radio_value" label="1">识别错误</el-radio>
+                  <el-input v-model="input_value_wrong" size="mini"
+                            :disabled="disabled_input_value" style="width: 150px"></el-input>
                 </p>
               </div>
               <div>
@@ -279,11 +285,22 @@
         </div>
         <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisibleAlarm = false">取 消</el-button>
-        <el-button type="primary" @click=" ">确 认</el-button>
+        <el-button type="primary" @click="checkConfirm">确 认</el-button>
       </span>
       </el-dialog>
     </div>
-
+    <div class="tip_dialog">
+      <el-dialog title="确认" :visible.sync="dialogVisibleMoreCheck" class="del_user">
+        <div class="dialog_content" style="height: 60px;font-weight: 600;
+            font-size: 16px;line-height: 60px">
+          是否批量确认？
+        </div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisibleMoreCheck = false">取 消</el-button>
+          <el-button type="primary" @click="moreCheckCommit">确 认</el-button>
+        </span>
+      </el-dialog>
+    </div>
 
   </div>
 </template>
@@ -300,7 +317,7 @@
         title:'设备告警信息确认 > 设备告警查询确认',
         value_start:'',
         value_end:'',
-        radio:'2',
+        radio:'0',
 
         checkAllQuyu: false,
         checkedQuyu: [],
@@ -342,8 +359,8 @@
         currentPage:1,
         total:1,
         tableDataAlarm:[],
-        dialogVisibleAlarm:true,
-        point_info:'这是一段点位信息',
+        dialogVisibleAlarm:false,
+        point_info:'点位信息',
         imgArr:[
         	{
         		title:'A相可见光',
@@ -382,21 +399,31 @@
         disabled_option:true,
         value_level:'',
         alarm_level_option:[
-          {value:1,label:'正常'},
-          {value:2,label:'预警'},
-          {value:3,label:'一般缺陷'},
-          {value:4,label:'严重缺陷'},
-          {value:5,label:'危险缺陷'},
+          {value:0,label:'正常'},
+          {value:1,label:'预警'},
+          {value:2,label:'一般缺陷'},
+          {value:3,label:'严重缺陷'},
+          {value:4,label:'危险缺陷'},
         ],
         radio_value:'1',
         input_value_wrong:'',
+        disabled_input_value:true,
         textarea:'',
+        ajaxTableData:{
+        	page:1,
+          size:10
+        },
+        rowIndex:0,
+        checkId:'',
+        dialogVisibleMoreCheck:false,
+        multipleSelection: [],
       }
     },
     mounted(){
     	this.init()
       this.value_end = this.getDateTime()
       this.value_start = this.convertToLateDate()
+      this.getTableData()
     },
     methods:{
       init(){
@@ -430,30 +457,61 @@
         _this.listAlarm = [
           {
             displayName: "正常",
-            id: 1,
+            id: 0,
             name: 1
           },
           {
             displayName: "预警",
-            id: 2,
+            id: 1,
             name: 1
           },
           {
             displayName: "一般缺陷",
-            id: 3,
+            id: 2,
             name: 1
           },
           {
             displayName: "严重缺陷",
-            id: 4,
+            id: 3,
             name: 1
           },
           {
             displayName: "危险缺陷",
-            id: 5,
+            id: 4,
             name: 1
           },
         ]
+
+      },
+
+      getTableData(){
+        let _this = this
+        _this.ajaxTableData.startTime = _this.value_start
+        _this.ajaxTableData.endTime = _this.value_end
+        _this.ajaxTableData.checkStatus = _this.radio*1
+        //console.log(_this.checkedAlarm)
+        if(_this.checkedAlarm.length<1){
+          _this.ajaxTableData.alarmLevel = null
+        }else {
+        	let alarmIds = []
+          for(let i in _this.checkedAlarm){
+            alarmIds.push(_this.checkedAlarm[i].id)
+          }
+          _this.ajaxTableData.alarmLevel = alarmIds.toString()
+        }
+
+
+        //console.log(_this.ajaxTableData)
+        _this.ajax_api('post',url_api + '/point-alarm-history',
+          _this.ajaxTableData,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data.items)
+              _this.tableDataAlarm = res.data.items
+              _this.total = res.data.total
+            }
+          })
 
       },
 
@@ -551,36 +609,264 @@
 
       handleSizeChange(val) {
         //console.log(`每页 ${val} 条`);
-        this.taskData.size = val
+        this.ajaxTableData.size = val
         this.getTableData()
       },
       handleCurrentChange(val) {
         //console.log(`当前页: ${val}`);
-        this.taskData.page = val
+        this.ajaxTableData.page = val
         this.getTableData()
       },
       index(val){
-        return val
+        return (this.ajaxTableData.page - 1)*this.ajaxTableData.size + val + 1
         //return (this.taskData.page - 1)*this.taskData.size + val + 1
       },
       radioResultChange(val){
-      	if(val==2){
+      	if(val==1){
       		this.disabled_option = false
         }else {
           this.disabled_option = true
         }
       },
+      radioValueChange(val){
+        if(val==1){
+          this.disabled_input_value = false
+        }else {
+          this.disabled_input_value = true
+        }
+      },
 
       queryList(){
         let _this = this
-        let queryData = {
-          startTime: _this.value_start,
-          endTime: _this.value_end,
-          s: _this.radio
-        }
-        console.log(queryData)
+        _this.getTableData()
       },
+      alarmLevelShow(row){
+      	let alarmLevelName = ''
+      	switch (row.alarmLevel){
+          case 0:
+            alarmLevelName = '正常'
+            break
+          case 1:
+            alarmLevelName = '预警'
+            break
+          case 2:
+            alarmLevelName = '一般缺陷'
+            break
+          case 3:
+            alarmLevelName = '严重缺陷'
+            break
+          case 4:
+            alarmLevelName = '危险缺陷'
+            break
+        }
+        return alarmLevelName
+      },
+      dblBoxShow(row){
+        let _this = this
+        _this.rowIndex = row.index
+        _this.checkId = row.id
+        //console.log(row.index)
+        //console.log(row.id) GET /ui/point-alarm-history/info/{id}
+        _this.dialogVisibleAlarm = true
+        _this.point_info = row.point.displayName
+        _this.input_value_wrong = ''
+        _this.textarea=''
+        _this.ajax_api('get',url_api + '/point-alarm-history/info/'+row.id,
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data)
+              //报警等级
+              if(res.data.resultStatus==0){
+                _this.radio_result = '0'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = true
+              }else {
+                _this.radio_result = '1'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = false
+              }
+              //识别状态
+              if(res.data.errorFlag==0){
+                _this.radio_value = '0'
+                _this.disabled_input_value = true
+              }else {
+                _this.radio_value = '1'
+                _this.disabled_input_value = false
+              }
+            }
+          })
 
+      },
+      prevData(){
+        let _this = this
+        if(_this.rowIndex<1){
+          alert('本页第一条了')
+          return
+        }else {
+          _this.rowIndex--
+        }
+        _this.input_value_wrong = ''
+        _this.textarea=''
+        _this.point_info = _this.tableDataAlarm[_this.rowIndex].point.displayName
+        let id = _this.tableDataAlarm[_this.rowIndex].id
+        _this.checkId = id
+        //console.log(id,'index'+_this.rowIndex)
+        _this.ajax_api('get',url_api + '/point-alarm-history/info/'+id,
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data)
+              //报警等级
+              if(res.data.resultStatus==0){
+                _this.radio_result = '0'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = true
+              }else {
+                _this.radio_result = '1'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = false
+              }
+              //识别状态
+              if(res.data.errorFlag==0){
+                _this.radio_value = '0'
+                _this.disabled_input_value = true
+              }else {
+                _this.radio_value = '1'
+                _this.disabled_input_value = false
+              }
+            }
+          })
+
+      },
+      nextData(){
+      	let _this = this
+        _this.rowIndex++
+        if(_this.rowIndex>=_this.tableDataAlarm.length){
+      		alert('本页最后一条了')
+          return
+        }
+        _this.input_value_wrong = ''
+        _this.textarea=''
+        _this.point_info = _this.tableDataAlarm[_this.rowIndex].point.displayName
+        let id = _this.tableDataAlarm[_this.rowIndex].id
+        _this.checkId = id
+        //console.log(id,'index'+_this.rowIndex)
+        _this.ajax_api('get',url_api + '/point-alarm-history/info/'+id,
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data)
+              //报警等级
+              if(res.data.resultStatus==0){
+                _this.radio_result = '0'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = true
+              }else {
+                _this.radio_result = '1'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = false
+              }
+              //识别状态
+              if(res.data.errorFlag==0){
+                _this.radio_value = '0'
+                _this.disabled_input_value = true
+              }else {
+                _this.radio_value = '1'
+                _this.disabled_input_value = false
+              }
+            }
+          })
+      },
+      checkConfirm(){
+      	let _this = this
+        let data = {
+          alarmLevel: _this.value_level,
+          checkDesc: _this.textarea,
+          irBaseAlarmTypeId: _this.value_type.toString(),
+          modifyValue: _this.input_value_wrong,
+          reconStatus: _this.radio_value,
+          resultStatus: _this.radio_result
+        }
+        _this.ajax_api('put',url_api + '/point-alarm-history/updPointAlarmHistory/'+_this.checkId,
+          data,
+          true,
+          function (res) {
+            if(res.code == 200){
+              _this.$message({
+                message: '审核成功',
+                type: 'success',
+              });
+            }
+          })
+
+      },
+      dialogVisibleMoreCheckShow(){
+        if(this.multipleSelection.length<1){
+          this.$message({
+            message: '请选择',
+          });
+          return
+        }
+      	this.dialogVisibleMoreCheck = true
+      },
+      moreCheckCommit(){
+        let _this = this
+        let ids = []
+        for(let i in _this.multipleSelection){
+        	ids.push(_this.multipleSelection[i].id)
+        }
+        let moreCheckData = {
+          ids: ids.toString()
+        }
+        //console.log(moreCheckData)
+        _this.ajax_api('put',url_api + '/point-alarm-history/batch-confirm',
+          moreCheckData,
+          true,
+          function (res) {
+            if(res.code == 200){
+              _this.$message({
+                message: '审核成功',
+                type: 'success',
+              });
+              this.dialogVisibleMoreCheck = false
+              _this.getTableData()
+            }
+          })
+
+      },
+      resetList(){
+      	this.checkAllQuyu = false
+        this.checkedQuyu = []
+        this.isIndeterminateQuyu = false
+        this.moreQuyu = false
+
+        this.checkAllDevType = false
+        this.checkedDevType = []
+        this.isIndeterminateDevType = false
+        this.moreDevType = false
+
+        this.checkAllReconType = false
+        this.checkedReconType = []
+        this.isIndeterminateReconType = false
+        this.moreReconType = false
+
+        this.checkAllAlarm = false
+        this.checkedAlarm = []
+        this.isIndeterminateAlarm = false
+        this.moreAlarm = false
+
+        this.radio = '0'
+        this.value_end = this.getDateTime()
+        this.value_start = this.convertToLateDate()
+        this.getTableData()
+      },
+      handleSelectionChangeTable(val){
+        this.multipleSelection = val
+      },
       convertToLateDate(){
         var data = new Date();
         var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
@@ -619,6 +905,10 @@
         ss = ss < 10 ? "0" + ss : ss;
         //return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
         return y + "-" + m + "-" + d
+      },
+      tableRowClassName ({row, rowIndex}) {
+        //把每一行的索引放进row
+        row.index = rowIndex;
       },
     },
     components: {
@@ -697,21 +987,37 @@
       .left
         width 300px
         height 100%
+        border 1px solid #cae7ee
         float left
+        box-sizing border-box
       .right
         width calc(100% - 300px)
         height 100%
+        border 1px solid #cae7ee
         float left
+        box-sizing border-box
         position relative
+        background white
         /deep/ .el-table th
           padding 4px 0
         /deep/ .el-table td
           padding 4px 0
         p
-          height 28px
-          line-height 28px
+          height 30px
+          line-height 30px
           padding-left 10px
-          background #e3f2ee
+          background linear-gradient(#e3f2ee,#cae7ee)
+          background #e3f2ee/0
+        .table_alarm
+          max-height calc(100% - 62px)
+          overflow-y auto
+
+        .el-table::before
+          left: 0;
+          bottom: 0;
+          width: 100%;
+          height: 0px;
+
         .page
           position absolute
           bottom 0
@@ -758,6 +1064,43 @@
           padding 5px 10px
           .el-button
             padding 8px 22px
+
+
+    .tip_dialog /deep/
+      .el-dialog
+        background #d7efec
+        width: 500px;
+        min-width: 500px;
+        padding-bottom: 6px;
+        .el-dialog__header
+          padding 10px 10px 5px
+          position relative
+          height 16px
+          .el-dialog__title
+            display inline-block
+            position absolute
+            font-size 14px
+            top 4px
+            left 10px
+          .el-dialog__headerbtn
+            top 8px
+            right 8px
+        .el-dialog__body
+          padding 0px 8px
+          .dialog_content
+            background white
+            padding 10px 20px
+            overflow hidden
+            border 1px solid #90e8c6
+        .el-dialog__footer
+          background #fff
+          border 1px solid #90e8c6
+          border-top none
+          margin 1px 8px 5px
+          padding 5px 10px
+          .el-button
+            padding 8px 22px
+
 
 
 </style>

@@ -2,7 +2,7 @@
   <div style="width:100%;height:100%;background: #fff">
     <p v-if="isTitle" class="dev_tree_p" style="padding-left:5px;height:30px;
     line-height:30px;background:linear-gradient(#e3f2ee,#cae7ee);">设备树</p>
-    <div style="max-height: calc(100% - 30px);overflow: auto">
+    <div style="height: calc(100% - 30px);max-height: calc(100% - 30px);overflow: auto">
       <el-tree
         :data="data"
         @node-click="nodeClick()"
@@ -11,12 +11,12 @@
         ref="tree"
         highlight-current
         :props="defaultProps">
-        <span class="custom-tree-node" slot-scope="{ node, data }">
+        <span class="custom-tree-node span-ellipsis" slot-scope="{ node, data }">
 
           <!--<span style="width: 10px;height:10px;background: red;display: inline-block"></span>-->
-          <span>
+          <span :title="node.data.name">
             <i :class="node.data.children?'el-icon-s-cooperation':'el-icon-s-order'"></i>
-            <span style="width: 13px;height:13px;background:#329632;display: inline-block"></span>
+            <span class="color_alarm" style="width: 13px;height:13px;display: inline-block"></span>
             {{ node.data.name }}
           </span>
           <span>{{node.data.id}}</span>
@@ -137,10 +137,24 @@
     font-size: 14px;
     padding-right: 8px;
   }
+  .color_alarm{
+    background :#329632;
+  }
+  .color_alarm1{
+    background :#ff0000;
+  }
 
-  div>>>.el-tree .el-tree-node__content
+  .span-ellipsis {
+    width: calc(100% - 70px);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    display: block;
+  }
+
+  /*div>>>.el-tree .el-tree-node__content
           display flex!important
   div>>>.el-tree .el-tree-node .el-tree-node__children
-          overflow visible!important
+          overflow visible!important*/
 
 </style>
