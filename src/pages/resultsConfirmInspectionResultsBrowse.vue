@@ -31,58 +31,58 @@
                           placeholder="选择日期">
           </el-date-picker>
           <el-radio style="line-height: 27px" v-model="radio" label="1">已审核</el-radio>
-          <el-radio v-model="radio" label="2">未审核</el-radio>
+          <el-radio v-model="radio" label="0">未审核</el-radio>
           <div>
             <ul>
               <li @click="queryList"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
-              <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
+              <li @click="resetList"><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
               <li><img src="../../static/images/export.png" alt=""><span>导出</span></li>
             </ul>
           </div>
         </div>
         <div class="right_title">巡检结果</div>
-        <div style="height: 284px;border: 1px solid">
+        <div style="border: 0px solid" class="table_box">
           <el-table size="mini" @row-dblclick="dblBoxShow"
-                    border :data="tableDataResults"
-                    style="width: 100%;">
+                    border :data="tableDataResults" :row-class-name="tableRowClassName"
+                    style="width: 100%;" class="el_table">
             <el-table-column
-              prop="date"
-              label="序号"
+              prop="date" align="center"
+              label="序号" type="index" :index="index1"
               width="50">
             </el-table-column>
             <el-table-column
-              prop="address"
-              label="任务名称"
+              prop="task.name" align="center"
+              label="任务名称" width="300"
             >
             </el-table-column>
             <el-table-column
-              prop="address"
+              prop="point.displayName" align="center"
               label="点位名称"
             >
             </el-table-column>
             <el-table-column
-              prop="address"
-              label="识别时间"
+              prop="createTime" align="center"
+              label="识别时间" width="260"
             >
             </el-table-column>
             <el-table-column
-              prop="address"
-              label="识别结果"
+              prop="modifyValue" align="center"
+              label="识别结果" width="110"
             >
             </el-table-column>
             <el-table-column
-              prop="address"
-              label="审核结果"
+              prop="address" align="center"
+              label="审核结果" width="110"
             >
             </el-table-column>
             <el-table-column
-              prop="address"
-              label="识别类型"
+              prop="reconType.name" align="center"
+              label="识别类型" width="190"
             >
             </el-table-column>
             <el-table-column
-              prop="address"
-              label="采集时间"
+              prop="address" align="center"
+              label="采集信息" width="120"
             >
             </el-table-column>
 
@@ -92,14 +92,14 @@
               @size-change="handleSizeChange1"
               @current-change="handleCurrentChange1"
               :current-page="currentPage1"
-              :page-sizes="[1, 5, 10, 20]"
-              :page-size="10"
+              :page-sizes="[2, 6, 10]"
+              :page-size="6"
               layout="total, sizes, prev, pager, next, jumper"
               :total="total1">
             </el-pagination>
           </div>
         </div>
-        <div class="right_bottom" style="border: 1px solid">
+        <div class="right_bottom" style="border: 0px solid">
           <ul class="ul_img_wrap">
             <li v-for="(item, index) in imageArr" style="width:33.3333%;height:50%;float:left;
                   box-sizing:border-box;border:1px solid #90e8c6">
@@ -111,13 +111,13 @@
           </ul>
           <div class="page_box">
             <el-pagination
-              @size-change="handleSizeChange1"
-              @current-change="handleCurrentChange1"
-              :current-page="currentPage1"
-              :page-sizes="[1, 5, 10, 20]"
-              :page-size="10"
+              @size-change="handleSizeChange2"
+              @current-change="handleCurrentChange2"
+              :current-page="currentPage2"
+              :page-sizes="[6, 12, 24]"
+              :page-size="6"
               layout="total, sizes, prev, pager, next, jumper"
-              :total="total1">
+              :total="total2">
             </el-pagination>
           </div>
         </div>
@@ -125,11 +125,11 @@
     </div>
     <menuBottom></menuBottom>
     <div class="alarm_dialog">
-      <el-dialog title="告警确认" :visible.sync="dialogVisibleAlarm" class="" style="margin-top: -8vh;">
+      <el-dialog title="巡检结果审核" :visible.sync="dialogVisibleAlarm" class="" style="margin-top: -8vh;">
         <div class="dialog_content">
           <div class="dialog_left">
             <div style="background: #D9ECEA;height: 26px;line-height: 26px">
-              <p style="margin-left: 10px;cursor: pointer">上一页</p>
+              <p @click="prevData" style="margin-left: 10px;cursor: pointer">上一页</p>
             </div>
             <div style="height: 26px;line-height: 26px;padding-left: 8px">
               <span>点位信息：</span>
@@ -137,12 +137,11 @@
                 padding: 2px 8px">{{point_info}}</span>
             </div>
             <div style="height: 400px;overflow-y: auto">
-              <ul style="height: 400px;overflow: auto">
-                <li v-for="(item, index) in imgArr" style="width:33.3333%;height:200px;float:left;
+              <ul>
+                <li v-for="(item, index) in imgArr" style="width:33.3333%;float:left;
                   box-sizing:border-box;border:1px solid #90e8c6">
                   <p style="background: #D9ECEA;height: 22px;line-height: 22px">{{item.title}}</p>
-                  <el-image :preview-src-list="srcList" style="width:100%;height:178px;" :src="item.url" alt="">
-                  </el-image>
+                  <img style="width:100%;height:100%;" :src="item.url" alt="">
                 </li>
               </ul>
             </div>
@@ -177,14 +176,14 @@
           <div class="dialog_right">
             <div style="background: #D9ECEA;height: 26px;line-height: 26px;padding: 0 10px;">
               <p style="float: left">识别结果</p>
-              <p style="float: right;cursor: pointer">下一页</p>
+              <p @click="nextData" style="float: right;cursor: pointer">下一页</p>
             </div>
             <div style="padding:10px">
               <p style="margin-bottom:10px">结果：</p>
-              <p><el-radio @change="radioResultChange" v-model="radio_result" label="1">正常</el-radio></p>
+              <p><el-radio @change="radioResultChange" v-model="radio_result" label="0">正常</el-radio></p>
               <div style="height: 120px;">
-                <el-radio @change="radioResultChange" v-model="radio_result" label="2" style="margin: 0">异常：</el-radio>
-                <el-select size="mini" v-model="value_type" multiple :disabled="disabled_option"
+                <el-radio @change="radioResultChange" v-model="radio_result" label="1" style="margin: 0">异常：</el-radio>
+                <el-select size="mini" v-model="value_type" multiple
                            placeholder="请选择" style="width: 220px">
                   <el-option
                     v-for="item in alarm_type_option"
@@ -196,7 +195,7 @@
               </div>
               <div style="height: 80px">
                 <span>告警等级：</span>
-                <el-select size="mini" v-model="value_level"
+                <el-select size="mini" v-model="value_level" :disabled="disabled_option"
                            placeholder="请选择" style="width: 220px;margin-left:-4px">
                   <el-option
                     v-for="item in alarm_level_option"
@@ -208,10 +207,11 @@
               </div>
               <div style="height: 100px">
                 <p style="margin-bottom:10px">实际值：</p>
-                <p><el-radio @change="" v-model="radio_value" label="1">识别正确</el-radio></p>
+                <p><el-radio @change="radioValueChange" v-model="radio_value" label="0">识别正确</el-radio></p>
                 <p>
-                  <el-radio @change="" v-model="radio_value" label="2">识别错误</el-radio>
-                  <el-input v-model="input_value_wrong" size="mini" style="width: 150px"></el-input>
+                  <el-radio @change="radioValueChange" v-model="radio_value" label="1">识别错误</el-radio>
+                  <el-input v-model="input_value_wrong" size="mini"
+                            :disabled="disabled_input_value" style="width: 150px"></el-input>
                 </p>
               </div>
               <div>
@@ -230,7 +230,7 @@
         </div>
         <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisibleAlarm = false">取 消</el-button>
-        <el-button type="primary" @click=" ">确 认</el-button>
+        <el-button type="primary" @click="checkConfirm">确 认</el-button>
       </span>
       </el-dialog>
     </div>
@@ -262,9 +262,11 @@
         isIndeterminatePoint: false,
         value_start:'',
         value_end:'',
-        radio:'2',
+        radio:'0',
         currentPage1:1,
         total1:1,
+        currentPage2:1,
+        total2:1,
         imageArr:[
           {
             title:'A相可见光',
@@ -295,7 +297,7 @@
           '../../static/abc.jpg',
         ],
         dialogVisibleAlarm:false,
-        point_info:'这是一段点位信息',
+        point_info:'点位信息',
         imgArr:[
           {
             title:'A相可见光',
@@ -346,7 +348,11 @@
         ],
         radio_value:'1',
         input_value_wrong:'',
+        disabled_input_value:true,
         textarea:'',
+        ajaxTableData:{page:1, size:6},
+        rowIndex:0,
+        checkId:'',
       }
     },
     components: {
@@ -358,8 +364,53 @@
     mounted(){
     	this.value_end = this.getDateTime()
       this.value_start = this.convertToLateDate()
+      this.getTableData()
     },
     methods:{
+      getTableData(){
+        let _this = this
+        _this.ajaxTableData.startTime = _this.value_start
+        _this.ajaxTableData.endTime = _this.value_end
+        _this.ajaxTableData.checkStatus = _this.radio*1
+
+/*{
+ "checkStatus": 0,
+ "endTime": "string",
+ "irBaseRobotId": 0,
+ "irDataTaskHistoryId": 0,
+ "irProjSaveType": 0,
+ "page": 0,
+ "pointIds": "string",
+ "pointType": 0,
+ "reconStatus": "string",
+ "size": 0,
+ "startTime": "string"
+ }*/
+/*checkStatus (integer, optional): 审核状态 0:未审核 1:已审核 ,
+ endTime (string, optional): 结束时间 ,
+ irBaseRobotId (integer, optional): 机器人编号 ,
+ irDataTaskHistoryId (integer, optional): 巡检记录编号 ,
+ irProjSaveType (integer, optional): 保存类型 ,
+ page (integer, optional): 当前页数 ,
+ pointIds (string, optional): 点位编号 ,
+ pointType (integer, optional): 点位类型，0：点位，1：类型 ,
+ reconStatus (string, optional): 识别状态 1 正确； 0 错误 ,
+ size (integer, optional): 每页显示条数 ,
+ startTime (string, optional): 开始时间*/
+
+        //console.log(_this.ajaxTableData)
+        _this.ajax_api('post',url_api + '/point-history',
+          _this.ajaxTableData,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data.items)
+              _this.tableDataResults = res.data.items
+              _this.total1 = res.data.total
+            }
+          })
+
+      },
       handleCheckAllChangePoint(val){
         this.checkedPoints = val ? pointsOptions : [];
         this.isIndeterminatePoint = false;
@@ -371,13 +422,8 @@
       },
 
       queryList(){
-      	let _this = this
-      	let queryData = {
-          startTime: _this.value_start,
-          endTime: _this.value_end,
-          s: _this.radio
-        }
-      	console.log(queryData)
+        let _this = this
+        _this.getTableData()
       },
 
       convertToLateDate(){
@@ -422,23 +468,230 @@
 
       handleSizeChange1(val) {
         //console.log(`每页 ${val} 条`);
-
+        this.ajaxTableData.size = val
+        this.getTableData()
       },
       handleCurrentChange1(val) {
+        //console.log(`当前页: ${val}`);
+        this.ajaxTableData.page = val
+        this.getTableData()
+      },
+      index1(val){
+        return (this.ajaxTableData.page - 1)*this.ajaxTableData.size + val + 1
+      },
+      handleSizeChange2(val) {
+        //console.log(`每页 ${val} 条`);
+
+      },
+      handleCurrentChange2(val) {
         //console.log(`当前页: ${val}`);
 
       },
       dblBoxShow(row){
       	let _this = this
       	//console.log(row.id)
-        _this.dialogVisibleAlarm= true
+        _this.rowIndex = row.index
+        _this.checkId = row.id
+        //console.log(row.index)
+        //console.log(row.id) GET /ui/point-alarm-history/info/{id}
+        _this.dialogVisibleAlarm = true
+        _this.point_info = row.point.displayName
+        _this.input_value_wrong = ''
+        _this.textarea=''
+        _this.ajax_api('get',url_api + '/point-history/info/'+row.id,
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data)
+              //报警等级
+              /*if(res.data.resultStatus==0){
+                _this.radio_result = '0'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = true
+              }else {
+                _this.radio_result = '1'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = false
+              }
+              //识别状态
+              if(res.data.errorFlag==0){
+                _this.radio_value = '0'
+                _this.disabled_input_value = true
+              }else {
+                _this.radio_value = '1'
+                _this.disabled_input_value = false
+              }*/
+              _this.input_value_wrong = res.data.modifyValue
+            }
+          })
       },
       radioResultChange(val){
-        if(val==2){
+        if(val==1){
           this.disabled_option = false
         }else {
           this.disabled_option = true
         }
+      },
+      radioValueChange(val){
+        if(val==1){
+          this.disabled_input_value = false
+        }else {
+          this.disabled_input_value = true
+        }
+      },
+      resetList(){
+        this.radio = '0'
+        this.value_end = this.getDateTime()
+        this.value_start = this.convertToLateDate()
+        this.getTableData()
+      },
+      prevData(){
+        let _this = this
+        if(_this.rowIndex<1){
+          //alert('本页第一条了')
+          _this.$message({
+            message: '本页第一条了',
+          });
+          return
+        }else {
+          _this.rowIndex--
+        }
+        _this.input_value_wrong = ''
+        _this.textarea=''
+        _this.point_info = _this.tableDataResults[_this.rowIndex].point.displayName
+        let id = _this.tableDataResults[_this.rowIndex].id
+        _this.checkId = id
+        //console.log(id,'index'+_this.rowIndex)
+        _this.ajax_api('get',url_api + '/point-history/info/'+id,
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data)
+              //报警等级
+              /*if(res.data.resultStatus==0){
+                _this.radio_result = '0'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = true
+              }else {
+                _this.radio_result = '1'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = false
+              }
+              //识别状态
+              if(res.data.errorFlag==0){
+                _this.radio_value = '0'
+                _this.disabled_input_value = true
+              }else {
+                _this.radio_value = '1'
+                _this.disabled_input_value = false
+              }*/
+              _this.input_value_wrong = res.data.modifyValue
+            }
+          })
+
+      },
+      nextData(){
+        let _this = this
+        _this.rowIndex++
+        if(_this.rowIndex>=_this.tableDataResults.length){
+          //alert('本页最后一条了')
+          _this.$message({
+            message: '本页最后一条了',
+          });
+          return
+        }
+        _this.input_value_wrong = ''
+        _this.textarea=''
+        _this.point_info = _this.tableDataResults[_this.rowIndex].point.displayName
+        let id = _this.tableDataResults[_this.rowIndex].id
+        _this.checkId = id
+        //console.log(id,'index'+_this.rowIndex)
+        _this.ajax_api('get',url_api + '/point-history/info/'+id,
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data)
+              //报警等级
+              /*if(res.data.resultStatus==0){
+                _this.radio_result = '0'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = true
+              }else {
+                _this.radio_result = '1'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = false
+              }
+              //识别状态
+              if(res.data.errorFlag==0){
+                _this.radio_value = '0'
+                _this.disabled_input_value = true
+              }else {
+                _this.radio_value = '1'
+                _this.disabled_input_value = false
+              }*/
+              _this.input_value_wrong = res.data.modifyValue
+            }
+          })
+      },
+      checkConfirm(){
+      	/*"cameraPic": "string",
+         "checkStatus": "string",
+         "flirPic": "string",
+         "irBaseRobotId": 0,
+         "irDataTaskHistoryId": 0,
+         "irProjPointId": 0,
+         "irProjWatchPosId": 0,
+         "modifyValue": 0,
+         "pointType": "string",
+         "reconStatus": "string",
+         "reconTime": "2020-04-17T00:20:52.434Z",
+         "sound": "string",
+         "value": 0*/
+      	/*cameraPic (string, optional): 可见光图片 ,
+         checkStatus (string, optional): 审核状态 0:未审核 1:已审核 ,
+         flirPic (string, optional): 红外图片 ,
+         irBaseRobotId (integer, optional): 机器人编号 ,
+         irDataTaskHistoryId (integer, optional): 巡检记录编号 ,
+         irProjPointId (integer, optional): 巡检点位编号 ,
+         irProjWatchPosId (integer, optional): 观察位编号 ,
+         modifyValue (number, optional): 人工判断结果值 ,
+         pointType (string, optional): 点位类型，0：点位，1：类型 ,
+         reconStatus (string, optional): 识别状态 0 正确； 1 错误 ,
+         reconTime (string, optional): 识别时间 ,
+         sound (string, optional): 声音 ,
+         value (number, optional): 识别值*/
+        let _this = this
+        let data = {
+          //alarmLevel: _this.value_level,
+          checkDesc: _this.textarea,
+          modifyValue: _this.input_value_wrong,
+          reconStatus: _this.radio_value,
+          irBaseRobotId: 1,
+          //resultStatus: _this.radio_result,
+        }
+        _this.ajax_api('put',url_api + '/point-history/updPointHistory/'+_this.checkId,
+          data,
+          true,
+          function (res) {
+            if(res.code == 200){
+              _this.$message({
+                message: '审核成功',
+                type: 'success',
+              });
+            }else {
+              _this.$message({
+                message: '服务器繁忙...',
+              });
+            }
+          })
+
+      },
+      tableRowClassName ({row, rowIndex}) {
+        //把每一行的索引放进row
+        row.index = rowIndex;
       },
     },
   }
@@ -518,8 +771,24 @@
           padding-left 12px
           box-sizing border-box
 
+        .table_box
+          height calc(100% - 588px)
+          /*overflow-y auto*/
+          position relative
+          /deep/ .el-table th
+            padding 2px 0
+          /deep/ .el-table td
+            padding 2px 0
+          .el-table::before
+            height: 0px;
+          .el_table
+            max-height calc(100% - 30px)
+            overflow-y auto
+          .page_box
+            position absolute
+            bottom 0
         .right_bottom
-          height calc(100% - 350px)
+          height 528px
           .ul_img_wrap
             height calc(100% - 30px)
             .li_img
@@ -527,8 +796,9 @@
     .alarm_dialog /deep/
       .el-dialog
         background #d7efec
-        width: 90%;
-        min-width: 1000px;
+        /*width: 65%;
+        min-width: 800px;*/
+        width: 1100px;
         padding-bottom: 6px;
         .el-dialog__header
           padding 10px 10px 5px
@@ -551,12 +821,12 @@
             overflow hidden
             border 1px solid #90e8c6
             .dialog_left
-              width 75%
+              width calc(100% - 336px)
               border-right 1px solid #90e8c6
               float left
               box-sizing border-box
             .dialog_right
-              width 25%
+              width 336px
               float left
 
         .el-dialog__footer

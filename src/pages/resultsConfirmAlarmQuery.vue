@@ -515,13 +515,6 @@
 
       },
 
-      handleSizeChange(val) {
-        //console.log(`每页 ${val} 条`);
-      },
-      handleCurrentChange(val) {
-        //console.log(`当前页: ${val}`);
-      },
-
       handleCheckAllChange(val) {
         this.checkedQuyu = val ? this.citiesQuyu : [];
         this.isIndeterminateQuyu = false;
@@ -702,7 +695,10 @@
       prevData(){
         let _this = this
         if(_this.rowIndex<1){
-          alert('本页第一条了')
+          //alert('本页第一条了')
+          _this.$message({
+            message: '本页最后一条了',
+          });
           return
         }else {
           _this.rowIndex--
@@ -745,7 +741,10 @@
       	let _this = this
         _this.rowIndex++
         if(_this.rowIndex>=_this.tableDataAlarm.length){
-      		alert('本页最后一条了')
+      		//alert('本页最后一条了')
+          _this.$message({
+            message: '本页最后一条了',
+          });
           return
         }
         _this.input_value_wrong = ''
@@ -1024,8 +1023,9 @@
     .alarm_dialog /deep/
       .el-dialog
         background #d7efec
-        width: 90%;
-        min-width: 1000px;
+        /*width: 65%;*/
+        /*min-width: 800px;*/
+        width: 1100px;
         padding-bottom: 6px;
         .el-dialog__header
           padding 10px 10px 5px
@@ -1048,12 +1048,12 @@
             overflow hidden
             border 1px solid #90e8c6
             .dialog_left
-              width 75%
+              width calc(100% - 336px)
               border-right 1px solid #90e8c6
               float left
               box-sizing border-box
             .dialog_right
-              width 25%
+              width 336px
               float left
 
         .el-dialog__footer

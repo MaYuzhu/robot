@@ -29,9 +29,9 @@
       </el-date-picker>
       <div>
         <ul>
-          <li @click="aaa">test</li>
+          <!--<li @click="aaa">test</li>-->
           <li @click="queryInit"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
-          <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
+          <li @click="resetData"><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
           <li @click="exportExcel"><img src="../../static/images/export.png" alt=""><span>导出报告</span></li>
         </ul>
       </div>
@@ -40,72 +40,72 @@
     <div class="table_wrap">
       <el-table size="mini" id="outInspectionReport"
                 :data="tableData"
-                border
+                border @selection-change="handleSelectionChangeTable"
                 style="width: 100%;">
         <el-table-column
           type="index" :index="index"
-          label="序号"
+          label="序号" align="center"
           width="50">
         </el-table-column>
         <el-table-column type="selection"
-          prop="name"
-          label="123"
+          prop="" align="center"
+          label=""
         >
         </el-table-column>
         <el-table-column
-          prop="name"
+          prop="task.name" align="center"
           label="任务名称"
         >
         </el-table-column>
         <el-table-column
-          prop="address"
-          label="任务状态"
+          prop="" :formatter="taskStatusFun"
+          label="任务状态" width="100" align="center"
         >
         </el-table-column>
         <el-table-column
-          prop="address"
-          label="审核状态"
+          prop="" align="center"
+          label="审核状态" width="100" :formatter="checkStatusFun"
         >
         </el-table-column>
         <el-table-column
-          prop="address"
+          prop="restartStartTime" align="center"
           label="开始时间"
         >
         </el-table-column>
         <el-table-column
-          prop="address"
+          prop="taskEndTime" align="center"
           label="结束时间"
         >
         </el-table-column>
         <el-table-column
-          prop="address"
-          label="巡检点位总数"
+          prop="pointTotalNum" align="center"
+          label="巡检点位总数" width="100"
         >
         </el-table-column>
         <el-table-column
-          prop="address"
-          label="正常点位数"
+          prop="normalPointNum" align="center"
+          label="正常点位数" width="100"
         >
         </el-table-column>
         <el-table-column
-          prop="address"
-          label="告警点位数"
+          prop="alarmPointNum" align="center"
+          label="告警点位数" width="100"
         >
         </el-table-column>
         <el-table-column
-          prop="address"
-          label="识别异常点位数"
+          prop="abnormalPointNum" align="center"
+          label="识别异常点位数" width="110"
         >
         </el-table-column>
 
-        <el-table-column
+        <!--<el-table-column
           prop="src"
           label="图片"
         >
           <template slot-scope="scope">
             <img :src="scope.row.src" alt="" width="150px">
           </template>
-        </el-table-column>
+        </el-table-column>-->
 
       </el-table>
       <div class="page">
@@ -113,7 +113,7 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
-          :page-sizes="[1, 10, 20, 50]"
+          :page-sizes="[10, 20, 50]"
           :page-size="10"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total">
@@ -138,7 +138,7 @@
     data(){
       return{
         title:'巡检报告生成 > 巡检报告生成',
-        tableData: [
+        tableData1: [
         	{
           date: '2016-05-03',
           name: '王小虎',
@@ -165,17 +165,20 @@
           name: '王小虎',
           address: '上海市普陀区金沙江路 1518 弄'
         }],
+        tableData:[],
         value_start:'',
         value_end:'',
         checkAll: false,
         taskTypeData:[
-          {name:'全面巡视',id:0},{name:'例行巡视',id:1},{name:'专项巡视',id:2},{name:'特殊巡视',id:3},
-          /*{name:'紧急任务',id:4},{name:'多光谱任务',id:5},*/
+          {name:'全面巡视',id:1},{name:'例行巡视',id:2},{name:'专项巡视',id:3},{name:'特殊巡视',id:4},
+          /*{name:'紧急任务',id:5},{name:'多光谱任务',id:6},*/
         ],
         isIndeterminate: false,
         checkedCities:[],
         currentPage:1,
         total:1,
+        ajaxTableData: {page:1, size:10},
+        multipleSelection: [],
       }
     },
     components: {
@@ -186,13 +189,11 @@
     mounted(){
       this.value_end = this.getDateTime()
       this.value_start = this.convertToLateDate()
+      this.getTableData()
     },
     methods:{
-      index(val){
-        return val
-      },
       //定义导出Excel表格事件
-      exportExcel() {
+      exportExcelText() {
         /* 从表生成工作簿对象 */
         var wb = XLSX.utils.table_to_book(document.querySelector("#outInspectionReport"));
         /* 获取二进制字符串作为输出 */
@@ -216,7 +217,6 @@
         }
         return wbout;
       },
-
       aaa(){
         const column = [
           {
@@ -249,15 +249,80 @@
         table2excel(column, data, excelName)
       },
 
+      getTableData(){
+      	let _this = this
+        let irBaseInspectTypeId = ''
+        if(_this.checkedCities.length<1){
+          irBaseInspectTypeId = null
+        }else {
+        	let ids = []
+          for(let i in _this.checkedCities){
+        		ids.push(_this.checkedCities[i].id)
+          }
+          irBaseInspectTypeId = ids.toString()
+        }
+        //_this.ajaxTableData.startTime = _this.value_start
+        //_this.ajaxTableData.endTime = _this.value_end
+        _this.ajaxTableData.irBaseInspectTypeId = irBaseInspectTypeId
+        _this.ajax_api('get',url_api + '/task-history',
+          _this.ajaxTableData,
+          true,
+          function (res) {
+            if(res.code == 200){
+              console.log(res.data.items)
+              _this.tableData = res.data.items
+              _this.total = res.data.total
+            }
+          })
+
+      },
       queryInit(){
         let _this = this
-        let queryData = {
-          startTime: _this.value_start,
-          endTime: _this.value_end,
-        }
-        console.log(queryData)
+        _this.getTableData()
       },
+      resetData(){
+        this.value_start = this.convertToLateDate()
+        this.value_end = this.getDateTime()
+        this.checkedCities = []
+        this.isIndeterminate = false
+        this.getTableData()
+      },
+      exportExcel(){
+      	let _this = this
+        if(_this.multipleSelection.length<1){
+          _this.$message({
+            message: '请选择',
+          });
+          return
+        }
+        let ids = []
+        for(let i in _this.multipleSelection){
+          ids.push(_this.multipleSelection[i].id)
+        }
+        let moreCheckData = {
+          ids: ids.toString()
+        }
+        _this.$confirm('确定要导出吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          _this.multipleSelection.toString()
+          console.log(moreCheckData)
+          /*_this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });*/
+        }).catch(() => {
+          _this.$message({
+            message: '已取消'
+          });
+        });
 
+      },
+      handleSelectionChangeTable(val){
+        this.multipleSelection = val
+      },
       handleCheckAllChange(val) {
       	//console.log(val)
         this.checkedCities = val ? this.taskTypeData : [];
@@ -270,9 +335,13 @@
       },
       handleSizeChange(val) {
         //console.log(`每页 ${val} 条`);
+        this.ajaxTableData.size = val
+        this.getTableData()
       },
       handleCurrentChange(val) {
         //console.log(`当前页: ${val}`);
+        this.ajaxTableData.page = val
+        this.getTableData()
       },
       convertToLateDate(){
         var data = new Date();
@@ -312,6 +381,48 @@
         ss = ss < 10 ? "0" + ss : ss;
         //return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
         return y + "-" + m + "-" + d
+      },
+      taskStatusFun(row){
+        let status = ''
+        switch (row.taskStatus){
+          case 0:
+            status = '已执行'
+            break
+          case 1:
+            status = '终止'
+            break
+          case 2:
+            status = '暂停'
+            break
+          case 3:
+            status = '正在执行'
+            break
+          case 4:
+            status = '未执行'
+            break
+          case 5:
+            status = '超期'
+            break
+          case 6:
+            status = '预执行'
+            break
+        }
+        return status
+      },
+      checkStatusFun(row){
+        let result = ''
+        switch (row.checkStatus){
+          case 0:
+            result = '未审核'
+            break
+          case 1:
+            result = '已审核'
+            break
+        }
+        return result
+      },
+      index(val){
+        return (this.ajaxTableData.page - 1)*this.ajaxTableData.size + val + 1
       },
 
     }
