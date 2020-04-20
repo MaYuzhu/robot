@@ -2,7 +2,7 @@
 	<div id="tabs">
     <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
       <el-tab-pane label="实时信息" name="first">
-        <div style="padding:0 8px">
+        <div style="padding:0 0px">
           <el-table size="mini"
 
             border
@@ -46,7 +46,7 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="设备警告信息" name="second">
-        <div style="padding:0 8px">
+        <div style="padding:0 4px">
           <el-table size="mini"
 
                     border
@@ -100,7 +100,7 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="系统警告信息" name="third">
-        <div style="padding:0 8px">
+        <div style="padding:0 4px">
           <el-table size="mini"
 
                     border
@@ -146,12 +146,12 @@
   export default {
     data() {
       return {
-        activeName: 'second'
+        activeName: 'first'
       };
     },
     methods: {
       handleClick(tab, event) {
-        console.log(tab, event);
+        //console.log(tab, event);
       }
     }
   };
@@ -160,10 +160,11 @@
 <style lang="stylus" rel="stylesheet/stylus">
 
   #tabs
-    background transparent
+    /*background transparent*/
     .el-tabs--card
       .el-tabs__header
         background: linear-gradient(#e3f2ee,#cae7ee)
+        margin 0
         .el-tabs__item
           height: 30px;
           margin: 0 3px;

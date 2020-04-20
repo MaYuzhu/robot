@@ -27,6 +27,7 @@ Vue.use(base)
 /*import table2excel from './excel'
 Vue.use(table2excel)*/
 
+
 // 引入 ECharts 主模块
 let echarts = require('echarts/lib/echarts');
 // 引入折线图/柱状图等组件

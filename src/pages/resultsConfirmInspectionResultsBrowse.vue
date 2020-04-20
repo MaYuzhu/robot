@@ -57,7 +57,7 @@
             </el-table-column>
             <el-table-column
               prop="point.displayName" align="center"
-              label="点位名称"
+              label="点位名称" width="300"
             >
             </el-table-column>
             <el-table-column
@@ -82,7 +82,7 @@
             </el-table-column>
             <el-table-column
               prop="address" align="center"
-              label="采集信息" width="120"
+              label="采集信息"
             >
             </el-table-column>
 

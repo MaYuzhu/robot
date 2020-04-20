@@ -4,19 +4,20 @@
     <div class="left">
       <div style="background: #e9e9e9;display: flex">
         <p style="height:36px;line-height: 36px;margin: 0 18px;float: left">机器人列表：</p>
-        <el-select v-model="value" placeholder="请选择" size="medium" style="float: left">
+        <el-select v-model="robotId" placeholder="请选择"
+                   @change='changeId' size="medium" style="float: left">
           <el-option
             v-for="item in options"
             :key="item.value"
-            :label="item.label"
-            :value="item.value">
+            :label="item.name"
+            :value="item.id">
           </el-option>
         </el-select>
       </div>
       <div style="background:lavender;clear: both">
-        <XunjianContent></XunjianContent>
+        <XunjianContent :taskInfo="taskInfo"></XunjianContent>
       </div>
-      <taskControl style=""></taskControl>
+      <taskControl class="task_map"></taskControl>
     </div>
 
     <div class="right" style="width: 35%">
@@ -46,24 +47,11 @@
 
 
 	export default {
-    components: {
-      HeaderTop,
-      TabsBottom,
-      XunjianContent,
-      taskControl,
-      menuBottom
-    },
     data() {
       return {
       	title:'机器人管理 > 机器人管理',
-        options: [{
-          value: '选项1',
-          label: '机器人一号'
-        }, {
-          value: '选项2',
-          label: '机器人二号'
-        }],
-        value: '选项1',
+        options: [],
+        value: '',
 
         lockReconnect: false,
         wsCfg: {
@@ -72,7 +60,10 @@
         },
         src:'',
         listener:null,
-        hkUrl:'192.168.1.13'
+        hkUrl:'192.168.1.13',
+        robotId:'',
+        taskInfo:{},
+
       }
     },
     methods: {
@@ -266,6 +257,47 @@
         }
       },
 
+      getRobotList(){
+      	let _this = this
+        _this.ajax_api('get',url_api + '/robot',
+          {page:1,size:100},
+          true,function (res) {
+            if(res.code == 200){
+              _this.options = res.data.items
+              _this.robotId = _this.options[0].id
+              _this.getTaskInfo()
+            }
+          })
+      },
+      getTaskInfo(){
+        let _this = this//GET /ui/robot/{id}/current-task
+        _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
+          null,
+          true,function (res) {
+            if(res.code == 200){
+            	//console.log(res)
+              _this.taskInfo = {
+            		name:res.data.taskName,
+                taskStatus:res.data.taskStatus,
+                abnormalPointNum:res.data.abnormalPointNum,
+                pointTotal:res.data.pointTotal,
+                currentPoint:res.data.currentPoint,
+                passPointNum:res.data.passPointNum,
+                totalRunTime:res.data.totalRunTime,
+                cumulativeRunTime:res.data.cumulativeRunTime,
+
+              }
+              //console.log(_this.taskInfo)
+            }
+          })
+
+      },
+      changeId(val){
+      	let _this = this
+      	//console.log(val)
+        _this.getTaskInfo()
+      },
+
     },
     mounted() {
     	let _this = this
@@ -294,7 +326,10 @@
       });
 
       //this.createWebSocket();
+      _this.getRobotList()
+
     },
+
     beforeRouteLeave(to, form, next) {
       next()
       if(this.listener){
@@ -302,6 +337,13 @@
         this.listener.unsubscribe();
       }
 
+    },
+    components: {
+      HeaderTop,
+      TabsBottom,
+      XunjianContent,
+      taskControl,
+      menuBottom,
     },
 
   }
@@ -317,6 +359,8 @@
       float left
       height calc(100% - 270px)
       overflow hidden
+      .task_map
+        height calc(100% - 123px)
     .right
       width 35%
       height calc(100% - 270px)
@@ -331,6 +375,8 @@
         height 50%
         border 2px solid
     .tabs_bottom
+      height 180px
+      background white
       clear both
   div>>>
     .el-select

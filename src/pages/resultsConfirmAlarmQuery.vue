@@ -135,7 +135,7 @@
           <el-table-column
             prop="point.displayName"
             label="点位名称" align="center"
-            width="">
+            width="320">
           </el-table-column>
           <el-table-column
             prop="resultStatus"
@@ -160,7 +160,7 @@
           <el-table-column
             prop=""
             label="采集信息" align="center"
-            width="120">
+            >
           </el-table-column>
 
         </el-table>

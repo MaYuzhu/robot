@@ -365,7 +365,7 @@
           </ul>
         </div>
         <div class="head_center">{{title}}</div>
-        <div class="top_count"><span>0</span></div>
+        <router-link to="/resultsConfirm/alarm-query" class="top_count"><span>{{countAlarm}}</span></router-link>
       </div>
     </div>
     <div class="head_right">
@@ -391,6 +391,7 @@
         username: localStorage.getItem("username"),
         companyName:'',
         companyArea:'',
+        countAlarm:0,
       }
 
     },
@@ -399,7 +400,7 @@
     },
     props:['title'],
     methods: {
-      ...mapMutations(['changeLogin']),
+      //...mapMutations(['changeLogin']),
       // 移入
       mouseOver() {
         this.menu_show = true
@@ -471,6 +472,8 @@
             }
           })
       },
+      //报警数显示
+
     }
   }
 </script>

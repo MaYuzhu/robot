@@ -5,7 +5,8 @@
       "env",
       {
         "modules": false,
-        "useBuiltIns": "entry"
+        "useBuiltIns": "entry",
+        "corejs": 3
       }
     ],
     "stage-3"

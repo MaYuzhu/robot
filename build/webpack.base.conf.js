@@ -18,12 +18,26 @@ const createLintingRule = () => ({
     formatter: require('eslint-friendly-formatter'),
     emitWarning: !config.dev.showEslintErrorsInOverlay
   }*/
+  test: /\.(js|vue)$/,
+  loader: 'babel-loader',
+  include: [
+    resolve('src'),
+    resolve('test'),
+    resolve('node_modules/webpack-dev-server/client'),
+    resolve('node_modules/echarts/src'),
+    resolve('node_modules/vue-awesome'),
+    resolve('node_modules/element-ui/packages'),
+    resolve('node_modules/element-ui/src'),
+    resolve('node_modules/_element-ui@2.13.1@element-ui/packages'),
+    resolve('node_modules/_element-ui@2.13.1@element-ui/src/utils')
+  ]
 })
 
 module.exports = {
   context: path.resolve(__dirname, '../'),
   entry: {
-    app: './src/main.js'
+    //app: './src/main.js'
+    app: ['babel-polyfill','./src/main.js']
   },
   output: {
     path: config.build.assetsRoot,
@@ -67,7 +81,11 @@ module.exports = {
           resolve('src'),
           resolve('test'),
           resolve('node_modules/webpack-dev-server/client'),
-          resolve('node_modules/_js-table2excel@1.0.3@js-table2excel/index.js')
+          resolve('node_modules/_js-table2excel@1.0.3@js-table2excel/index.js'),
+          resolve('node_modules/element-ui/packages'),
+          resolve('node_modules/element-ui/src'),
+          resolve('node_modules/_element-ui@2.13.1@element-ui/packages'),
+          resolve('node_modules/_element-ui@2.13.1@element-ui/src')
         ]
       },
       {
