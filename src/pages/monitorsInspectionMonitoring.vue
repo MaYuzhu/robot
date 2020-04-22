@@ -4,7 +4,7 @@
     <div style="overflow: hidden;height: 100%">
       <div class="left" style="width: 65%;">
         <div style="background:lavender">
-          <XunjianContent></XunjianContent>
+          <XunjianContent :taskInfo="taskInfo"></XunjianContent>
         </div>
         <taskControl></taskControl>
       </div>
@@ -35,8 +35,59 @@
   export default {
     data(){
       return{
-        title:'巡检监控 > 巡检监控'
+        title:'巡检监控 > 巡检监控',
+        taskInfo:{},
+        robotId:'',
       }
+    },
+
+    mounted(){
+    	let _this = this
+    	if(robotIdCurrent){
+    		_this.robotId = robotIdCurrent
+        _this.getTaskInfo()
+      }else {
+        _this.getRobotList()
+      }
+
+    },
+    methods:{
+      getRobotList(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/robot',
+          {page:1,size:100},
+          true,function (res) {
+            if(res.code == 200){
+              _this.options = res.data.items
+              _this.robotId = _this.options[0].id
+              robotIdCurrent = _this.robotId
+              _this.getTaskInfo()
+            }
+          })
+      },
+      getTaskInfo(){
+        let _this = this//GET /ui/robot/{id}/current-task
+        _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
+          null,
+          true,function (res) {
+            if(res.code == 200){
+              //console.log(res)
+              _this.taskInfo = {
+                name:res.data.taskName,
+                taskStatus:res.data.taskStatus,
+                abnormalPointNum:res.data.abnormalPointNum,
+                pointTotal:res.data.pointTotal,
+                currentPoint:res.data.currentPoint,
+                passPointNum:res.data.passPointNum,
+                totalRunTime:res.data.totalRunTime,
+                cumulativeRunTime:res.data.cumulativeRunTime,
+
+              }
+              //console.log(_this.taskInfo)
+            }
+          })
+
+      },
     },
     components: {
       HeaderTop,
@@ -44,15 +95,6 @@
       XunjianContent,
       taskControl,
       menuBottom
-    },
-    mounted(){
-      this.$axios({
-        method: 'get',
-        url: url_api + '/user/userList',
-
-      }).then(res=>{
-      	//console.log(res.data)
-      })
     },
   }
 </script>

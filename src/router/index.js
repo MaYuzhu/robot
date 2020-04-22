@@ -3,6 +3,7 @@ import Router from 'vue-router'
 
 import login from '@/pages/login'
 import robotManagement from '@/pages/robotManagement'
+import robotAddNewTask from '@/pages/robotAddNewTask'
 
 import tasksComprehensiveInspection from '@/pages/tasksComprehensiveInspection'
 import tasksRoutineInspection from '@/pages/tasksRoutineInspection'
@@ -67,6 +68,14 @@ const router = new Router({
       component: robotManagement,
       meta:{
         name:'机器人管理'
+      }
+    },
+    {
+      path: '/robots/add-task',
+      name: 'robotAddNewTask',
+      component: robotAddNewTask,
+      meta:{
+        name:'创建任务'
       }
     },
     {

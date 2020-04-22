@@ -60,9 +60,9 @@
         <div class="right_content">
           <p>运行状态信息</p>
           <div>
-            <div><p>温度: <span>0</span></p></div>
-            <div><p>湿度: <span>0</span></p></div>
-            <div><p>风速: <span>0</span></p></div>
+            <div><p>温度: <span>{{temperature}} ℃</span></p></div>
+            <div><p>湿度: <span>{{humidity}} %</span></p></div>
+            <div><p>风速: <span>{{wind_speed}} m/s</span></p></div>
           </div>
           <p>控制状态信息</p>
           <div class="right_content_bottom">
@@ -181,10 +181,15 @@
         body_speed: '',
         yun_y: '',
         zoom: '',
+        listener:null,
+        temperature:0,
+        humidity:0,
+        wind_speed:0,
       }
     },
     mounted(){
       this.init()
+      this.weather()
     },
     methods:{
     	init(){
@@ -198,11 +203,44 @@
             _this.yun_y = 1
             _this.body_speed = 1
           })
-      }
+      },
+      weather(){
+        let _this = this
+        var ros = new ROSLIB.Ros({
+          url : 'ws://192.168.1.78:9090'
+        });
+        //console.log(ros)
+        ros.on('connection', function() {
+          console.log('Connected to websocket server.');
+        });
+
+        _this.listener = new ROSLIB.Topic({
+          ros : ros,
+          name : '/car_status_now',
+          messageType : 'yidamsg/weather'
+        });
+
+        _this.listener.subscribe(function(message) {
+          console.log(message);
+          //_this.listener.unsubscribe();
+          _this.temperature = message.temperature
+          _this.humidity = message.humidity
+          _this.wind_speed = message.wind_speed
+        });
+      },
     },
     components: {
       HeaderTop,
       menuBottom
+    },
+    beforeRouteLeave(to, form, next) {
+    	let _this = this
+      next()
+      if(_this.listener){
+        console.log('连接已断开')
+        _this.listener.unsubscribe();
+      }
+
     },
   }
 </script>

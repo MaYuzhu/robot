@@ -265,6 +265,7 @@
             if(res.code == 200){
               _this.options = res.data.items
               _this.robotId = _this.options[0].id
+              robotIdCurrent = _this.robotId
               _this.getTaskInfo()
             }
           })
@@ -295,6 +296,7 @@
       changeId(val){
       	let _this = this
       	//console.log(val)
+        robotIdCurrent = _this.robotId
         _this.getTaskInfo()
       },
 
