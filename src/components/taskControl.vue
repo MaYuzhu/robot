@@ -1,6 +1,6 @@
 <template>
 	<div class="task_control_wrap">
-    <select id="selecttype">
+    <select id="selecttype" style="display: none">
       <option value="none" selected>None</option>
       <option value="pointSelect">点选</option>
       <option value="toggleSelect">多选</option>
@@ -24,14 +24,18 @@
           <el-button type="text" size="mini">取消选择</el-button>
         </li>
         <li @click="addPlate">
-          <el-button type="text" size="mini">挂牌</el-button>
+          <el-button type="text" size="mini">{{addPlateText}}</el-button>
         </li>
         <li>
           <el-dropdown trigger="click" placement="bottom" :hide-on-click=false>
           <span class="el-dropdown-link">
             图层管理<i class="el-icon-arrow-down el-icon--right"></i>
           </span>
-          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-menu slot="dropdown">
+              <el-dropdown-item>
+                <el-checkbox v-model="checked11" @change="change11">测试点</el-checkbox>
+              </el-dropdown-item>
+
               <el-dropdown-item>
                 <el-checkbox v-model="checked1">停靠点</el-checkbox>
               </el-dropdown-item>
@@ -62,6 +66,38 @@
       </ul>
       <!--<img src="../../static/aaaa.jpg" style="width: 100%" alt="">-->
     </div>
+    <div class="plate_dialog">
+      <el-dialog title="挂牌" :visible.sync="dialogVisiblePlate" class="del_user" @close='closeDialog'>
+        <div class="dialog_content">
+          <p style="margin:10px">挂牌有效时间</p>
+          <div style="margin:10px 20px">
+            <span style="display:inline-block;width: 50px">起始</span>
+            <el-date-picker size="mini" style="width: 200px;"
+                            v-model="startTime"
+                            value-format="yyyy-MM-dd HH:mm:ss"
+                            format="yyyy-MM-dd HH:mm:ss"
+                            type="datetime"
+                            placeholder="选择日期时间">
+            </el-date-picker>
+          </div>
+          <div style="margin:10px 20px">
+            <span style="display:inline-block;width: 50px">至</span>
+            <el-date-picker size="mini" style="width: 200px;"
+                            v-model="endTime"
+                            value-format="yyyy-MM-dd HH:mm:ss"
+                            format="yyyy-MM-dd HH:mm:ss"
+                            type="datetime"
+                            placeholder="选择日期时间">
+            </el-date-picker>
+          </div>
+          <p style="margin:10px">确定要执行挂牌操作吗？</p>
+        </div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisiblePlate = false">取 消</el-button>
+          <el-button type="primary" @click="addPlateCommit">确 认</el-button>
+        </span>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -72,6 +108,9 @@
 	export default {
     data() {
       return {
+        checked11:true,
+        checked22:false,
+        checked33:false,
         checked1: true,
         checked2: true,
         checked3: true,
@@ -84,12 +123,19 @@
         addTaskDisabled:true,
         choosePointText:'地图选点',
         taskStopText:'任务暂停',
+        addPlateText:'挂牌',
         pointmove:null,
         isShowStopPoint:false,
         pointSelect:null,
         boxSelect: null,
         selectedFeatures: null,
         pointIds:'',
+        dialogVisiblePlate: false,
+        startTime:'',
+        endTime:'',
+        dragBoxPoint: null,
+        dragBoxPlate: null,
+        addPlateVector: null,
       };
     },
     mounted(){
@@ -114,7 +160,8 @@
               }),
 
             });
-          }
+          },
+          visible: true
         });
         //console.log("123");
         _this.geoJsonLayerPoint = new ol.layer.Vector({
@@ -134,7 +181,8 @@
               }),
 
             });
-          }
+          },
+          visible: true
         });
 
         _this.map = new ol.Map({
@@ -150,7 +198,12 @@
             center: [0, 0],
             zoom: 4
           }),
-          controls: ol.control.defaults().extend([new ol.control.FullScreen()])
+          //controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
+          controls: ol.control.defaults().extend([
+            new ol.control.FullScreen(),
+            new ol.control.MousePosition()
+          ]),
+
         });
 
         $('.ol-full-screen button').text('全屏')
@@ -186,13 +239,13 @@
             layers: [_this.geoJsonLayerPoint]
           });
           var selectedFeatures = _this.boxSelect.getFeatures();
-          var dragBox = new ol.interaction.DragBox({
+          _this.dragBoxPoint = new ol.interaction.DragBox({
             //condition : ol.events.condition.always  //默认是always
             condition: ol.events.condition.platformModifierKeyOnly
           });
-          _this.map.addInteraction(dragBox);
-          dragBox.on('boxend', function() {
-            var extent = dragBox.getGeometry().getExtent();
+          _this.map.addInteraction(_this.dragBoxPoint);
+          _this.dragBoxPoint.on('boxend', function() {
+            var extent = _this.dragBoxPoint.getGeometry().getExtent();
             vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
               selectedFeatures.push(feature)
               //console.log(123123123)
@@ -200,7 +253,7 @@
             //console.log(selectedFeatures)
             _this.pointIds = '1,2'
           });
-          dragBox.on('boxstart', function() {
+          _this.dragBoxPoint.on('boxstart', function() {
             selectedFeatures.clear();
           });
           _this.map.on('click', function() {
@@ -214,6 +267,7 @@
           _this.isShowStopPoint = false
           _this.map.removeInteraction(_this.boxSelect);
           _this.map.removeInteraction(_this.pointmove);
+          _this.map.removeInteraction(_this.dragBoxPoint);
         }
 
       },
@@ -309,10 +363,70 @@
         }
 
       },
+
+      test(){
+        const arrPoint = [[0, 0],[21.136,12.909],[8.85,11.628],
+          [7.773,11.44],[-4.63,11.991],[6.307,-0.088],[-3.86,8.088]]
+      	//const arrPoint = [[0, 0],[689676, -14675],[631064, 308194],[631064, 523440],[631064, 816958],[562576, 1041989],[141867, 993069],[-396249, 905014]]
+      	let _this = this
+        //console.log('test')
+        var vehSource = new ol.source.Vector({});
+        var vehVector = new ol.layer.Vector({
+          source: vehSource,
+          style: new ol.style.Style({
+           image:new ol.style.Icon({
+             rotation: 0,
+             color: "white",
+             src: '../../static/img/location.png',
+             scale:0.15,
+            })
+          })
+        });
+        _this.map.addLayer(vehVector);
+
+        var pos = [10,20]
+        pos = ol.proj.transform(pos, 'EPSG:4326', 'EPSG:3857');
+        console.log(pos)
+        var iconFeature1 = new ol.Feature({
+          geometry: new ol.geom.Point([10,20], "XY"),
+          name: "my Icon",
+        });
+        vehSource.addFeature(iconFeature1);
+
+        var i = 0
+        function moveRobot(){
+        	console.log(i)
+          if(vehSource)vehSource.clear();
+          var iconFeature = new ol.Feature({
+            geometry: new ol.geom.Point(ol.proj.transform(arrPoint[i], 'EPSG:4326', 'EPSG:3857'), "XY"),
+            name: "my Icon",
+          });
+          vehSource.addFeature(iconFeature);
+          i++
+          if(i>5){
+            i = 0
+          }
+          setTimeout(moveRobot,1000)
+        }
+        moveRobot()
+
+      },
+      addTask(){
+        if(this.addTaskDisabled){
+          //return
+        }
+        this.$router.push({
+          name: 'robotAddNewTask',
+          path: '/robots/add-task',
+          params: {
+            //ids:this.pointIds
+            ids:'1,2'
+          }
+        })
+      },
       //挂牌
       addPlate(){
       	let _this = this
-
         var style = new ol.style.Style({
           fill: new ol.style.Fill({
             color: 'rgba(255, 0, 0, 0.2)'
@@ -328,146 +442,79 @@
             })
           })
         })
-        var source = new ol.source.Vector({wrapX: false});
-        var draw = new ol.interaction.Draw({
-          geometryName: "draw01",
-          source: source,
-          type: 'LineString',
-          geometryFunction: function(coordinates, geometry){
-            if(!geometry){
-              geometry = new ol.geom.Polygon(null);       //多边形
-            }
-            var start = coordinates[0];
-            var end = coordinates[1];
-            geometry.setCoordinates([
-              [
-                start,
-                [start[0], end[1]],
-                end,
-                [end[0], start[1]],
-                start
-              ]
-            ]);
-            return geometry;
-          },
-          style: style,
-        });
-
-        // 数据源
-        var drawSoucre = new ol.source.Vector();
-        // 数据源图层，绘图时图层
-        var drawLayer = new ol.layer.Vector({
-          source: drawSoucre,
-          style: style
-        });
-        $(document).keydown(function (e) {
-          if(e.keyCode==17){
-            _this.map.addInteraction(draw);
-          }
-        }).keyup(function (e) {
-          if(e.keyCode==17){
-            _this.map.removeInteraction(draw);
-          }
-        })
-        _this.map.addLayer(drawLayer)
-
-
-        draw.on("drawend", function (e) {
-
-
-          //alert(123)
-
-
-        });
-
-
-      },
-      addTask(){
-        if(this.addTaskDisabled){
-          //return
-        }
-        this.$router.push({
-          path:'/robots/add-task',
-          query: {
-            ids:this.pointIds
-          }
-        })
-      },
-      //test
-      test(){
-      	let _this = this
         var source = new ol.source.Vector({wrapX:false})
-        var vector = new ol.layer.Vector({
-          source: source
-        })
-        var pointFeatures = _this.geoJsonLayerPoint.getSource().getFeatures()
-        var vectorSource = new ol.source.Vector({
-          features: pointFeatures
-        })
-        //框选
-        _this.boxSelect = new ol.interaction.Select({
-          layers: [_this.geoJsonLayerPoint]
-        });
-        var selectedFeatures = _this.boxSelect.getFeatures();
-        var dragBox = new ol.interaction.DragBox({
-          condition: ol.events.condition.platformModifierKeyOnly
-        });
-        _this.map.addInteraction(dragBox);
-        dragBox.on('boxend', function() {
-          var extent = dragBox.getGeometry().getExtent();
-          vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
-            selectedFeatures.push(feature)
+
+        if(_this.addPlateText == '挂牌'){
+          _this.addPlateText = '退出挂牌'
+
+          _this.addPlateVector = new ol.layer.Vector({
+            source: source,
+            style:style
+          })
+          _this.map.addLayer(_this.addPlateVector)
+
+          var pointFeatures = _this.geoJsonLayerPoint.getSource().getFeatures()
+          var vectorSource = new ol.source.Vector({
+            features: pointFeatures
+          })
+
+          //框选
+          _this.boxSelect = new ol.interaction.Select({
+            layers: [_this.geoJsonLayerPoint]
           });
-          console.log(dragBox.getGeometry())
-          //var geometry = new ol.geom.Polygon(dragBox.getGeometry())
-          var geometryFeature = new ol.Feature({geometry:dragBox.getGeometry()});
-          vector.getSource().addFeature(geometryFeature);
-        });
-        dragBox.on('boxstart', function(wh) {
-          selectedFeatures.clear();
-          console.log(wh)
-        });
-        _this.map.on('click', function() {
-          selectedFeatures.clear();
-        });
-        _this.map.addInteraction(_this.boxSelect);
+          var selectedFeatures = _this.boxSelect.getFeatures();
+          _this.dragBoxPlate = new ol.interaction.DragBox({
+            condition: ol.events.condition.platformModifierKeyOnly
+          });
+          _this.map.addInteraction(_this.dragBoxPlate);
+          _this.dragBoxPlate.on('boxend', function() {
+            var extent = _this.dragBoxPlate.getGeometry().getExtent();
+            vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
+              selectedFeatures.push(feature)
+            });
+            //console.log(selectedFeatures)
+            //console.log(dragBox.getGeometry())
+            var geometryFeature = new ol.Feature({geometry:_this.dragBoxPlate.getGeometry()});
+            _this.addPlateVector.getSource().addFeature(geometryFeature);
+            //console.log(_this.addPlateVector.getSource())
+            _this.dialogVisiblePlate = true
+            _this.$emit('isVideo', false)
+          });
+          _this.dragBoxPlate.on('boxstart', function() {
+            selectedFeatures.clear();
+            _this.addPlateVector.getSource().clear();
+          });
+          _this.map.on('click', function() {
+            selectedFeatures.clear();
+            _this.addPlateVector.getSource().clear();
+          });
+          _this.map.addInteraction(_this.boxSelect);
 
+        }else {
+          _this.addPlateText = '挂牌'
+          _this.map.removeInteraction(_this.dragBoxPlate);
+          _this.map.removeInteraction(_this.boxSelect);
+          _this.addPlateVector.getSource().clear();
 
-
-        _this.map.addLayer(vector)
-        var geometryFunction = function (coordinates, geometry) {
-          if(!geometry){
-            geometry = new ol.geom.Polygon(null);//多边形
-            console.log('xxx')
-          }
-
-          var start = coordinates[0];
-          var end = coordinates[1];
-          geometry.setCoordinates([[start, [start[0], end[1]], end, [end[0], start[1]], start]]);
-          return geometry;
         }
-        /*
-        var geometryFunction = function (coordinates, geometry) {
-          if(!geometry){
-            geometry = new ol.geom.Polygon(null);//多边形
-            console.log('xxx')
-          }
 
-          var start = coordinates[0];
-          var end = coordinates[1];
-          geometry.setCoordinates([[start, [start[0], end[1]], end, [end[0], start[1]], start]]);
-          return geometry;
+      },
+      addPlateCommit(){
+
+      },
+      closeDialog(){
+      	let _this = this
+        _this.$emit('isVideo', true)
+      },
+      change11(val){
+      	let _this = this
+        if(val){
+          _this.geoJsonLayerPoint.setVisible(true)
+        }else{
+          _this.geoJsonLayerPoint.setVisible(false)
         }
-        // var geometryFunction = ol.interaction.Draw.createRegularPolygon(4);
-        var draw = new ol.interaction.Draw({
-          source: source,
-          type: 'Circle',
-          geometryFunction: geometryFunction,
-          maxPoints:2
-        })
-        _this.map.addInteraction(draw);*/
 
-      }
+      },
     },
   }
 </script>
@@ -531,6 +578,47 @@
         top 38px
       /deep/ .ol-attribution
         display none
+      /deep/ .ol-mouse-position
+        margin-top 30px
 
+    .plate_dialog/deep/
+      div>>>.el-dialog
+        background #d7efec
+        width: 500px;
+        padding-bottom: 6px;
+        .dialog_content
+          background white
+          padding 10px 20px
+          border 1px solid #90e8c6
+          .title
+            height 40px
+            line-height 40px
+            border-bottom 1px solid #bababa
+            span
+              font-size 14px
+              font-weight 600
+      div>>>
+        .el-dialog__body
+          padding 2px 5px 0px
+      div>>>
+        .el-dialog__footer
+          border 1px solid #90e8c6
+          border-top none
+          padding 5px 10px
+          margin 0 5px
+          background white
+        .el-button
+          padding 6px 20px
+      div>>>
+        .el-dialog__headerbtn
+          top 8px
+          right 8px
+      div>>>.el-dialog
+        .el-dialog__title
+          display inline-block
+          position absolute
+          font-size 14px
+          top 4px
+          left 10px
 
 </style>

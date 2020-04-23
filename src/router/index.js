@@ -71,7 +71,7 @@ const router = new Router({
       }
     },
     {
-      path: '/robots/add-task',
+      path: '/robots/add-task/:ids?',
       name: 'robotAddNewTask',
       component: robotAddNewTask,
       meta:{

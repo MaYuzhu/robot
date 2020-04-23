@@ -17,7 +17,7 @@
       <div style="background:lavender;clear: both">
         <XunjianContent :taskInfo="taskInfo"></XunjianContent>
       </div>
-      <taskControl class="task_map"></taskControl>
+      <taskControl @isVideo="isVideo" class="task_map"></taskControl>
     </div>
 
     <div class="right" style="width: 35%">
@@ -300,6 +300,17 @@
         _this.getTaskInfo()
       },
 
+      //视频窗口隐藏
+      isVideo(val){
+        //console.log(val)
+        if(!val){
+          $('.right_top').css({'visibility': 'hidden'})
+        }else {
+          $('.right_top').css({'visibility': 'visible'})
+        }
+
+      }
+
     },
     mounted() {
     	let _this = this
@@ -359,13 +370,13 @@
     .left
       width 65%
       float left
-      height calc(100% - 270px)
+      height calc(100% - 274px)
       overflow hidden
       .task_map
         height calc(100% - 123px)
     .right
       width 35%
-      height calc(100% - 270px)
+      height calc(100% - 278px)
       //border 2px solid red
       box-sizing border-box
       float left
@@ -373,9 +384,11 @@
         height 50%
         border 2px solid
         position relative
+        visibility visible
       .right_bottom
         height 50%
         border 2px solid
+        box-sizing border-box
     .tabs_bottom
       height 180px
       background white

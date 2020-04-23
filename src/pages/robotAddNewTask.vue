@@ -47,10 +47,11 @@
           points:'',
         },
         savePutData:{},
+        ids: this.$route.params.ids,
       }
     },
     mounted(){
-
+      console.log(this.ids)
     },
     methods:{
       treeCheck(data){
