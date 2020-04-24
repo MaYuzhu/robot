@@ -132,7 +132,7 @@
           //console.log(res.code)
           _this.tip_text = ''
           if(res.code==200){
-
+            //console.log(res.data)
             localStorage.setItem("token",res.data.token);
             localStorage.setItem("userId",res.data.userId);
             localStorage.setItem("username",_this.loginForm.account);

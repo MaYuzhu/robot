@@ -61,7 +61,9 @@
             </el-dropdown-menu>
           </el-dropdown>
         </li>
-        <li @click="test"><el-button type="text" size="mini">test</el-button></li>
+        <li @click="test(true)"><el-button type="text" size="mini">go</el-button></li>
+        <li @click="test(false)"><el-button type="text" size="mini">stop</el-button></li>
+        <li @click="plateShow"><el-button type="text" size="mini">区域</el-button></li>
         <li><el-button type="text" size="mini"></el-button></li>
       </ul>
       <!--<img src="../../static/aaaa.jpg" style="width: 100%" alt="">-->
@@ -97,6 +99,15 @@
           <el-button type="primary" @click="addPlateCommit">确 认</el-button>
         </span>
       </el-dialog>
+    </div>
+    <!--地图弹出框-->
+    <div id="popup" class="ol-popup">
+      <span style="cursor:pointer;" id="popup-closer" class="ol-popup-closer"></span>
+      <div id="popup-content">
+        <p>挂牌有效时间</p>
+        <p><span>开始时间：</span><span>{{popupStartTime}}</span></p>
+        <p><span>结束时间：</span><span>{{popupEndTime}}</span></p>
+      </div>
     </div>
   </div>
 </template>
@@ -136,11 +147,19 @@
         dragBoxPoint: null,
         dragBoxPlate: null,
         addPlateVector: null,
+        allPlateVector: null,
+        popupStartTime:'2020-04-24 00:00:00',
+        popupEndTime:'2020-05-24 00:00:00',
+        timeId:null,
+        vehVector:null,
       };
     },
     mounted(){
-      this.init()
-
+    	let _this = this
+      _this.init()
+      _this.plateShow()
+      _this.plateMove()
+      _this.plateClick()
     },
     methods:{
     	init(){
@@ -201,7 +220,7 @@
           //controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
           controls: ol.control.defaults().extend([
             new ol.control.FullScreen(),
-            new ol.control.MousePosition()
+            //new ol.control.MousePosition()
           ]),
 
         });
@@ -222,6 +241,13 @@
           })
           return pan;
         }*/
+        //如果挂牌打开先关闭
+        if(_this.addPlateText == '退出挂牌'){
+          _this.addPlateText = '挂牌'
+          _this.map.removeInteraction(_this.dragBoxPlate);
+          _this.map.removeInteraction(_this.boxSelect);
+          _this.addPlateVector.getSource().clear();
+        }
 
         if(_this.choosePointText=='地图选点'){
           _this.choosePointText = '停止'
@@ -364,51 +390,51 @@
 
       },
 
-      test(){
+
+      test(e){
         const arrPoint = [[0, 0],[21.136,12.909],[8.85,11.628],
           [7.773,11.44],[-4.63,11.991],[6.307,-0.088],[-3.86,8.088]]
-      	//const arrPoint = [[0, 0],[689676, -14675],[631064, 308194],[631064, 523440],[631064, 816958],[562576, 1041989],[141867, 993069],[-396249, 905014]]
+      	//const arrPoint = [[0, 0],[689676, -14675],[631064, 308194],[631064, 523440],
+        // [631064, 816958],[562576, 1041989],[141867, 993069],[-396249, 905014]]
       	let _this = this
-        //console.log('test')
-        var vehSource = new ol.source.Vector({});
-        var vehVector = new ol.layer.Vector({
-          source: vehSource,
-          style: new ol.style.Style({
-           image:new ol.style.Icon({
-             rotation: 0,
-             color: "white",
-             src: '../../static/img/location.png',
-             scale:0.15,
-            })
-          })
-        });
-        _this.map.addLayer(vehVector);
-
-        var pos = [10,20]
-        pos = ol.proj.transform(pos, 'EPSG:4326', 'EPSG:3857');
-        console.log(pos)
-        var iconFeature1 = new ol.Feature({
-          geometry: new ol.geom.Point([10,20], "XY"),
-          name: "my Icon",
-        });
-        vehSource.addFeature(iconFeature1);
-
         var i = 0
-        function moveRobot(){
-        	console.log(i)
-          if(vehSource)vehSource.clear();
-          var iconFeature = new ol.Feature({
-            geometry: new ol.geom.Point(ol.proj.transform(arrPoint[i], 'EPSG:4326', 'EPSG:3857'), "XY"),
-            name: "my Icon",
-          });
-          vehSource.addFeature(iconFeature);
-          i++
-          if(i>5){
-            i = 0
+
+
+        if(e){
+          if(_this.vehVector){
+            _this.vehVector.getSource().clear()
           }
-          setTimeout(moveRobot,1000)
+          var vehSource = new ol.source.Vector({});
+          _this.vehVector = new ol.layer.Vector({
+            source: vehSource,
+            style: new ol.style.Style({
+              image:new ol.style.Icon({
+                rotation: 0,
+                color: "white",
+                src: '../../static/img/location.png',
+                scale:0.15,
+              })
+            })
+          });
+          _this.map.addLayer(_this.vehVector);
+          function moveRobot(){
+            if(vehSource)vehSource.clear();
+            var iconFeature = new ol.Feature({
+              geometry: new ol.geom.Point(ol.proj.transform(arrPoint[i], 'EPSG:4326', 'EPSG:3857'), "XY"),
+              name: "my Icon",
+            });
+            vehSource.addFeature(iconFeature);
+            i++
+            if(i>arrPoint.length-1){
+              i = 0
+            }
+            _this.timeId = window.setTimeout(moveRobot,1000)
+          }
+          moveRobot()
+        }else {
+          window.clearTimeout(_this.timeId)
         }
-        moveRobot()
+
 
       },
       addTask(){
@@ -427,6 +453,15 @@
       //挂牌
       addPlate(){
       	let _this = this
+        //如果选点打开先关闭
+        if(_this.choosePointText == '停止'){
+          _this.choosePointText = '地图选点'
+          _this.isShowStopPoint = false
+          _this.map.removeInteraction(_this.boxSelect);
+          _this.map.removeInteraction(_this.pointmove);
+          _this.map.removeInteraction(_this.dragBoxPoint);
+        }
+
         var style = new ol.style.Style({
           fill: new ol.style.Fill({
             color: 'rgba(255, 0, 0, 0.2)'
@@ -500,6 +535,24 @@
 
       },
       addPlateCommit(){
+      	let _this = this
+        let plateFeatures = _this.addPlateVector.getSource().getFeatures()
+        let plateCoordinate = plateFeatures[0].getGeometry().getCoordinates()
+        //console.log(plateCoordinate)
+
+        let polygon_d = '';
+      	let fence_shp = ''
+        plateCoordinate[0].forEach((v, k) => {
+          var ol_ep =  ol.proj.transform([v[0],v[1]], 'EPSG:3857', 'EPSG:4326')
+          polygon_d += ol_ep[0] + " " + ol_ep[1];
+          if (plateCoordinate[0].length != k + 1) {
+            polygon_d += ", ";
+          }
+          fence_shp = 'POLYGON((' + polygon_d + '))'
+          //console.log(polygon_d)
+        });
+        console.log(fence_shp)
+        localStorage.setItem("fence_shp",fence_shp);
 
       },
       closeDialog(){
@@ -514,6 +567,120 @@
           _this.geoJsonLayerPoint.setVisible(false)
         }
 
+      },
+      plateShow(){
+      	let _this = this
+        let wkt = localStorage.getItem("fence_shp")
+        //console.log(wkt)
+        var format = new ol.format.WKT();
+        var feature = format.readFeature(wkt,{
+          dataProjection: 'EPSG:4326',
+          featureProjection: 'EPSG:3857'
+        });
+        feature.setId('plate1')
+        var source = new ol.source.Vector({
+          features: [feature]
+        });
+        var style = new ol.style.Style({
+          fill: new ol.style.Fill({
+            color: 'rgba(255, 190, 0, 0.2)'
+          }),
+          stroke: new ol.style.Stroke({
+            color: '#ff9c68',
+            width: 2
+          }),
+          image: new ol.style.Circle({
+            radius: 5,
+            fill: new ol.style.Fill({
+              color: '#ffcc33'
+            })
+          })
+        })
+        _this.allPlateVector = new ol.layer.Vector({
+          source: source,
+          style: style
+        })
+        _this.map.addLayer(_this.allPlateVector)
+      },
+      plateMove(){
+        let _this = this
+        const container = document.getElementById('popup');
+        const content = document.getElementById('popup-content');
+        const closer = document.getElementById('popup-closer');
+        //点击兴趣点弹出框使用
+        var overlay = new ol.Overlay({
+          element: container,//设置弹出框的容器
+          autoPan: true, //是否自动平移，即假如标记在屏幕边缘，弹出时自动平移地图使弹出框完全可见
+          autoPanAnimation: {
+            duration: 250
+          }
+        });
+        _this.map.addOverlay(overlay);
+        var selectMove = new ol.interaction.Select({
+          condition: ol.events.condition.pointerMove,
+          layers: [_this.allPlateVector],
+          style: new ol.style.Style({
+            fill: new ol.style.Fill({
+              color: 'rgba(255, 190, 0, 0.4)'
+            }),
+            stroke: new ol.style.Stroke({
+              color: '#ff3228',
+              width: 2
+            }),
+          })
+        });
+        _this.map.addInteraction(selectMove);
+        selectMove.on('select', function(e) {
+          var features=e.target.getFeatures().getArray();
+          if (features.length>0){
+            var feature=features[0];
+            var coordinate = ol.extent.getBottomLeft(feature.getGeometry().getExtent());
+
+            $('#popup').css({'visibility': 'visible'})
+            overlay.setPosition(coordinate);
+          }else {
+            $('#popup').css({'visibility': 'hidden'})
+          }
+        });
+      },
+      plateClick(){
+        let _this = this
+
+        var selectClick = new ol.interaction.Select({
+          //condition: ol.events.condition.pointerMove,
+          layers: [_this.allPlateVector],
+          style: new ol.style.Style({
+            fill: new ol.style.Fill({
+              color: 'rgba(190, 190, 0, 0.2)'
+            }),
+            stroke: new ol.style.Stroke({
+              color: '#ff0050',
+              width: 2
+            }),
+          })
+        });
+        var selectedFeatures = selectClick.getFeatures();
+        _this.map.addInteraction(selectClick);
+        selectClick.on('select', function(e) {
+          var features=e.target.getFeatures().getArray();
+          if (features.length>0){
+            var feature=features[0];
+            //alert(feature.getId())
+            _this.$confirm('确认取消该挂牌?', '提示', {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }).then(() => {
+              //localStorage.setItem("fence_shp",null)
+              _this.$message({
+                type: 'success',
+                message: '取消挂牌成功!'+feature.getId()
+              });
+            }).catch(() => {
+              selectedFeatures.clear()
+            });
+          }
+        });
       },
     },
   }
@@ -621,4 +788,14 @@
           top 4px
           left 10px
 
+    #popup
+      #popup-content
+        border 1px solid #d9d9d9
+        border-radius 5px
+        margin-top 10px
+        background white
+        padding 5px 12px
+        p
+          margin 8px 0
+          white-space nowrap
 </style>
