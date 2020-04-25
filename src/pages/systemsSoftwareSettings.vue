@@ -286,7 +286,7 @@
     background white
     .software_content
       width 100%
-      height calc(100% - 70px)
+      height calc(100% - 90px)
       background white
       div>>>
         .el-tabs__header

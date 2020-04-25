@@ -321,7 +321,7 @@
     height 100%
     .management_content
       width 100%
-      height calc(100% - 70px)
+      height calc(100% - 90px)
       display flex
       .content_left
         float left

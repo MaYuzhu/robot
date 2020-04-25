@@ -370,13 +370,13 @@
     .left
       width 65%
       float left
-      height calc(100% - 274px)
+      height calc(100% - 272px)
       overflow hidden
       .task_map
         height calc(100% - 123px)
     .right
       width 35%
-      height calc(100% - 278px)
+      height calc(100% - 272px)
       //border 2px solid red
       box-sizing border-box
       float left

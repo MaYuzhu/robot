@@ -152,6 +152,7 @@
         popupEndTime:'2020-05-24 00:00:00',
         timeId:null,
         vehVector:null,
+        passRouteLayer:null,
       };
     },
     mounted(){
@@ -392,8 +393,10 @@
 
 
       test(e){
-        const arrPoint = [[0, 0],[21.136,12.909],[8.85,11.628],
-          [7.773,11.44],[-4.63,11.991],[6.307,-0.088],[-3.86,8.088]]
+        const arrPoint = [[21.136,12.909],[20.136,12.909],
+          [19.136,12.909],[18.136,12.909],[17.136,12.909],[16.136,12.909],
+          [15.136,12.909],[14.136,12.809],[13.136,12.709],[11.136,12.609],
+          [10.136,12.509],[8.136,12.509],[6.136,12.509],[3.136,12.509]]
       	//const arrPoint = [[0, 0],[689676, -14675],[631064, 308194],[631064, 523440],
         // [631064, 816958],[562576, 1041989],[141867, 993069],[-396249, 905014]]
       	let _this = this
@@ -417,6 +420,26 @@
             })
           });
           _this.map.addLayer(_this.vehVector);
+
+          var passRouteSource = new ol.source.Vector({});
+          _this.passRouteLayer = new ol.layer.Vector({
+            source: passRouteSource,
+            style: new ol.style.Style({
+              stroke: new ol.style.Stroke({ //边界样式
+                color: '#3c42ac',
+                width: 3
+              }),
+              image: new ol.style.Circle({
+                radius: 1,
+                fill: new ol.style.Fill({
+                  color: 'deeppink'
+                })
+              }),
+            })
+          });
+          _this.map.addLayer(_this.passRouteLayer);
+          var routeArr = [],
+          routeArrPoint = []
           function moveRobot(){
             if(vehSource)vehSource.clear();
             var iconFeature = new ol.Feature({
@@ -424,9 +447,28 @@
               name: "my Icon",
             });
             vehSource.addFeature(iconFeature);
+
+            routeArrPoint.push(arrPoint[i])
+            for (var j = 0, ii = routeArrPoint.length; j < ii; ++j) {
+              routeArr.push(
+                new ol.Feature({
+                  geometry:new ol.geom.Point(ol.proj.fromLonLat(routeArrPoint[j])),
+                })
+              )
+            }
+            var geom2 = new ol.geom.LineString(routeArrPoint);
+            geom2.transform('EPSG:4326', 'EPSG:3857');
+            var feature2 = new ol.Feature({
+              geometry:geom2
+            });
+
+            passRouteSource.addFeature(feature2);
+            passRouteSource.addFeature(iconFeature);
             i++
             if(i>arrPoint.length-1){
               i = 0
+              passRouteSource.clear()
+              routeArrPoint = []
             }
             _this.timeId = window.setTimeout(moveRobot,1000)
           }

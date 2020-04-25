@@ -248,9 +248,10 @@
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .systems_display_wrap
     background white
+    height 100%
     .systems_content
       display flex
-      height 100%
+      height calc(100% - 90px)
       overflow hidden
       .left,.right
         float left

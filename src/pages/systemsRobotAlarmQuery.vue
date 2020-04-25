@@ -24,7 +24,7 @@
       </ul>
     </div>
     <div class="title">用户操作</div>
-    <div>
+    <div class="table_box">
       <el-table size="mini" ref="alarmRobotTable"
                 :data="tableData"
                 border
@@ -71,18 +71,19 @@
         </el-table-column>
 
       </el-table>
+      <div class="page_box">
+        <el-pagination
+          @size-change="handleSizeChange"
+          @current-change="handleCurrentChange"
+          :current-page="currentPage"
+          :page-sizes="[1, 5, 10, 20]"
+          :page-size="10"
+          layout="total, sizes, prev, pager, next, jumper"
+          :total="total">
+        </el-pagination>
+      </div>
     </div>
-    <div class="page_box">
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="currentPage"
-        :page-sizes="[1, 5, 10, 20]"
-        :page-size="10"
-        layout="total, sizes, prev, pager, next, jumper"
-        :total="total">
-      </el-pagination>
-    </div>
+
     <el-dialog title="确认" :visible.sync="dialogVisibleShenhe" class="del_user">
       <div class="dialog_content" style="height: 60px;font-weight: 600;font-size: 16px;line-height: 40px">
         <p>{{shenheMessage}}</p>
@@ -282,7 +283,7 @@
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .robot_alarm_query_wrap
     position relative
-    height calc(100% - 24px)
+    height 100%
     .robot_top
       display flex
       height 30px
@@ -316,9 +317,13 @@
       background linear-gradient(#e3f2ee,#cae7ee)
       align-items center
       padding-left 20px
-    .page_box
-      position absolute
-      bottom 0
+    .table_box
+      height calc(100% - 150px)
+      position relative
+      background white
+      .page_box
+        position absolute
+        bottom 0
 
     div>>>
       .el-dialog

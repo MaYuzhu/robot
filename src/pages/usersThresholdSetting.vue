@@ -908,7 +908,7 @@
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .threshold_wrap
-    height calc(100% - 70px)
+    height 100%
     .threshold_top
       display flex
       height 30px
@@ -965,14 +965,14 @@
               margin-right 4px
 
     .threshold_content
-      height calc(100% - 30px)
+      height calc(100% - 120px)
       .content_left
         width 300px
-        height calc(100% - 10px)
+        height calc(100% - 0px)
         float left
       .content_right
         width calc(100% - 300px)
-        height calc(100% - 10px)
+        height calc(100% - 0px)
         float left
         .alarm_box
           height 100%

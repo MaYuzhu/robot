@@ -3,7 +3,7 @@
     <HeaderTop :title="title"></HeaderTop>
     <div style="display: flex" class="center_box">
       <div style="width: 55%;float: left">
-        <XunjianContent></XunjianContent>
+        <XunjianContent :taskInfo="taskInfo"></XunjianContent>
         <taskControl></taskControl>
       </div>
       <select style="display: none" id="ip" class="sel" onchange=""></select>
@@ -187,6 +187,8 @@
         playback_title:'视频回放',
         playback_img:'../../static/images/playback.png',
         g_bPTZAuto : false,
+        taskInfo:{},
+        robotId:'',
       }
     },
     methods:{
@@ -220,6 +222,42 @@
         });
       },
 
+      getRobotList(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/robot',
+          {page:1,size:100},
+          true,function (res) {
+            if(res.code == 200){
+              _this.options = res.data.items
+              _this.robotId = _this.options[0].id
+              robotIdCurrent = _this.robotId
+              _this.getTaskInfo()
+            }
+          })
+      },
+      getTaskInfo(){
+        let _this = this//GET /ui/robot/{id}/current-task
+        _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
+          null,
+          true,function (res) {
+            if(res.code == 200){
+              //console.log(res)
+              _this.taskInfo = {
+                name:res.data.taskName,
+                taskStatus:res.data.taskStatus,
+                abnormalPointNum:res.data.abnormalPointNum,
+                pointTotal:res.data.pointTotal,
+                currentPoint:res.data.currentPoint,
+                passPointNum:res.data.passPointNum,
+                totalRunTime:res.data.totalRunTime,
+                cumulativeRunTime:res.data.cumulativeRunTime,
+
+              }
+              //console.log(_this.taskInfo)
+            }
+          })
+
+      },
       //可见光
       test_login(){
         let _this = this
@@ -748,6 +786,12 @@
       });
 
       //this.createWebSocket();
+      if(robotIdCurrent){
+        _this.robotId = robotIdCurrent
+        _this.getTaskInfo()
+      }else {
+        _this.getRobotList()
+      }
     },
     beforeRouteLeave(to, form, next) {
       next()

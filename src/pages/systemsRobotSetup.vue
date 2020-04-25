@@ -439,11 +439,11 @@
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .robot_setup_wrap
-    min-height 100%
+    height 100%
     background #f9f9f9
     .robot_setup_content
       display flex
-      min-height 100%
+      height calc(100% - 90px)
       .left ,.right
         float left
         width 50%

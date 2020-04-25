@@ -587,7 +587,7 @@
     .content
       display flex
       display block\0
-      height calc(100% - 72px)
+      height calc(100% - 92px)
       background white
       .content_left
         width 300px
@@ -648,7 +648,7 @@
           width 100%
           position absolute
           left 0px
-          bottom 20px
+          bottom 0px
           background #e9e9e9
           padding 5px 10px
           box-sizing border-box

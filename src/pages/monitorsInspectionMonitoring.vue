@@ -1,7 +1,7 @@
 <template>
   <div class="monitoring_wrap">
     <HeaderTop :title="title"></HeaderTop>
-    <div style="overflow: hidden;height: 100%">
+    <div class="content">
       <div class="left" style="width: 65%;">
         <div style="background:lavender">
           <XunjianContent :taskInfo="taskInfo"></XunjianContent>
@@ -20,7 +20,7 @@
     </div>
 
 
-    <TabsBottom style="clear: both"></TabsBottom>
+    <TabsBottom class="tabs_bottom"></TabsBottom>
     <menuBottom></menuBottom>
   </div>
 </template>
@@ -102,11 +102,17 @@
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .monitoring_wrap
     height 100%
-    .left,.right
-      float left
-      height 100%
-      box-sizing border-box
-      .right_top,.right_bottom
-        height 50%
-        border 1px solid
+    .content
+      height calc(100% - 272px)
+      .left,.right
+        float left
+        height 100%
+        box-sizing border-box
+        .right_top,.right_bottom
+          height 50%
+          border 1px solid
+    .tabs_bottom
+      height 180px
+      background white
+      clear both
 </style>

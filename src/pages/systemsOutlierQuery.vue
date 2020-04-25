@@ -237,6 +237,7 @@
         float left
         overflow-y auto
         position relative
+        background white
         p
           height 30px
           line-height 30px

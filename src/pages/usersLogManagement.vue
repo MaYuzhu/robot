@@ -201,7 +201,7 @@
       background linear-gradient(#e3f2ee,#cae7ee)
       padding-left 10px
     .table_box
-      height calc(100% - 170px)
+      height calc(100% - 154px)
       border 1px solid #cae7ee
       position relative
       background white

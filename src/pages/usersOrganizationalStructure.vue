@@ -334,7 +334,7 @@
     height 100%
     .content
       display flex
-      height calc(100% - 72px)
+      height calc(100% - 92px)
       background white
       .content_left
         width 300px
