@@ -144,6 +144,7 @@
     methods: {
       handleAvatarSuccess(res, file) {
         this.imageUrl = URL.createObjectURL(file.raw);
+        //action="https://jsonplaceholder.typicode.com/posts/"
       },
       beforeAvatarUpload(file) {
         const isJPG = file.type === 'image/jpeg';
@@ -210,12 +211,12 @@
           }
         ]
         }*/
-        if(!_this.imageUrl){
+        /*if(!_this.imageUrl){
           _this.$message({
             message: '请上传图片',
           });
           return
-        }
+        }*/
         if(!_this.companyName){
           _this.$message({
             message: '请填写企业名称',

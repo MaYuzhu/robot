@@ -130,6 +130,7 @@
         checked6: true,
         checked7: true,
         map: null,
+        geoJsonLayerRoute:null,
         geoJsonLayerPoint: null,
         addTaskDisabled:true,
         choosePointText:'地图选点',
@@ -148,8 +149,9 @@
         dragBoxPlate: null,
         addPlateVector: null,
         allPlateVector: null,
-        popupStartTime:'2020-04-24 00:00:00',
-        popupEndTime:'2020-05-24 00:00:00',
+        popupStartTime:'',
+        popupEndTime:'',
+        routeId:'',
         timeId:null,
         vehVector:null,
         passRouteLayer:null,
@@ -159,17 +161,17 @@
     	let _this = this
       _this.init()
       _this.plateShow()
-      _this.plateMove()
-      _this.plateClick()
+
     },
     methods:{
     	init(){
     		let _this = this
-        var geoJsonLayer = new ol.layer.Vector({
+        _this.geoJsonLayerRoute = new ol.layer.Vector({
           title: 'add Layer',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
-            url: '../../static/route.json',
+            //url: '../../static/route.json',
+            url: '../../static/geojson/route.geojson',
             format:new ol.format.GeoJSON()
           }),
           style: function (feature, resolution) {
@@ -188,7 +190,8 @@
           title: 'add Layer Point',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
-            url: '../../static/point.json',
+            //url: '../../static/point.json',
+            url: '../../static/geojson/stops.geojson',
             format:new ol.format.GeoJSON()
           }),
           style: function (feature, resolution) {
@@ -207,7 +210,7 @@
 
         _this.map = new ol.Map({
           layers: [
-            geoJsonLayer,
+            _this.geoJsonLayerRoute,
             _this.geoJsonLayerPoint
           ],
           target: 'map',
@@ -391,7 +394,6 @@
 
       },
 
-
       test(e){
         const arrPoint = [[21.136,12.909],[20.136,12.909],
           [19.136,12.909],[18.136,12.909],[17.136,12.909],[16.136,12.909],
@@ -535,9 +537,17 @@
             features: pointFeatures
           })
 
+          var routeFeatures = _this.geoJsonLayerRoute.getSource().getFeatures()
+          var routeVectorSource = new ol.source.Vector({
+            features: routeFeatures
+          })
+
+          var pointIdsArr = []
+          var routeIdsArr = []
+
           //框选
           _this.boxSelect = new ol.interaction.Select({
-            layers: [_this.geoJsonLayerPoint]
+            layers: [_this.geoJsonLayerRoute,_this.geoJsonLayerPoint]
           });
           var selectedFeatures = _this.boxSelect.getFeatures();
           _this.dragBoxPlate = new ol.interaction.DragBox({
@@ -549,17 +559,26 @@
             vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
               selectedFeatures.push(feature)
             });
+            routeVectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
+              selectedFeatures.push(feature)
+              routeIdsArr.push(feature.getId().slice(6))
+            });
+            _this.routeId = routeIdsArr.toString()
+            //console.log(_this.routeId)
             //console.log(selectedFeatures)
             //console.log(dragBox.getGeometry())
             var geometryFeature = new ol.Feature({geometry:_this.dragBoxPlate.getGeometry()});
             _this.addPlateVector.getSource().addFeature(geometryFeature);
             //console.log(_this.addPlateVector.getSource())
             _this.dialogVisiblePlate = true
+            _this.startTime = ''
+            _this.endTime = ''
             _this.$emit('isVideo', false)
           });
           _this.dragBoxPlate.on('boxstart', function() {
             selectedFeatures.clear();
             _this.addPlateVector.getSource().clear();
+            routeIdsArr = []
           });
           _this.map.on('click', function() {
             selectedFeatures.clear();
@@ -581,7 +600,6 @@
         let plateFeatures = _this.addPlateVector.getSource().getFeatures()
         let plateCoordinate = plateFeatures[0].getGeometry().getCoordinates()
         //console.log(plateCoordinate)
-
         let polygon_d = '';
       	let fence_shp = ''
         plateCoordinate[0].forEach((v, k) => {
@@ -593,8 +611,47 @@
           fence_shp = 'POLYGON((' + polygon_d + '))'
           //console.log(polygon_d)
         });
-        console.log(fence_shp)
-        localStorage.setItem("fence_shp",fence_shp);
+        //console.log(fence_shp)
+        let addFenceData = {
+          startTime:_this.startTime,
+          endTime:_this.endTime,
+          fenceAngle:fence_shp,
+          irBaseDeviceId:4,
+          irProjRountIds:_this.routeId,
+          isDelete:0,
+          fenceName:'test',
+        }
+        if(!addFenceData.startTime){
+          _this.$message({
+            message: '请选择开始时间',
+          });
+          return
+        }
+        if(!addFenceData.endTime){
+          _this.$message({
+            message: '请选择结束时间',
+          });
+          return
+        }
+        //console.log(addFenceData)
+        //localStorage.setItem("fence_shp",fence_shp);
+        //POST /ui/fence/addFence
+        _this.ajax_api('post',url_api + '/fence/addFence',
+          addFenceData,
+          true,function (res) {
+              if(res.code == 200){
+                _this.$message({
+                  message: '挂牌成功',
+                  type: 'success',
+                });
+                _this.dialogVisiblePlate = false
+                _this.plateShow()
+              }else {
+                _this.$message({
+                  message: res.message,
+                });
+              }
+            })
 
       },
       closeDialog(){
@@ -612,37 +669,62 @@
       },
       plateShow(){
       	let _this = this
-        let wkt = localStorage.getItem("fence_shp")
-        //console.log(wkt)
-        var format = new ol.format.WKT();
-        var feature = format.readFeature(wkt,{
-          dataProjection: 'EPSG:4326',
-          featureProjection: 'EPSG:3857'
-        });
-        feature.setId('plate1')
-        var source = new ol.source.Vector({
-          features: [feature]
-        });
-        var style = new ol.style.Style({
-          fill: new ol.style.Fill({
-            color: 'rgba(255, 190, 0, 0.2)'
-          }),
-          stroke: new ol.style.Stroke({
-            color: '#ff9c68',
-            width: 2
-          }),
-          image: new ol.style.Circle({
-            radius: 5,
-            fill: new ol.style.Fill({
-              color: '#ffcc33'
-            })
+        if(_this.allPlateVector){
+          _this.allPlateVector.getSource().clear()
+        }
+
+        _this.ajax_api('get',url_api + '/fence',
+          {page:1,size:1000},
+          true,function (res) {
+            if(res.code == 200){
+            	let fence_items = res.data.items
+              let features = []
+              for(let i=0;i<fence_items.length;i++){
+            		let wkt = fence_items[i].fenceAngle
+                let format = new ol.format.WKT();
+                let feature = format.readFeature(wkt,{
+                  dataProjection: 'EPSG:4326',
+                  featureProjection: 'EPSG:3857'
+                });
+                let idProperties = {
+                	id:fence_items[i].id,
+                  startTime:fence_items[i].startTime,
+                  endTime:fence_items[i].endTime
+                }
+                feature.setProperties(idProperties)
+                features.push(feature)
+              }
+              let source = new ol.source.Vector({
+                features: features
+              });
+              let style = new ol.style.Style({
+                fill: new ol.style.Fill({
+                  color: 'rgba(255, 190, 0, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                  color: '#ff9c68',
+                  width: 2
+                }),
+                image: new ol.style.Circle({
+                  radius: 5,
+                  fill: new ol.style.Fill({
+                    color: '#ffcc33'
+                  })
+                })
+              })
+              _this.allPlateVector = new ol.layer.Vector({
+                source: source,
+                style: style
+              })
+              _this.map.addLayer(_this.allPlateVector)
+              _this.plateMove()
+              _this.plateClick()
+            }
           })
-        })
-        _this.allPlateVector = new ol.layer.Vector({
-          source: source,
-          style: style
-        })
-        _this.map.addLayer(_this.allPlateVector)
+
+        //let wkt = localStorage.getItem("fence_shp")
+        //console.log(wkt)
+
       },
       plateMove(){
         let _this = this
@@ -677,7 +759,9 @@
           if (features.length>0){
             var feature=features[0];
             var coordinate = ol.extent.getBottomLeft(feature.getGeometry().getExtent());
-
+            //console.log(feature.get('id'))
+            _this.popupStartTime = feature.get('startTime')
+            _this.popupEndTime = feature.get('endTime')
             $('#popup').css({'visibility': 'visible'})
             overlay.setPosition(coordinate);
           }else {
@@ -708,16 +792,31 @@
           if (features.length>0){
             var feature=features[0];
             //alert(feature.getId())
+            //console.log(feature.get('id'))
             _this.$confirm('确认取消该挂牌?', '提示', {
               confirmButtonText: '确定',
               cancelButtonText: '取消',
               type: 'warning'
             }).then(() => {
               //localStorage.setItem("fence_shp",null)
-              _this.$message({
-                type: 'success',
-                message: '取消挂牌成功!'+feature.getId()
-              });
+              //POST /ui/fence/delFence/{id}
+              _this.ajax_api('post',url_api + '/fence/delFence/'+feature.get('id'),
+                null,
+                true,function (res) {
+              	  if(res.code==200){
+                    _this.$message({
+                      type: 'success',
+                      message: '取消挂牌成功!'
+                    });
+                    _this.plateShow()
+                    selectedFeatures.clear()
+                  }else {
+                    _this.$message({
+                      message: res.message
+                    });
+                  }
+                })
+
             }).catch(() => {
               selectedFeatures.clear()
             });
@@ -736,7 +835,7 @@
     #map
       width 100%
       height 100%
-      border 2px solid pink
+      border 1px solid deeppink
       background white
       position relative
       >ul
