@@ -7,8 +7,10 @@
           <span>首页</span>
         </div>
         <div>
-          <i class="head_i bangzhu"></i>
-          <span>帮助</span>
+          <a href="/static/test.docx" target="_blank">
+            <i class="head_i bangzhu"></i>
+            <span style="color:#000">帮助</span>
+          </a>
         </div>
         <div @click="logout">
           <i class="head_i tuichu"></i>
@@ -374,7 +376,7 @@
     </div>
     <div class="head_right">
 
-      <div class="top_logo"><img src="../../static/images/logo.jpg" alt=""></div>
+      <div class="top_logo"><img :src="logoUrl" alt=""></div>
       <span class="divide-line"></span>
       <div class="top_text">
         <span>{{companyName}}</span>
@@ -396,11 +398,14 @@
         companyName:'',
         companyArea:'',
         countAlarm:0,
+        //../../static/images/logo.jpg
+        logoUrl:'',
       }
 
     },
     mounted(){
     	this.getCompanyName()
+      this.countAlarmShow()
     },
     props:['title'],
     methods: {
@@ -472,12 +477,18 @@
               _this.companyName = company_name[0].value
               _this.companyArea = company_area[0].value
               _this.imageUrl = logo[0].value
-
+              _this.logoUrl = logo[0].value
             }
           })
       },
       //报警数显示
+      countAlarmShow(){
+        let _this = this
+        _this.countAlarm = 2
+      },
+      wordDetail(){
 
+      },
     }
   }
 </script>
@@ -545,6 +556,7 @@
           margin-top 4px
           margin-left 4px
           position relative
+          z-index 9999
           .menu_title
             width: 230px;
             height: 27px;
@@ -559,7 +571,7 @@
             cursor pointer
           .menu_ul
             position: absolute;
-            z-index 999
+            z-index 9999
             background-color: #eee;
             width: 230px;
             min-height: 430px;
@@ -596,6 +608,7 @@
               color white
             .pop_up
               position: absolute;
+              z-index 99999
               background-color: #eee;
               width: 600px;
               min-height: 430px;
@@ -678,6 +691,7 @@
         img
           width 100%
           height 100%
+          border-radius 50%
       .divide-line
         height: 40px;
         width: 1px;

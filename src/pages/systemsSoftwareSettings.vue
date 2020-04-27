@@ -20,7 +20,7 @@
               <p>系统图标：</p>
               <el-upload style="width: 180px"
                 class="avatar-uploader"
-                action="https://jsonplaceholder.typicode.com/posts/"
+                :action=pictureUpdate
                 :show-file-list="false"
                 :on-success="handleAvatarSuccess"
                 :before-upload="beforeAvatarUpload">
@@ -131,8 +131,9 @@
       return{
         title:'软件设置 > 软件设置',
         imageUrl: '',
+        imageUrlUpload:'',
         DestroyIncomeStatistics:true,
-
+        pictureUpdate: url_api+ '/file',
         companyName: '',
         companyArea: '',
 
@@ -144,7 +145,10 @@
     methods: {
       handleAvatarSuccess(res, file) {
         this.imageUrl = URL.createObjectURL(file.raw);
-        //action="https://jsonplaceholder.typicode.com/posts/"
+        //action="https://jsonplaceholder.typicode.com/posts/" 37位//8b79b27e7d14cb6569400958ee474c56.jpg
+        //console.log(file.response.data.localUrl)
+        //console.log(file.response.data.localUrl.slice(-37))
+        this.imageUrlUpload = 'http://localhost:8080/smcsp/file' + file.response.data.localUrl.slice(-37)
       },
       beforeAvatarUpload(file) {
         const isJPG = file.type === 'image/jpeg';
@@ -234,7 +238,7 @@
             {
               name: "logo",
               displayName: "logo图标",
-              value: _this.imageUrl
+              value: _this.imageUrlUpload
               //value:'https://gss2.bdstatic.com/9fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike150%2C5%2C5%2C150%2C50/sign=b30eadd0267f9e2f6438155a7e598241/21a4462309f790528aa758080df3d7ca7bcbd54f.jpg'
             },
             {

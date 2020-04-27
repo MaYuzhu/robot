@@ -107,7 +107,7 @@
         radio_items:[
           {
             value:1,
-            label:'全面巡检'
+            label:'全面巡检~'
           },
           {
             value:2,
@@ -209,7 +209,7 @@
           //console.log(res.data)
           let inspect = res.data
           let result = inspect.filter(item => {
-            return item.parentId == 4
+            return item.parentId == 0
           })
           _this.citiesQuyu = result
           //_this.checkedQuyu = [result[1],result[3]]

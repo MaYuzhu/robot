@@ -2,13 +2,13 @@
   <div class="monitors_robot_wrap">
     <HeaderTop :title="title"></HeaderTop>
     <div style="display: flex" class="center_box">
-      <div style="width: 55%;float: left">
+      <div style="width: 60%;float: left">
         <XunjianContent :taskInfo="taskInfo"></XunjianContent>
         <taskControl></taskControl>
       </div>
       <select style="display: none" id="ip" class="sel" onchange=""></select>
       <select style="display: none" id="channels" class="sel"></select>
-      <div style="width: 45%;height: 100%;float: left">
+      <div style="width: 40%;height: 100%;float: left">
         <div class="right_top" style="border:1px solid;height: 50%" @dblclick="bigDiv">
           <!--<Button @click="test_ie">IE9</Button>-->
           <Button @click="test_login" style="position: absolute;z-index: 99999">可见光</Button>
@@ -21,7 +21,7 @@
       </div>
     </div>
     <div style="display: flex;">
-      <div style="width: 55%; height: 300px;background: white;float: left">
+      <div style="width: 60%; height: 300px;background: white;float: left">
         <TabsBottom></TabsBottom>
       </div>
       <div class="control_wrap">
@@ -818,7 +818,7 @@
       height calc(100% - 390px)
     >div
       .control_wrap
-        width 45%
+        width 40%
         height 300px
         border 1px solid #c6cdd3
         float left
@@ -896,15 +896,17 @@
                 margin-top 3px
                 float right
             .radar
-              width: 120px;
-              height: 120px;
+              /*width: 120px;
+              height: 120px;*/
               position: relative;
+              text-align center
               /*background: -webkit-radial-gradient(center,rgba(32,255,77,.3) 0,rgba(32,255,77,0) 75%),-webkit-repeating-radial-gradient(rgba(32,255,77,0) 5.8%,rgba(32,255,77,0) 18%,#109cb4 18.6%,rgba(32,255,77,0) 18.9%),-webkit-linear-gradient(90deg,rgba(32,255,77,0) 49.5%,#109cb4 50%,#109cb4 0,rgba(32,255,77,0) 50.2%),-webkit-linear-gradient(0deg,rgba(32,255,77,0) 49.5%,#109cb4 50%,#109cb4 0,rgba(32,255,77,0) 50.2%);
               margin: auto;
               top: calc(50% - 60px - 0px);
               border-radius: 50%;
               border: .2rem solid #109cb4;
               overflow: hidden;*/
+
             .radar::before
               content: " ";
               display: block;

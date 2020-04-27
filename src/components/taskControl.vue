@@ -177,7 +177,7 @@
           style: function (feature, resolution) {
             return new ol.style.Style({
               stroke: new ol.style.Stroke({
-                color:'#49ac73',
+                color:'#6abcff',
                 width: 2
               }),
 
@@ -199,7 +199,7 @@
               image: new ol.style.Circle({
                 radius: 5,
                 fill: new ol.style.Fill({
-                  color: 'orange'
+                  color: '#3837ae'
                 })
               }),
 
@@ -762,10 +762,12 @@
             //console.log(feature.get('id'))
             _this.popupStartTime = feature.get('startTime')
             _this.popupEndTime = feature.get('endTime')
-            $('#popup').css({'visibility': 'visible'})
+            //$('#popup').css({'visibility': 'visible'})
+            $('#popup').css({'display': 'block'})
             overlay.setPosition(coordinate);
           }else {
-            $('#popup').css({'visibility': 'hidden'})
+            //$('#popup').css({'visibility': 'hidden'})
+            $('#popup').css({'display': 'none'})
           }
         });
       },
@@ -835,7 +837,7 @@
     #map
       width 100%
       height 100%
-      border 1px solid deeppink
+      /*border 1px solid deeppink*/
       background white
       position relative
       >ul
@@ -845,7 +847,7 @@
         width 100%
         height 30px
         position absolute
-        z-index 998
+        z-index 99
         >li
           float left
           margin 0 16px
@@ -867,7 +869,7 @@
 
 
       /deep/ .ol-full-screen
-        z-index 999
+        z-index 996
         width 42px
         height 26px
         top 2px

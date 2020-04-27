@@ -6,7 +6,10 @@
         <div style="background:lavender">
           <XunjianContent :taskInfo="taskInfo"></XunjianContent>
         </div>
-        <taskControl></taskControl>
+        <div class="taskControl_wrap">
+          <taskControl></taskControl>
+        </div>
+
       </div>
       <div class="right" style="width: 35%">
         <div class="right_top">
@@ -111,6 +114,8 @@
         .right_top,.right_bottom
           height 50%
           border 1px solid
+        .taskControl_wrap
+          height calc(100% - 87px)
     .tabs_bottom
       height 180px
       background white
