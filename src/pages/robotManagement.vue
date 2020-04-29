@@ -23,10 +23,13 @@
     <div class="right" style="width: 35%">
       <div class="right_top" @dblclick="bigDiv">
         <!--<Button @click="test_ie">IE9</Button>-->
-        <Button @click="test_login" style="position: absolute;z-index: 99999">可见光</Button>
+        <!--<Button @click="test_login" style="position:absolute;z-index:99999">可见光</Button>-->
+        <div @click="test_login" class="play_video">
+          <img src="../../static/img/play.png" alt="">
+        </div>
         <div id="divPlugin" style="width: 100%;height: 100%;"></div>
       </div>
-      <div class="right_bottom">
+      <div class="right_bottom" id="container_red" @dblclick="showFull">
         <Button @click="red_pic">红外测试</Button>
         <img id="chatterMessage" :src="src" style="width: 100%;height: 100%" alt="">
       </div>
@@ -309,6 +312,36 @@
           $('.right_top').css({'visibility': 'visible'})
         }
 
+      },
+
+      //红外全屏
+      showFull(){
+        var full=document.getElementById("container_red");
+        this.launchIntoFullscreen(full);
+      },
+      launchIntoFullscreen(element) {
+        if(element.requestFullscreen){
+          element.requestFullscreen();
+        }
+        else if(element.mozRequestFullScreen) {
+          element.mozRequestFullScreen();
+        }
+        else if(element.webkitRequestFullscreen) {
+          element.webkitRequestFullscreen();
+        }
+        else if(element.msRequestFullscreen) {
+          element.msRequestFullscreen();
+        }
+      },
+      //退出全屏
+      exitFullscreen() {
+        if(document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if(document.mozCancelFullScreen) {
+          document.mozCancelFullScreen();
+        } else if(document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        }
       }
 
     },
@@ -337,6 +370,11 @@
           }
         }
       });
+      var video_w = $('.play_video').parent().width()
+      var video_h = $('.play_video').parent().height()
+      var margin = (video_h/2-30) + 'px ' + (video_w/2-30) + 'px'
+      console.log(margin)
+      $('.play_video').css({'margin':margin})
 
       //this.createWebSocket();
       _this.getRobotList()
@@ -382,9 +420,19 @@
       float left
       .right_top
         height 50%
-        border 2px solid
-        position relative
+        border 1px solid
+        /*position relative*/
         visibility visible
+        .play_video
+          width 60px
+          height 60px
+          position absolute
+          z-index 99999
+          background #343434
+          /*cursor pointer*/
+          img
+            width 100%
+            height 100%
       .right_bottom
         height 50%
         border 2px solid

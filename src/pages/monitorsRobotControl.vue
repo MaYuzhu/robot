@@ -11,7 +11,7 @@
       <div style="width: 40%;height: 100%;float: left">
         <div class="right_top" style="border:1px solid;height: 50%" @dblclick="bigDiv">
           <!--<Button @click="test_ie">IE9</Button>-->
-          <Button @click="test_login" style="position: absolute;z-index: 99999">可见光</Button>
+          <Button @click="test_login" style="position:absolute;z-index:99999">可见光</Button>
           <div id="divPlugin" style="width: 100%;height: 100%;"></div>
         </div>
         <div class="right_bottom" style="border:1px solid;height: 50%">

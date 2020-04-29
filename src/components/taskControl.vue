@@ -264,11 +264,12 @@
           var vectorSource = new ol.source.Vector({
             features: pointFeatures
           })
+          var pointIdsArr = []
           //框选
           _this.boxSelect = new ol.interaction.Select({
             layers: [_this.geoJsonLayerPoint]
           });
-          var selectedFeatures = _this.boxSelect.getFeatures();
+          _this.selectedFeatures = _this.boxSelect.getFeatures();
           _this.dragBoxPoint = new ol.interaction.DragBox({
             //condition : ol.events.condition.always  //默认是always
             condition: ol.events.condition.platformModifierKeyOnly
@@ -277,17 +278,24 @@
           _this.dragBoxPoint.on('boxend', function() {
             var extent = _this.dragBoxPoint.getGeometry().getExtent();
             vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
-              selectedFeatures.push(feature)
-              //console.log(123123123)
+              _this.selectedFeatures.push(feature)
+              pointIdsArr.push(feature.getId().slice(6))
             });
             //console.log(selectedFeatures)
-            _this.pointIds = '1,2'
+            _this.pointIds = pointIdsArr.toString()
+            if(_this.pointIds!=''){
+              _this.addTaskDisabled = false
+            }
           });
           _this.dragBoxPoint.on('boxstart', function() {
-            selectedFeatures.clear();
+            _this.selectedFeatures.clear();
+            pointIdsArr = []
+            _this.addTaskDisabled = true
           });
           _this.map.on('click', function() {
-            selectedFeatures.clear();
+            _this.selectedFeatures.clear();
+            pointIdsArr = []
+            _this.addTaskDisabled = true
           });
           _this.map.addInteraction(_this.boxSelect);
           _this.map.addInteraction(_this.pointmove);
@@ -298,6 +306,8 @@
           _this.map.removeInteraction(_this.boxSelect);
           _this.map.removeInteraction(_this.pointmove);
           _this.map.removeInteraction(_this.dragBoxPoint);
+          pointIdsArr = []
+          _this.addTaskDisabled = true
         }
 
       },
@@ -375,13 +385,16 @@
       },
       removeChoosePoint(){
       	let _this = this
-        _this.map.removeInteraction(_this.pointmove)
-        _this.map.removeInteraction(_this.boxSelect)
+        //_this.map.removeInteraction(_this.pointmove)
+        //_this.map.removeInteraction(_this.boxSelect)
         if(_this.selectedFeatures){
+      		//console.log(11)
           _this.selectedFeatures.clear()
+          _this.pointIds = ''
         }
-        _this.isShowStopPoint = false
-        _this.choosePointText = '地图选点'
+        //_this.isShowStopPoint = false
+        //_this.choosePointText = '地图选点'
+        //_this.addTaskDisabled = true
       },
       //任务暂停-继续
       taskStop(){
@@ -482,15 +495,14 @@
 
       },
       addTask(){
-        if(this.addTaskDisabled){
-          //return
+        if(this.pointIds==''){
+          return
         }
         this.$router.push({
           name: 'robotAddNewTask',
           path: '/robots/add-task',
           params: {
-            //ids:this.pointIds
-            ids:'1,2'
+            ids:this.pointIds
           }
         })
       },
@@ -542,7 +554,6 @@
             features: routeFeatures
           })
 
-          var pointIdsArr = []
           var routeIdsArr = []
 
           //框选
