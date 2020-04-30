@@ -208,10 +208,53 @@
           visible: true
         });
 
+        var geoJsonLayerRoute3 = new ol.layer.Vector({
+          title: 'add Layer',
+          source: new ol.source.Vector({
+            //projection: 'EPSG:4326',
+            url: '../../static/route.json',
+            //url: '../../static/geojson/route.geojson',
+            format:new ol.format.GeoJSON()
+          }),
+          style: function (feature, resolution) {
+            return new ol.style.Style({
+              stroke: new ol.style.Stroke({
+                color:'#6ad864',
+                width: 2
+              }),
+
+            });
+          },
+          visible: true
+        });
+        var geoJsonLayerPoint3 = new ol.layer.Vector({
+          title: 'add Layer Point',
+          source: new ol.source.Vector({
+            //projection: 'EPSG:4326',
+            url: '../../static/point.json',
+            //url: '../../static/geojson/stops.geojson',
+            format:new ol.format.GeoJSON()
+          }),
+          style: function (feature, resolution) {
+            return new ol.style.Style({
+              image: new ol.style.Circle({
+                radius: 5,
+                fill: new ol.style.Fill({
+                  color: '#ffaf43'
+                })
+              }),
+
+            });
+          },
+          visible: true
+        });
+
         _this.map = new ol.Map({
           layers: [
             _this.geoJsonLayerRoute,
-            _this.geoJsonLayerPoint
+            _this.geoJsonLayerPoint,
+            geoJsonLayerRoute3,
+            geoJsonLayerPoint3,
           ],
           target: 'map',
           interactions: ol.interaction.defaults().extend([

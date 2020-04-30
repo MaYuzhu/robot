@@ -25,7 +25,7 @@
           <p>名称：</p>
           <el-input v-model="input" placeholder="请输入内容" style="width: 180px;float: left" size="mini"></el-input>
           <ul>
-            <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
+            <li @click="findList"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
             <li @click="rightsRoleCommit"><img src="../../static/images/save.png" alt=""><span>保存</span></li>
           </ul>
         </div>
@@ -309,6 +309,19 @@
               });
             }
         })
+      },
+      findList(){
+        let _this = this
+        if(_this.input==''){
+          _this.getAllPermission()
+        }else {
+          _this.ajax_api('get',url_api + '/permission/permissionList',
+            {displayName:_this.input},true,function (res) {
+              //console.log(res.data)
+              _this.tableData = res.data.items
+            })
+        }
+
       },
 
     },

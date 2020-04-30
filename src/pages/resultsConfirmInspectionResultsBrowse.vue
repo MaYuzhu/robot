@@ -270,15 +270,15 @@
         imageArr:[
           {
             title:'A相可见光',
-            url:'../../static/abc.jpg'
+            url:'/static/abc.jpg'
           },
           {
             title:'B相可见光',
-            url:'../../static/abc.jpg'
+            url:'/static/abc.jpg'
           },
           {
             title:'C相可见光',
-            url:'../../static/abc.jpg'
+            url:'/static/abc.jpg'
           },
           {
             title:'A相可见光',
@@ -294,7 +294,7 @@
           },
         ],
         srcList: [
-          '../../static/abc.jpg',
+          '/static/abc.jpg',
         ],
         dialogVisibleAlarm:false,
         point_info:'点位信息',

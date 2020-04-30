@@ -13,7 +13,7 @@
           <el-input v-model="input3_name" placeholder="请输入内容" style="width: 180px" size="mini"></el-input>
           <ul>
             <li @click="queryUser"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
-            <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
+            <li @click="allUserR"><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
             <li @click="addUser"><img src="../../static/images/add.png" alt=""><span>新增</span></li>
             <li @click="updateUser"><img src="../../static/images/modify.png" alt=""><span>修改</span></li>
             <li @click="delUser"><img src="../../static/images/remove.png" alt=""><span>删除</span></li>
@@ -521,6 +521,15 @@
         _this.userData.sn = _this.input2_sn
         _this.userData.name = _this.input3_name
         _this.getAllUserData()
+      },
+      allUserR(){
+        let _this = this
+        _this.input2_sn = ''
+        _this.input3_name = ''
+        _this.ajax_api('get',url_api + '/user/userList',null,true,function (res) {
+          _this.total = res.data.total
+          _this.tableData = res.data.items
+        })
       },
 
       formatStatus(row, column) {

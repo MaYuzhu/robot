@@ -4,13 +4,13 @@
     <div class="interval_show_top">
       <p style="font-weight: 600">间隔查询：</p>
       <p><el-input v-model="input" placeholder="请输入内容" size="mini"></el-input></p>
-      <p><img src="../../static/images/query.png" alt=""><span>查询</span></p>
+      <p @click="findDev"><img src="../../static/images/query.png" alt=""><span>查询</span></p>
     </div>
     <div class="interval_show_content">
       <div class="interval_show_content_left">
         <ul>
           <li v-for="(item,index) in leftOptions" :key="index"  class="left-item"
-              :class="{'is-checked':item.id==indexIschenked}"
+              :class="{'is-checked':item.id==indexIschecked}"
               @click="queryRightContent(item.id)">{{item.name}}</li>
         </ul>
       </div>
@@ -40,7 +40,7 @@
         title_dev:'',
         title_dev_id:'',
         input:'',
-        indexIschenked:6917,
+        indexIschecked:0,
         leftOptions: [],
         rightContent: [],
         loading:true,
@@ -61,14 +61,15 @@
           //console.log(res.data)
           if(res.code == 200){
             _this.leftOptions = res.data
-            _this.queryRightContent(6917)
+            _this.indexIschecked = res.data[0].id
+            _this.queryRightContent(_this.indexIschecked)
           }
         })
       },
       queryRightContent(index){
         let _this = this
         _this.loading = true
-        _this.indexIschenked = index
+        _this.indexIschecked = index
         _this.ajax_api('get',url_api + '/device/intervals',
           {deviceRegionId:index},
           true,function (res) {
@@ -88,7 +89,29 @@
       isVisible: function (childValue) {
         // childValue就是子组件传过来的值
         this.show_box_visible = childValue
-      }
+      },
+      findDev(){
+      	let _this = this
+        let stringInput = _this.input.trim()
+      	if(stringInput == ''){
+          _this.$message({
+            message: '请输入内容',
+          })
+          return
+        }
+        _this.loading = true
+        _this.ajax_api('get',url_api + '/device/intervals',
+          {intervalName:stringInput},
+          true,function (res) {
+            //console.log(res.data)
+            if(res.code == 200){
+              _this.rightContent = res.data
+              _this.loading = false
+            }
+          })
+
+
+      },
     },
   }
 </script>

@@ -269,7 +269,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              console.log(res.data.items)
+              //console.log(res.data.items)
               _this.tableData = res.data.items
               _this.total = res.data.total
             }

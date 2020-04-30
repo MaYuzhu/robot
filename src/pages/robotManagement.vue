@@ -69,6 +69,42 @@
 
       }
     },
+    mounted() {
+      let _this = this
+      _this.getRobotList()
+      _this.play_but()
+      // 初始化插件参数及插入插件
+      WebVideoCtrl.I_InitPlugin('100%', '100%', {
+        iWndowType: 1,
+        cbSelWnd: function (xmlDoc) {
+          let g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
+          var szInfo = "当前选择的窗口编号：" + g_iWndIndex;
+          console.log(szInfo);
+        }
+      });
+      WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
+      // 窗口事件绑定
+      $(window).bind({
+        resize: function () {
+          var $Restart = $("#restartDiv");
+          if ($Restart.length > 0) {
+            var oSize = _this.getWindowSize();
+            $Restart.css({
+              width: oSize.width + "px",
+              height: oSize.height + "px"
+            });
+          }
+        }
+      });
+      $(window).resize(function() {
+        // 变化后需要做的事
+        _this.play_but()
+      })
+
+      //this.createWebSocket();
+
+
+    },
     methods: {
     	red_pic(){
     		let _this = this
@@ -342,42 +378,15 @@
         } else if(document.webkitExitFullscreen) {
           document.webkitExitFullscreen();
         }
-      }
-
-    },
-    mounted() {
-    	let _this = this
-      // 初始化插件参数及插入插件
-      WebVideoCtrl.I_InitPlugin('100%', '100%', {
-        iWndowType: 1,
-        cbSelWnd: function (xmlDoc) {
-          let g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
-          var szInfo = "当前选择的窗口编号：" + g_iWndIndex;
-          console.log(szInfo);
-        }
-      });
-      WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
-      // 窗口事件绑定
-      $(window).bind({
-        resize: function () {
-          var $Restart = $("#restartDiv");
-          if ($Restart.length > 0) {
-            var oSize = _this.getWindowSize();
-            $Restart.css({
-              width: oSize.width + "px",
-              height: oSize.height + "px"
-            });
-          }
-        }
-      });
-      var video_w = $('.play_video').parent().width()
-      var video_h = $('.play_video').parent().height()
-      var margin = (video_h/2-30) + 'px ' + (video_w/2-30) + 'px'
-      console.log(margin)
-      $('.play_video').css({'margin':margin})
-
-      //this.createWebSocket();
-      _this.getRobotList()
+      },
+      //视频窗口按钮
+      play_but(){
+        var video_w = $('.play_video').parent().width()
+        var video_h = $('.play_video').parent().height()
+        var margin = (video_h/2-30) + 'px ' + (video_w/2-30) + 'px'
+        //console.log(margin)
+        $('.play_video').css({'margin':margin})
+      },
 
     },
 
