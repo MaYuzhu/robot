@@ -109,20 +109,23 @@
     	red_pic(){
     		let _this = this
         var ros = new ROSLIB.Ros({
-          url : 'ws://192.168.1.78:9090'
+          url : 'ws://192.168.1.10:9090'
         });
     		//console.log(ros)
-        ros.on('connection', function() {
+        /*ros.on('connection', function() {
           console.log('Connected to websocket server.');
-        });
+        });*/
 
         _this.listener = new ROSLIB.Topic({
           ros : ros,
-          name : '/thermal/image_proc/compressed',
-          messageType : 'sensor_msgs/CompressedImage'
+          /*name : '/thermal/image_proc/compressed',// /thermal/image_proc/compressed
+          messageType : 'sensor_msgs/CompressedImage', // sensor_msgs::CompressedImage*/
+          name : '/navigation/cmd_vel',// /thermal/image_proc/compressed
+          messageType : 'geometry_msgs/Twist' // sensor_msgs::CompressedImage
+
         });
 
-        _this.listener.subscribe(function(message) {
+        /*_this.listener.subscribe(function(message) {
           console.log('Received message on ' +': ' + message.data);
           var  url = "data:image/png;base64,";
           var i = message.data
@@ -133,7 +136,20 @@
           },1000)
 
           //_this.listener.unsubscribe();
+        });*/
+        var twist = new ROSLIB.Message({
+          linear : {
+            x : 2.0,
+            y : 1.0,
+            z : 2.0
+          },
+          angular : {
+            x : 5.0,
+            y : 4.0,
+            z : 6.0
+          }
         });
+        _this.listener.publish(twist);
       },
       test_aaa(){
         let _this = this
