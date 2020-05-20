@@ -155,14 +155,21 @@
         timeId:null,
         vehVector:null,
         passRouteLayer:null,
+        url:'ws://192.168.1.10:9090',
+        planLinePoint:[],
+        planLinePointVector:null,
+
       };
     },
     mounted(){
     	let _this = this
       _this.init()
       _this.plateShow()
-
+      _this.point_now()
+      //_this.planLineShow()
+      _this.planLinePoint = planLinePointArr
     },
+
     methods:{
     	init(){
     		let _this = this
@@ -251,8 +258,8 @@
 
         _this.map = new ol.Map({
           layers: [
-            _this.geoJsonLayerRoute,
-            _this.geoJsonLayerPoint,
+            //_this.geoJsonLayerRoute,
+            //_this.geoJsonLayerPoint,
             geoJsonLayerRoute3,
             geoJsonLayerPoint3,
           ],
@@ -272,6 +279,18 @@
 
         });
 
+        //计划线路
+        var planLineSource = new ol.source.Vector({});
+        _this.planLinePointVector = new ol.layer.Vector({
+            source: planLineSource,
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({ //边界样式
+                    color: '#a1ac82',
+                    width: 3
+                })
+            })
+        })
+        _this.map.addLayer(_this.planLinePointVector);
         $('.ol-full-screen button').text('全屏')
       },
       //地图选点
@@ -459,8 +478,6 @@
         // [631064, 816958],[562576, 1041989],[141867, 993069],[-396249, 905014]]
       	let _this = this
         var i = 0
-
-
         if(e){
           if(_this.vehVector){
             _this.vehVector.getSource().clear()
@@ -490,7 +507,7 @@
               image: new ol.style.Circle({
                 radius: 1,
                 fill: new ol.style.Fill({
-                  color: 'deeppink'
+                  color: 'pink'
                 })
               }),
             })
@@ -730,6 +747,7 @@
         _this.ajax_api('get',url_api + '/fence',
           {page:1,size:1000},
           true,function (res) {
+            //console.log(res)
             if(res.code == 200){
             	let fence_items = res.data.items
               let features = []
@@ -879,6 +897,141 @@
           }
         });
       },
+
+      point_now(){
+          let _this = this
+          if(_this.vehVector){
+              _this.vehVector.getSource().clear()
+          }
+          var vehSource = new ol.source.Vector({});
+          _this.vehVector = new ol.layer.Vector({
+              source: vehSource,
+              /*style: new ol.style.Style({
+                  image:new ol.style.Icon({
+                      color: "white",
+                      src: '../../static/img/location.png',
+                      scale:0.15,
+                  })
+              })*/
+          });
+
+          var passRouteSource = new ol.source.Vector({});
+          _this.passRouteLayer = new ol.layer.Vector({
+              source: passRouteSource,
+              style: new ol.style.Style({
+                  stroke: new ol.style.Stroke({ //边界样式
+                      color: '#a42cac',
+                      width: 3
+                  }),
+                  image: new ol.style.Circle({
+                      radius: 1,
+                      fill: new ol.style.Fill({
+                          color: 'deeppink'
+                      })
+                  }),
+              })
+          });
+          _this.map.addLayer(_this.passRouteLayer);
+          _this.map.addLayer(_this.vehVector);
+
+          var ros = new ROSLIB.Ros({
+              url : _this.url
+          });
+          //console.log(ros)
+          ros.on('connection', function() {
+              console.log('point.server');
+          });
+
+          _this.listener = new ROSLIB.Topic({
+              ros : ros,
+              name : '/robot_pose',
+              messageType : 'yidamsg/Yida_pose'
+          });
+          var routeArr = [],
+              routeArrPoint = []
+          _this.listener.subscribe(function(message) {
+              //console.log(message);
+              /*var routeArr = [],
+                  routeArrPoint = []*/
+                  if(vehSource)vehSource.clear();
+                  if(passRouteSource)passRouteSource.clear();
+                  var iconFeature = new ol.Feature({
+                      geometry: new ol.geom.Point(ol.proj.transform([message.x,message.z], 'EPSG:4326', 'EPSG:3857'), "XY"),
+                      name: "my Icon",
+                  });
+                  //console.log(message.anglez*180/Math.PI)
+                  var rotateDeg = message.anglez*180/Math.PI>0?90:270
+                  _this.vehVector.setStyle(
+                      new ol.style.Style({
+                          image:new ol.style.Icon({
+                              rotation: -message.anglez,//+ (270*Math.PI/180)
+                              //rotation:270*Math.PI/180,
+                              color: "white",
+                              src: '../../static/img/location1.png',
+                              scale:0.15,
+                          }),
+                      }),
+                  )
+                  vehSource.addFeature(iconFeature);
+
+                  routeArrPoint.push([message.x,message.z])
+                  /*routeArr.push(
+                      new ol.Feature({
+                          geometry:new ol.geom.Point(ol.proj.fromLonLat([message.x,message.y])),
+                      })
+                  )*/
+                  var geom2 = new ol.geom.LineString(routeArrPoint);
+                  geom2.transform('EPSG:4326', 'EPSG:3857');
+                  var feature2 = new ol.Feature({
+                      geometry:geom2
+                  });
+                  passRouteSource.addFeature(feature2);
+                  /*for (var j = 0, ii = routeArrPoint.length; j < ii; ++j) {
+                      routeArr.push(
+                          new ol.Feature({
+                              geometry:new ol.geom.Point(ol.proj.fromLonLat(routeArrPoint[j])),
+                          })
+                      )
+                  }
+                  var geom2 = new ol.geom.LineString(routeArrPoint);
+                  geom2.transform('EPSG:4326', 'EPSG:3857');
+                  var feature2 = new ol.Feature({
+                      geometry:geom2
+                  });*/
+                  //console.log(routeArr)
+                  //passRouteSource.addFeature(feature2);
+                  //passRouteSource.addFeature(iconFeature);
+
+              //_this.listener.unsubscribe();
+          });
+      },
+
+      planLineShow(val){
+        let _this = this
+        //console.log(_this.planLinePoint)
+        if(_this.planLinePointVector){
+            _this.planLinePointVector.getSource().clear()
+        }
+        var geomPlanLine = new ol.geom.LineString(val);
+        geomPlanLine.transform('EPSG:4326', 'EPSG:3857');
+        var featurePlanLine = new ol.Feature({
+            geometry:geomPlanLine
+        });
+        _this.planLinePointVector.getSource().addFeature(featurePlanLine);
+
+      },
+    },
+    computed:{
+      mapPlanLine:function(){
+        console.log(planLinePointArr)
+        return planLinePointArr
+      }
+    },
+    watch:{
+        planLinePoint: function(val,oval){
+            this.planLineShow(val)
+            //console.log(val,oval)
+        }
     },
   }
 </script>

@@ -148,6 +148,7 @@
         //action="https://jsonplaceholder.typicode.com/posts/" 37位//8b79b27e7d14cb6569400958ee474c56.jpg
         //console.log(file.response.data.localUrl)
         //console.log(file.response.data.localUrl.slice(-37))
+        //本地测试this.imageUrlUpload = 'http://localhost:8080/smcsp/file' + file.response.data.localUrl.slice(-37)
         this.imageUrlUpload = 'http://localhost:8080/smcsp/file' + file.response.data.localUrl.slice(-37)
       },
       beforeAvatarUpload(file) {
@@ -170,7 +171,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res.data.items)
+              console.log(res.data)
               let items = res.data.items
               let company_name = items.filter(item =>{
               	return item.name == "company_name"
@@ -258,6 +259,7 @@
           setCompanyData,
           true,
           function (res) {
+            console.log(res)
             if(res.code == 200){
               _this.$message({
                 message: '保存成功',

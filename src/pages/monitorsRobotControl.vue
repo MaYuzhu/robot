@@ -11,11 +11,13 @@
       <div style="width: 40%;height: 100%;float: left">
         <div class="right_top" style="border:1px solid;height: 50%" @dblclick="bigDiv">
           <!--<Button @click="test_ie">IE9</Button>-->
-          <Button @click="test_login" style="position:absolute;z-index:99999">可见光</Button>
+          <div @click="test_login" class="play_video">
+            <img src="../../static/img/play.png" alt="">
+          </div>
           <div id="divPlugin" style="width: 100%;height: 100%;"></div>
         </div>
         <div class="right_bottom" style="border:1px solid;height: 50%">
-          <Button @click="red_pic">红外测试</Button>
+          <Button @click="red_pic">红外</Button>
           <img id="chatterMessage" :src="src" style="width: 100%;height: 100%" alt="">
         </div>
       </div>
@@ -68,29 +70,37 @@
             </div>
             <div class="car-direction">
               <el-tooltip class="item car-direction-but car-top-but car-direction-but-disabled"
-                          effect="dark" content="W"
+                          effect="dark" content="W" :disabled="disabled"
                           placement="top-start">
-                <div><span class="car-but-text car-top-but-text car-but-text-disabled">W</span></div>
+                <div @click="carBodyC(1)">
+                  <span class="car-but-text car-top-but-text car-but-text-disabled">W</span>
+                </div>
               </el-tooltip>
               <el-tooltip class="item car-direction-but car-right-but car-direction-but-disabled"
-                          effect="dark" content="D"
+                          effect="dark" content="D" :disabled="disabled"
                           placement="right-start">
-                <div><span class="car-but-text car-right-but-text car-but-text-disabled">D</span></div>
+                <div @click="carBodyC(2)">
+                  <span class="car-but-text car-right-but-text car-but-text-disabled">D</span>
+                </div>
               </el-tooltip>
               <el-tooltip class="item car-direction-but car-bottom-but car-direction-but-disabled"
-                          effect="dark" content="S"
+                          effect="dark" content="S" :disabled="disabled"
                           placement="bottom-start">
-                <div><span class="car-but-text car-bottom-but-text car-but-text-disabled">S</span></div>
+                <div @click="carBodyC(3)">
+                  <span class="car-but-text car-bottom-but-text car-but-text-disabled">S</span>
+                </div>
               </el-tooltip>
               <el-tooltip class="item car-direction-but car-left-but car-direction-but-disabled"
-                          effect="dark" content="A"
+                          effect="dark" content="A" :disabled="disabled"
                           placement="left-start">
-                <div><span class="car-but-text car-left-but-text car-but-text-disabled">A</span></div>
+                <div @click="carBodyC(4)">
+                  <span class="car-but-text car-left-but-text car-but-text-disabled">A</span>
+                </div>
               </el-tooltip>
               <el-tooltip class="item car-center-but car-center-but-disabled"
-                          effect="dark" content="1"
+                          effect="dark" content="1" :disabled="disabled"
                           placement="top-start">
-                <div>
+                <div @click="carBodyC(5)" style="cursor: pointer">
                   <img src="../../static/images/stop.png" alt="" class="car-center-but-img">
                 </div>
               </el-tooltip>
@@ -189,17 +199,21 @@
         g_bPTZAuto : false,
         taskInfo:{},
         robotId:'',
+        g_iWndIndex:null,
+        url:'ws://192.168.1.10:9090',
+        time_id:null,
+        time_id_key:null,
       }
     },
     methods:{
       red_pic(){
         let _this = this
         var ros = new ROSLIB.Ros({
-          url : 'ws://192.168.1.78:9090'
+          url : _this.url
         });
         //console.log(ros)
         ros.on('connection', function() {
-          console.log('Connected to websocket server.');
+          console.log('red server.');
         });
 
         _this.listener = new ROSLIB.Topic({
@@ -209,7 +223,7 @@
         });
 
         _this.listener.subscribe(function(message) {
-          console.log('Received message on ' +': ' + message.data);
+          //console.log('Received message on ' +': ' + message.data);
           var  url = "data:image/png;base64,";
           var i = message.data
           _this.src = url+ i
@@ -221,7 +235,6 @@
           //_this.listener.unsubscribe();
         });
       },
-
       getRobotList(){
         let _this = this
         _this.ajax_api('get',url_api + '/robot',
@@ -306,10 +319,10 @@
                 }
                 oSel.append("<option value='" + id + "' bZero='false'>" + name + "</option>");
               });
-              showOPInfo(szIP + " 获取模拟通道成功！");
+              console.log(szIP + " 获取模拟通道成功！");
             },
             error: function () {
-              showOPInfo(szIP + " 获取模拟通道失败！");
+              console.log(szIP + " 获取模拟通道失败！");
             }
           });
           // 数字通道
@@ -330,10 +343,10 @@
                 }
                 oSel.append("<option value='" + id + "' bZero='false'>" + name + "</option>");
               });
-              showOPInfo(szIP + " 获取数字通道成功！");
+              console.log(szIP + " 获取数字通道成功！");
             },
             error: function () {
-              showOPInfo(szIP + " 获取数字通道失败！");
+              console.log(szIP + " 获取数字通道失败！");
             }
           });
           // 零通道
@@ -352,10 +365,10 @@
                   oSel.append("<option value='" + id + "' bZero='true'>" + name + "</option>");
                 }
               });
-              showOPInfo(szIP + " 获取零通道成功！");
+              console.log(szIP + " 获取零通道成功！");
             },
             error: function () {
-              showOPInfo(szIP + " 获取零通道失败！");
+              console.log(szIP + " 获取零通道失败！");
             }
           });
         }
@@ -363,7 +376,7 @@
       },
       clickStartRealPlay() {
         let _this = this
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
           szIP = _this.hkUrl,//$("#ip").val(),
           iStreamType = 1,//parseInt($("#streamtype").val(), 10),
           iChannelID = 1,//parseInt($("#channels").val(), 10),
@@ -409,7 +422,8 @@
       },
       //抓图
       clickCapturePic() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
         szInfo = "";
 
         if (oWndInfo != null) {
@@ -422,8 +436,8 @@
             szInfo = "抓图失败！";
           }
           console.log(oWndInfo.szIP + " " + szInfo);
-    }
-  },
+        }
+      },
       //录制声音
       clickVoice(){
       	let _this = this
@@ -468,11 +482,12 @@
       },
 
       PTZZoomIn() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex);
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex);
 
         if (oWndInfo != null) {
           WebVideoCtrl.I_PTZControl(10, false, {
-            iWndIndex: g_iWndIndex,
+            iWndIndex: _this.g_iWndIndex,
             success: function (xmlDoc) {
               console.log(oWndInfo.szIP + " 调焦+成功！");
             },
@@ -483,11 +498,12 @@
         }
       },
       PTZZoomout() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex);
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex);
 
         if (oWndInfo != null) {
           WebVideoCtrl.I_PTZControl(11, false, {
-            iWndIndex: g_iWndIndex,
+            iWndIndex: _this.g_iWndIndex,
             success: function (xmlDoc) {
               console.log(oWndInfo.szIP + " 调焦-成功！");
             },
@@ -498,11 +514,12 @@
         }
       },
       PTZZoomStop() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex);
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex);
 
         if (oWndInfo != null) {
           WebVideoCtrl.I_PTZControl(11, true, {
-            iWndIndex: g_iWndIndex,
+            iWndIndex: _this.g_iWndIndex,
             success: function (xmlDoc) {
               console.log(oWndInfo.szIP + " 调焦停止成功！");
             },
@@ -513,11 +530,12 @@
         }
       },
       PTZFocusIn() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex);
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex);
 
         if (oWndInfo != null) {
           WebVideoCtrl.I_PTZControl(12, false, {
-            iWndIndex: g_iWndIndex,
+            iWndIndex: _this.g_iWndIndex,
             success: function (xmlDoc) {
               console.log(oWndInfo.szIP + " 聚焦+成功！");
             },
@@ -528,11 +546,12 @@
         }
       },
       PTZFoucusOut() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex);
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex);
 
         if (oWndInfo != null) {
           WebVideoCtrl.I_PTZControl(13, false, {
-            iWndIndex: g_iWndIndex,
+            iWndIndex: _this.g_iWndIndex,
             success: function (xmlDoc) {
               console.log(oWndInfo.szIP + " 聚焦-成功！");
             },
@@ -543,11 +562,12 @@
         }
       },
       PTZFoucusStop() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex);
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex);
 
         if (oWndInfo != null) {
           WebVideoCtrl.I_PTZControl(12, true, {
-            iWndIndex: g_iWndIndex,
+            iWndIndex: _this.g_iWndIndex,
             success: function (xmlDoc) {
               console.log(oWndInfo.szIP + " 聚焦停止成功！");
             },
@@ -560,7 +580,8 @@
 
       // 打开声音
       clickOpenSound() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
         szInfo = "";
 
         if (oWndInfo != null) {
@@ -586,7 +607,8 @@
       },
       // 关闭声音
       clickCloseSound() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
           szInfo = "";
 
         if (oWndInfo != null) {
@@ -601,7 +623,8 @@
       },
       // 开始录像
       clickStartRecord() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
             szInfo = "";
 
         if (oWndInfo != null) {
@@ -618,7 +641,8 @@
       },
       // 停止录像
       clickStopRecord() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
           szInfo = "";
 
         if (oWndInfo != null) {
@@ -633,7 +657,8 @@
       },
       // 开始回放
       clickStartPlayback() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
         szIP = $("#ip").val(),
         bZeroChannel = $("#channels option").eq($("#channels").get(0).selectedIndex).attr("bZero") == "true" ? true : false,
         iChannelID = $("#channels").val()
@@ -687,7 +712,8 @@
       },
       // 停止回放
       clickStopPlayback() {
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        var _this = this
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
           szInfo = "";
 
         if (oWndInfo != null) {
@@ -725,7 +751,7 @@
       // PTZ控制 9为自动，1,2,3,4,5,6,7,8为方向PTZ
       mouseDownPTZControl(iPTZIndex) {
       	var _this = this
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
           bZeroChannel = $("#channels option").eq($("#channels").get(0).selectedIndex).attr("bZero") == "true" ? true : false,
           iPTZSpeed = 4,
           bStop = false;
@@ -758,15 +784,104 @@
         }
       },
 
+      //车体控制
+      carBodyC(n){
+          let _this = this
+          //let time_id
+          /*let _this = this
+          var ros = new ROSLIB.Ros({
+              url : _this.url
+          });
+          //console.log(ros)
+          ros.on('connection', function() {
+              console.log('car body');
+          });
+
+          _this.listener = new ROSLIB.Topic({
+              ros : ros,
+              name : '/navigation/cmd_vel',
+              messageType : 'geometry_msgs/Twist'
+          });*/
+          let x, z
+          //window.clearInterval(_this.time_id)
+          switch (n) {
+              case 1:
+                  x = 0.1
+                  z = 0
+                  _this.time_id = window.setInterval(function () {
+                      //console.log(x)
+                      _this.listener.publish(twist);
+                  },1000)
+                  break
+              case 2:
+                  x = 0
+                  z = -0.024
+                  _this.time_id = window.setInterval(function () {
+                      //console.log(x)
+                      _this.listener.publish(twist);
+                  },1000)
+                  break
+              case 3:
+                  x = -0.1
+                  z = 0
+                  _this.time_id = window.setInterval(function () {
+                      //console.log(x)
+                      _this.listener.publish(twist);
+                  },1000)
+                  break
+              case 4:
+                  x = 0
+                  z = 0.024
+                  _this.time_id = window.setInterval(function () {
+                      //console.log(x)
+                      _this.listener.publish(twist);
+                  },1000)
+                  break
+              case 5:
+                  x = 0
+                  z = 0
+                  console.log('stop')
+                  window.clearInterval(_this.time_id)
+                  break
+          }
+
+          var twist = new ROSLIB.Message({
+              linear : {
+                  x : x,
+                  y : 0,
+                  z : 0
+              },
+              angular : {
+                  x : 0,
+                  y : 0,
+                  z : z
+              }
+          });
+
+          //_this.listener.publish(twist);
+
+
+      },
+
+        //视频窗口按钮
+        play_but(){
+            var video_w = $('.play_video').parent().width()
+            var video_h = $('.play_video').parent().height()
+            var margin = (video_h/2-30) + 'px ' + (video_w/2-30) + 'px'
+            //console.log(margin)
+            $('.play_video').css({'margin':margin})
+        },
+
     },
     mounted() {
       let _this = this
+        _this.play_but()
       // 初始化插件参数及插入插件
       WebVideoCtrl.I_InitPlugin('100%', '100%', {
         iWndowType: 1,
         cbSelWnd: function (xmlDoc) {
-          let g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
-          var szInfo = "当前选择的窗口编号：" + g_iWndIndex;
+          _this.g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
+          var szInfo = "当前选择的窗口编号：" + _this.g_iWndIndex;
           console.log(szInfo);
         }
       });
@@ -792,6 +907,127 @@
       }else {
         _this.getRobotList()
       }
+
+      var ros = new ROSLIB.Ros({
+          url : _this.url
+      });
+      //console.log(ros)
+      ros.on('connection', function() {
+          console.log('car body');
+      });
+
+      _this.listener = new ROSLIB.Topic({
+          ros : ros,
+          name : '/navigation/cmd_vel',
+          messageType : 'geometry_msgs/Twist'
+      });
+
+      var x, z
+
+      $(document).keydown(function(event){
+
+          if(event.keyCode === 87){
+              x = 0.1
+              z = 0
+              var twist = new ROSLIB.Message({
+                  linear : {
+                      x : x,
+                      y : 0,
+                      z : 0
+                  },
+                  angular : {
+                      x : 0,
+                      y : 0,
+                      z : z
+                  }
+              });
+              window.clearInterval(_this.time_id_key)
+              _this.time_id_key = window.setInterval(function () {
+                  //console.log('a')
+                  _this.listener.publish(twist);
+              },1000)
+          }
+          if(event.keyCode === 68){
+              x = 0
+              z = -0.05
+              var twist = new ROSLIB.Message({
+                  linear : {
+                      x : x,
+                      y : 0,
+                      z : 0
+                  },
+                  angular : {
+                      x : 0,
+                      y : 0,
+                      z : z
+                  }
+              });
+              window.clearInterval(_this.time_id_key)
+              _this.time_id_key = window.setInterval(function () {
+                  //console.log('a')
+                  _this.listener.publish(twist);
+              },1000)
+          }
+          if(event.keyCode === 83){
+              x = -0.1
+              z = 0
+              var twist = new ROSLIB.Message({
+                  linear : {
+                      x : x,
+                      y : 0,
+                      z : 0
+                  },
+                  angular : {
+                      x : 0,
+                      y : 0,
+                      z : z
+                  }
+              });
+              window.clearInterval(_this.time_id_key)
+              _this.time_id_key = window.setInterval(function () {
+                  //console.log('a')
+                  _this.listener.publish(twist);
+              },1000)
+          }
+          if(event.keyCode === 65){
+              x = 0
+              z = 0.05
+              var twist = new ROSLIB.Message({
+                  linear : {
+                      x : x,
+                      y : 0,
+                      z : 0
+                  },
+                  angular : {
+                      x : 0,
+                      y : 0,
+                      z : z
+                  }
+              });
+              window.clearInterval(_this.time_id_key)
+              _this.time_id_key = window.setInterval(function () {
+                  //console.log('a')
+                  _this.listener.publish(twist);
+              },1000)
+          }
+      });
+      $(document).keyup(function(event){
+          if(event.keyCode === 87){
+              console.log('stop_key')
+              window.clearInterval(_this.time_id_key)
+          }
+          if(event.keyCode === 68){
+              window.clearInterval(_this.time_id_key)
+          }
+          if(event.keyCode === 83){
+              window.clearInterval(_this.time_id_key)
+          }
+          if(event.keyCode === 65){
+              window.clearInterval(_this.time_id_key)
+          }
+      });
+
+
     },
     beforeRouteLeave(to, form, next) {
       next()
@@ -1147,4 +1383,19 @@
 
 
 
+      .right_top
+        height 50%
+        border 1px solid
+        /*position relative*/
+        visibility visible
+        .play_video
+          width 60px
+          height 60px
+          position absolute
+          z-index 99999
+          background #343434
+          /*cursor pointer*/
+          img
+            width 100%
+            height 100%
 </style>

@@ -7,9 +7,9 @@
         <div class="left_content">
           <p>运行状态信息</p>
           <div class="yunxing_info">
-            <div><p>机身温度: <span>{{body_wendu}}</span></p></div>
+            <div><p>机身温度: <span>{{body_wendu}} ℃</span></p></div>
             <div><p>云台水平位置: <span>{{yun_x}}</span></p></div>
-            <div><p>运行速度: <span>{{body_speed}}</span></p></div>
+            <div><p>运行速度: <span>{{body_speed}} m/s</span></p></div>
             <div><p>云台垂直位置: <span>{{yun_y}}</span></p></div>
             <div><p>相机倍数: <span>{{zoom}}</span></p></div>
           </div>
@@ -23,7 +23,8 @@
           </div>
           <p>电池状态信息</p>
           <div class="dian_info">
-            <div><p>当前电池电量: <span>0</span></p></div>
+            <span>电压{{dianya}}V</span>
+            <div><p>当前电池电量: <span>{{power}} %</span></p></div>
           </div>
           <p>机器人自身模块信息</p>
           <div class="mokuai_info">
@@ -185,11 +186,16 @@
         temperature:0,
         humidity:0,
         wind_speed:0,
+        power:'',
+        dianya:0,
+        url:'ws://192.168.1.10:9090',
       }
     },
     mounted(){
       this.init()
       this.weather()
+      this. power_now()
+      this.speed_now()
     },
     methods:{
     	init(){
@@ -201,13 +207,13 @@
 
             _this.yun_x = 1
             _this.yun_y = 1
-            _this.body_speed = 1
+            //_this.body_speed = 1
           })
       },
       weather(){
         let _this = this
         var ros = new ROSLIB.Ros({
-          url : 'ws://192.168.1.78:9090'
+          url : _this.url
         });
         //console.log(ros)
         ros.on('connection', function() {
@@ -228,6 +234,51 @@
           _this.wind_speed = message.wind_speed
         });
       },
+      power_now(){
+        let _this = this
+        var ros = new ROSLIB.Ros({
+            url : _this.url
+        });
+        //console.log(ros)
+        ros.on('connection', function() {
+            console.log('power server.');
+        });
+
+        _this.listener = new ROSLIB.Topic({
+            ros : ros,
+            name : '/car_status_now',
+            messageType : 'yidamsg/nrcar_status'
+        });
+
+        _this.listener.subscribe(function(message) {
+            //console.log(message);
+            //_this.listener.unsubscribe();
+            _this.power = message.battery_info
+            _this.body_wendu = message.incar_temperature
+            _this.dianya = message.battery_voltage
+        });
+      },
+      speed_now(){
+            let _this = this
+            var ros = new ROSLIB.Ros({
+                url : _this.url
+            });
+            //console.log(ros)
+            ros.on('connection', function() {
+                console.log('speed server.');
+            });
+
+            _this.listener = new ROSLIB.Topic({
+                ros : ros,
+                name : '/cmd_vel',
+                messageType : 'geometry_msgs/Twist'
+            });
+
+            _this.listener.subscribe(function(message) {
+                console.log(message.linear.x);
+                _this.body_speed = message.linear.x
+            });
+        },
     },
     components: {
       HeaderTop,

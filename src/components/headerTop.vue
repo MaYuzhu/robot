@@ -484,7 +484,7 @@
       //报警数显示
       countAlarmShow(){
         let _this = this
-        _this.countAlarm = 2
+        _this.countAlarm = 0
       },
       wordDetail(){
 

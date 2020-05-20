@@ -83,6 +83,7 @@
         this.findNewTree(target)
       });
       this.$root.eventHub.$on('editTaskDbl',(target) => {
+        console.log(target)
         this.editTaskId(target)
       });
     },

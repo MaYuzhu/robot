@@ -30,7 +30,7 @@
         <div id="divPlugin" style="width: 100%;height: 100%;"></div>
       </div>
       <div class="right_bottom" id="container_red" @dblclick="showFull">
-        <Button @click="red_pic">红外测试</Button>
+        <Button @click="red_pic">红外</Button>
         <img id="chatterMessage" :src="src" style="width: 100%;height: 100%" alt="">
       </div>
     </div>
@@ -66,7 +66,7 @@
         hkUrl:'192.168.1.13',
         robotId:'',
         taskInfo:{},
-
+        g_iWndIndex:null,
       }
     },
     mounted() {
@@ -77,8 +77,8 @@
       WebVideoCtrl.I_InitPlugin('100%', '100%', {
         iWndowType: 1,
         cbSelWnd: function (xmlDoc) {
-          let g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
-          var szInfo = "当前选择的窗口编号：" + g_iWndIndex;
+          _this.g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
+          var szInfo = "当前选择的窗口编号：" + _this.g_iWndIndex;
           console.log(szInfo);
         }
       });
@@ -118,26 +118,25 @@
 
         _this.listener = new ROSLIB.Topic({
           ros : ros,
-          /*name : '/thermal/image_proc/compressed',// /thermal/image_proc/compressed
-          messageType : 'sensor_msgs/CompressedImage', // sensor_msgs::CompressedImage*/
-          name : '/navigation/cmd_vel',// /thermal/image_proc/compressed
-          messageType : 'geometry_msgs/Twist' // sensor_msgs::CompressedImage
+          name : '/thermal/image_proc/compressed',// /thermal/image_proc/compressed
+          messageType : 'sensor_msgs/CompressedImage', // sensor_msgs::CompressedImage
+          /*name : '/navigation/cmd_vel',// /thermal/image_proc/compressed
+          messageType : 'geometry_msgs/Twist' // sensor_msgs::CompressedImage*/
 
         });
 
-        /*_this.listener.subscribe(function(message) {
-          console.log('Received message on ' +': ' + message.data);
+        _this.listener.subscribe(function(message) {
+          //console.log('Received message on ' +': ' + message.data);
           var  url = "data:image/png;base64,";
           var i = message.data
           _this.src = url+ i
           setTimeout(function () {
-
             $("#chatterMessage").src = _this.src
           },1000)
 
           //_this.listener.unsubscribe();
-        });*/
-        var twist = new ROSLIB.Message({
+        });
+        /*var twist = new ROSLIB.Message({
           linear : {
             x : 2.0,
             y : 1.0,
@@ -149,7 +148,7 @@
             z : 6.0
           }
         });
-        _this.listener.publish(twist);
+        _this.listener.publish(twist);*/
       },
       test_aaa(){
         let _this = this
@@ -221,7 +220,7 @@
         };
 
       },
-      reconnect() {
+      /*reconnect() {
         if (this.lockReconnect) {
           return;
         }
@@ -232,7 +231,7 @@
           this.lockReconnect = false;
           this.createWebSocket(this.wsCfg.url);
         }, 5000);
-      },
+      },*/
       test() {
         // 给服务器发送一个字符串:
         // ws.send("Hello!");
@@ -242,11 +241,10 @@
       //可见光
       test_login(){
       	let _this = this
-
+        $('.play_video').hide()
         var iRet = WebVideoCtrl.I_Login(_this.hkUrl, 1, 80, 'admin', '1234asdf', {
             success: function (xmlDoc) {
               console.log(" 登录成功！");
-
               /*$("#ip").prepend("<option value='" + szIP + "'>" + szIP + "</option>");
               setTimeout(function () {
                 $("#ip").val(szIP);
@@ -267,7 +265,7 @@
       },
       clickStartRealPlay() {
         let _this = this
-        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+        var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
         szIP = _this.hkUrl,//$("#ip").val(),
         iStreamType = 1,//parseInt($("#streamtype").val(), 10),
         iChannelID = 1,//parseInt($("#channels").val(), 10),

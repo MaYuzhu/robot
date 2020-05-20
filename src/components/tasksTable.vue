@@ -348,6 +348,8 @@
         value_time_huizong2:'',
         irProjTaskId:'',
         templateShow:true,
+        url:'ws://192.168.1.10:9090',
+        taskServer:null,
       }
     },
 
@@ -394,8 +396,10 @@
       },
 
       handleClickGo(row) {
+        let _this = this
         //console.log(row);
-        this.dialogVisible = true
+        _this.dialogVisible = true
+        _this.irProjTaskId = row.id
       },
       //定期执行
       fixDate(row){
@@ -643,12 +647,12 @@
         let _this = this  //GET /ui/task/{id}/editStatus
         _this.ajax_api('get',url_api + '/task/'+ row.id +'/editStatus',{},true,function (res) {
           //console.log(res.data)
-          if(!res.data.editStatus){
+          /*if(!res.data.editStatus){
             _this.$message({
               message: '该任务不可编辑',
             });
             return
-          }
+          }*/
           _this.$root.eventHub.$emit('editTaskDbl', row.id);
         })
 
@@ -673,7 +677,126 @@
       atOnce(){
       	let _this = this
         _this.dialogVisible = false
+        /*var linePlan = {
+            "InspectId":"1",
+            "Tasks":[
+                {
+                    "Align":"middle",
+                    "IsAnterograde":false,
+                    "Status":"0",
+                    "TLoc":"0.386;6.807;-1.854",
+                    "TLocType":"start",
+                    "TLocWidth":5,
+                    "TurnAngle":0
+                },
+                {
+                    "Align":"middle",
+                    "CameraPose":"2:1/0.649,-3.534,9.054,50.0,50.0,1,4,down,0.0,0.0,0.0,0.0,0,0.0/1/783",
+                    "Id":"1002",
+                    "IsAnterograde":false,
+                    "Status":"0",
+                    "TLoc":"0.386;7.457;-1.854",
+                    "TLocType":"transfer",
+                    "TLocWidth":5,
+                    "TurnAngle":0
+                },
+                {
+                    "Align":"middle",
+                    "Id":"4",
+                    "IsAnterograde":false,
+                    "Status":"0",
+                    "TLoc":"-0.424;6.806;-1.691",
+                    "TLocType":"end",
+                    "TLocWidth":5,
+                    "TurnAngle":92
+                }
+            ]
+        }
+        var linePlanStr = JSON.stringify(linePlan)
+        var linePlanObj = JSON.parse(linePlanStr)
+        var lineArr = []
+        if(lineArr.length>0){
+          lineArr = []
+        }
+        for(var i=0;i<linePlanObj.Tasks.length;i++){
+            var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
+            var point = [pointArr[0],pointArr[1]]
+            lineArr.push(point)
+        }
+        _this.$root.eventHub.$emit('planLine', lineArr);*/
+        //  /ui/task/{id}/execute
+        // 查看可否执行  /ui/task/{id}/execut-status
+        console.log(this.irProjTaskId)
+        /*_this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId+'/execut-status',
+            null,true,function (res) {
+                //console.log(res)
+            })
+        _this.ajax_api('post',url_api + '/task/'+ _this.irProjTaskId+'/execute',
+            {
+                "cumulativeRunTime": 0,
+                "hum": 0,
+                "irBaseRobotId": 1,
+                "irProjTaskId": _this.irProjTaskId,
+                "taskEndTime": "2020-05-18 17:25:44",
+                "taskStartTime": "2020-05-18 11:25:44",
+                "taskStatus": "3",
+                "wind": 0
+            },true,function (res) {
+                //console.log(11)
+            })*/
+          _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
+              {},true,function (res) {
+                  console.log(res.data.path)
+                  //取到计划线路的点
+                  if(!res.data.path){
+                      console.log(res.data.path)
+                      return
+                  }
+                  var linePlanObj = JSON.parse(res.data.path)
+                  var lineArr = []
+                  if(lineArr.length>0){
+                      lineArr = []
+                  }
+                  for(var i=0;i<linePlanObj.Tasks.length;i++){
+                      var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
+                      var point = [pointArr[0]*1,pointArr[2]*1]
+                      lineArr.push(point)
+                  }
+                  planLinePointArr = lineArr
+                  var ros = new ROSLIB.Ros({
+                      url : _this.url
+                  });
+                  //console.log(ros)
+                  ros.on('connection', function() {
+                      console.log('任务.');
+                  });
+
+                  _this.taskServer = new ROSLIB.Service({
+                      ros : ros,
+                      name : '/tasklist',
+                      serviceType : 'yidamsg/TaskList'
+                  });
+                  _this.taskServerClear = new ROSLIB.Service({
+                      ros : ros,
+                      name : '/taskclear',
+                      serviceType : 'yidamsg/TaskList'
+                  });
+                  _this.taskServerClear.callService({flag:0},function(result) {
+                      console.log('Clear');
+                      var request = new ROSLIB.ServiceRequest({
+                          plan : res.data.path,
+                          //plan : JSON.stringify(aa),
+                      });
+
+                      _this.taskServer.callService(request, function(result) {
+                          console.log(result);
+                      });
+                  })
+
+              })
       },
+
+
 
       //时间格式转换
       getTimeMy(time){
