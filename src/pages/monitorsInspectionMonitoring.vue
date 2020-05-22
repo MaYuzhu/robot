@@ -7,7 +7,7 @@
           <XunjianContent :taskInfo="taskInfo"></XunjianContent>
         </div>
         <div class="taskControl_wrap">
-          <taskControl></taskControl>
+          <taskControl @isVideo="isVideo"></taskControl>
         </div>
 
       </div>
@@ -16,17 +16,18 @@
           <div @click="test_login" class="play_video">
             <img src="../../static/img/play.png" alt="">
           </div>
-          <div id="divPlugin" style="width: 100%;height: 100%;"></div>
+          <div id="divPlugin" style="width: 100%;height: 100%;background:#343434"></div>
         </div>
         <div class="right_bottom" id="container_red" @dblclick="showFull">
-          <Button @click="red_pic">红外</Button>
+          <Button class="red_pic_but" @click="red_pic">红外</Button>
           <img id="chatterMessage" :src="src" style="width: 100%;height: 100%" alt="">
         </div>
       </div>
     </div>
 
-
-    <TabsBottom class="tabs_bottom"></TabsBottom>
+    <div class="tabs_bottom">
+      <TabsBottom @isVideo="isVideo"></TabsBottom>
+    </div>
     <menuBottom></menuBottom>
   </div>
 </template>
@@ -44,10 +45,10 @@
         title:'巡检监控 > 巡检监控',
         taskInfo:{},
         robotId:'',
-        hkUrl:'192.168.1.13',
+        hkUrl:hKUrl,
         src:'',
         listener:null,
-        url:'ws://192.168.1.10:9090',
+        url:robotUrl,
         g_iWndIndex:null,
       }
     },
@@ -69,7 +70,7 @@
                 console.log(szInfo);
             }
         });
-        WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
+
         // 窗口事件绑定
         $(window).bind({
             resize: function () {
@@ -128,6 +129,7 @@
       },
 
       red_pic(){
+          $('.red_pic_but').hide()
             let _this = this
             var ros = new ROSLIB.Ros({
                 url : _this.url
@@ -160,133 +162,134 @@
 
       },
 
-        //可见光
-        test_login(){
-            let _this = this
-            $('.play_video').hide()
-            var iRet = WebVideoCtrl.I_Login(_this.hkUrl, 1, 80, 'admin', '1234asdf', {
-                success: function (xmlDoc) {
-                    console.log(" 登录成功！");
-                    /*$("#ip").prepend("<option value='" + szIP + "'>" + szIP + "</option>");
-                    setTimeout(function () {
-                      $("#ip").val(szIP);
-                      getChannelInfo();
-                    }, 100);*/
-                    _this.clickStartRealPlay()
+      //可见光
+      test_login(){
+          let _this = this
+          $('.play_video').hide()
+          WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin")
+          var iRet = WebVideoCtrl.I_Login(_this.hkUrl, 1, 80, 'admin', '1234asdf', {
+              success: function (xmlDoc) {
+                  console.log(" 登录成功！");
+                  /*$("#ip").prepend("<option value='" + szIP + "'>" + szIP + "</option>");
+                  setTimeout(function () {
+                    $("#ip").val(szIP);
+                    getChannelInfo();
+                  }, 100);*/
+                  _this.clickStartRealPlay()
 
-                },
-                error: function () {
-                    console.log(" 登录失败！");
-                }
-            });
-            if (-1 == iRet) {
-                _this.clickStartRealPlay()
-            }
+              },
+              error: function () {
+                  console.log(" 登录失败！");
+              }
+          });
+          if (-1 == iRet) {
+              _this.clickStartRealPlay()
+          }
 
 
-        },
-        clickStartRealPlay() {
-            let _this = this
-            var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
-                szIP = _this.hkUrl,//$("#ip").val(),
-                iStreamType = 1,//parseInt($("#streamtype").val(), 10),
-                iChannelID = 1,//parseInt($("#channels").val(), 10),
-                bZeroChannel = false,//$("#channels option").eq($("#channels").get(0).selectedIndex).attr("bZero") == "true" ? true : false,
-                szInfo = "";
+      },
+      clickStartRealPlay() {
+          let _this = this
+          var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
+              szIP = _this.hkUrl,//$("#ip").val(),
+              iStreamType = 1,//parseInt($("#streamtype").val(), 10),
+              iChannelID = 1,//parseInt($("#channels").val(), 10),
+              bZeroChannel = false,//$("#channels option").eq($("#channels").get(0).selectedIndex).attr("bZero") == "true" ? true : false,
+              szInfo = "";
 
-            if ("" == szIP) {
-                return;
-            }
+          if ("" == szIP) {
+              return;
+          }
 
-            if (oWndInfo != null) {// 已经在播放了，先停止
-                WebVideoCtrl.I_Stop();
-                console.log('已经在播放了，先停止');
-            }
+          if (oWndInfo != null) {// 已经在播放了，先停止
+              WebVideoCtrl.I_Stop();
+              console.log('已经在播放了，先停止');
+          }
 
-            var iRet = WebVideoCtrl.I_StartRealPlay(szIP, {
-                iStreamType: iStreamType,
-                iChannelID: iChannelID,
-                bZeroChannel: bZeroChannel
-            });
+          var iRet = WebVideoCtrl.I_StartRealPlay(szIP, {
+              iStreamType: iStreamType,
+              iChannelID: iChannelID,
+              bZeroChannel: bZeroChannel
+          });
 
-            if (0 == iRet) {
-                szInfo = "开始预览成功！";
-            } else {
-                szInfo = "开始预览失败！";
-            }
+          if (0 == iRet) {
+              szInfo = "开始预览成功！";
+          } else {
+              szInfo = "开始预览失败！";
+          }
 
-            console.log(szIP + " " + szInfo);
-        },
-        // 获取窗口尺寸
-        getWindowSize() {
-            var nWidth = $(this).width() + $(this).scrollLeft(),
-                nHeight = $(this).height() + $(this).scrollTop();
+          console.log(szIP + " " + szInfo);
+      },
+      // 获取窗口尺寸
+      getWindowSize() {
+          var nWidth = $(this).width() + $(this).scrollLeft(),
+              nHeight = $(this).height() + $(this).scrollTop();
 
-            return {width: nWidth, height: nHeight};
-        },
-        bigDiv(){
-            clickFullScreen()
-            // 全屏
-            function clickFullScreen() {
-                WebVideoCtrl.I_FullScreen(true);
-            }
-        },
+          return {width: nWidth, height: nHeight};
+      },
+      bigDiv(){
+          clickFullScreen()
+          // 全屏
+          function clickFullScreen() {
+              WebVideoCtrl.I_FullScreen(true);
+          }
+      },
 
-        changeId(val){
-            let _this = this
-            //console.log(val)
-            robotIdCurrent = _this.robotId
-            _this.getTaskInfo()
-        },
+      changeId(val){
+          let _this = this
+          //console.log(val)
+          robotIdCurrent = _this.robotId
+          _this.getTaskInfo()
+      },
 
-        //视频窗口隐藏
-        isVideo(val){
-            //console.log(val)
-            if(!val){
-                $('.right_top').css({'visibility': 'hidden'})
-            }else {
-                $('.right_top').css({'visibility': 'visible'})
-            }
+      //视频窗口隐藏
+      isVideo(val){
+          //console.log(val)
+          if(!val){
+              $('.right_top').css({'visibility': 'hidden'})
+          }else {
+              $('.right_top').css({'visibility': 'visible'})
+          }
 
-        },
+      },
 
-        //红外全屏
-        showFull(){
-            var full=document.getElementById("container_red");
-            this.launchIntoFullscreen(full);
-        },
-        launchIntoFullscreen(element) {
-            if(element.requestFullscreen){
-                element.requestFullscreen();
-            }
-            else if(element.mozRequestFullScreen) {
-                element.mozRequestFullScreen();
-            }
-            else if(element.webkitRequestFullscreen) {
-                element.webkitRequestFullscreen();
-            }
-            else if(element.msRequestFullscreen) {
-                element.msRequestFullscreen();
-            }
-        },
-        //退出全屏
-        exitFullscreen() {
-            if(document.exitFullscreen) {
-                document.exitFullscreen();
-            } else if(document.mozCancelFullScreen) {
-                document.mozCancelFullScreen();
-            } else if(document.webkitExitFullscreen) {
-                document.webkitExitFullscreen();
-            }
-        },
-        //视频窗口按钮
-        play_but(){
-            var video_w = $('.play_video').parent().width()
-            var video_h = $('.play_video').parent().height()
-            var margin = (video_h/2-30) + 'px ' + (video_w/2-30) + 'px'
-            //console.log(margin)
-            $('.play_video').css({'margin':margin})
-        },
+      //红外全屏
+      showFull(){
+          var full=document.getElementById("container_red");
+          this.launchIntoFullscreen(full);
+      },
+      launchIntoFullscreen(element) {
+          if(element.requestFullscreen){
+              element.requestFullscreen();
+          }
+          else if(element.mozRequestFullScreen) {
+              element.mozRequestFullScreen();
+          }
+          else if(element.webkitRequestFullscreen) {
+              element.webkitRequestFullscreen();
+          }
+          else if(element.msRequestFullscreen) {
+              element.msRequestFullscreen();
+          }
+      },
+      //退出全屏
+      exitFullscreen() {
+          if(document.exitFullscreen) {
+              document.exitFullscreen();
+          } else if(document.mozCancelFullScreen) {
+              document.mozCancelFullScreen();
+          } else if(document.webkitExitFullscreen) {
+              document.webkitExitFullscreen();
+          }
+      },
+      //视频窗口按钮
+      play_but(){
+          var video_w = $('.play_video').parent().width()
+          var video_h = $('.play_video').parent().height()
+          var margin = (video_h/2-30) + 'px ' + (video_w/2-30) + 'px'
+          //console.log(margin)
+          $('.play_video').css({'margin':margin})
+      },
     },
     beforeRouteLeave(to, form, next) {
         next()

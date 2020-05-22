@@ -41,7 +41,7 @@
                       <router-link to="/robots/robot-management">机器人管理</router-link>
                       <span>|</span>
                     </div>
-                    <div>
+                    <div v-if="false">
                       <router-link to="/robots/add-task">创建任务</router-link>
                       <span>|</span>
                     </div>

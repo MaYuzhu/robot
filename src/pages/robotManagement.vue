@@ -19,7 +19,9 @@
       </div>
       <taskControl @isVideo="isVideo" class="task_map"></taskControl>
     </div>
-
+<div v-if="false">
+  <iframe src="../../static/hkVedio/hkvedio.html" width="500" height="300" frameborder="0"></iframe>
+</div>
     <div class="right" style="width: 35%">
       <div class="right_top" @dblclick="bigDiv">
         <!--<Button @click="test_ie">IE9</Button>-->
@@ -27,15 +29,18 @@
         <div @click="test_login" class="play_video">
           <img src="../../static/img/play.png" alt="">
         </div>
-        <div id="divPlugin" style="width: 100%;height: 100%;"></div>
+        <div id="divPlugin" style="width: 100%;height: 100%;background:#343434"></div>
       </div>
       <div class="right_bottom" id="container_red" @dblclick="showFull">
-        <Button @click="red_pic">红外</Button>
+        <Button class="red_pic_but" @click="red_pic">红外</Button>
         <img id="chatterMessage" :src="src" style="width: 100%;height: 100%" alt="">
       </div>
     </div>
 
-    <TabsBottom class="tabs_bottom"></TabsBottom>
+    <div class="tabs_bottom">
+      <TabsBottom @isVideo="isVideo"></TabsBottom>
+    </div>
+
     <menuBottom></menuBottom>
 	</div>
 </template>
@@ -55,7 +60,7 @@
       	title:'机器人管理 > 机器人管理',
         options: [],
         value: '',
-
+        url:robotUrl,
         lockReconnect: false,
         wsCfg: {
           // websocket地址
@@ -63,7 +68,7 @@
         },
         src:'',
         listener:null,
-        hkUrl:'192.168.1.13',
+        hkUrl:hKUrl,
         robotId:'',
         taskInfo:{},
         g_iWndIndex:null,
@@ -82,7 +87,7 @@
           console.log(szInfo);
         }
       });
-      WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
+      //WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
       // 窗口事件绑定
       $(window).bind({
         resize: function () {
@@ -107,9 +112,10 @@
     },
     methods: {
     	red_pic(){
+        $('.red_pic_but').hide()
     		let _this = this
         var ros = new ROSLIB.Ros({
-          url : 'ws://192.168.1.10:9090'
+          url : _this.url
         });
     		//console.log(ros)
         /*ros.on('connection', function() {
@@ -242,6 +248,7 @@
       test_login(){
       	let _this = this
         $('.play_video').hide()
+        WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
         var iRet = WebVideoCtrl.I_Login(_this.hkUrl, 1, 80, 'admin', '1234asdf', {
             success: function (xmlDoc) {
               console.log(" 登录成功！");
@@ -329,7 +336,7 @@
           null,
           true,function (res) {
             if(res.code == 200){
-            	//console.log(res)
+            	console.log(res)
               _this.taskInfo = {
             		name:res.data.taskName,
                 taskStatus:res.data.taskStatus,
@@ -366,7 +373,7 @@
 
       //红外全屏
       showFull(){
-        var full=document.getElementById("container_red");
+        var full = document.getElementById("container_red");
         this.launchIntoFullscreen(full);
       },
       launchIntoFullscreen(element) {
@@ -383,6 +390,8 @@
           element.msRequestFullscreen();
         }
       },
+
+
       //退出全屏
       exitFullscreen() {
         if(document.exitFullscreen) {
@@ -444,7 +453,7 @@
       .right_top
         height 50%
         border 1px solid
-        /*position relative*/
+        position relative
         visibility visible
         .play_video
           width 60px

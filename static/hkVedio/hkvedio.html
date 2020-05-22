@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Cache-Control" content="no-cache, must-revalidate" />
+    <meta http-equiv="Expires" content="0" />
+    <script src="../js/webVideoCtrl.js"></script>
+    <script src="../js/jquery-1.11.3.min.js"></script>
+</head>
+<body>
+  <div class="right_top" @dblclick="bigDiv">
+    <!--<Button @click="test_ie">IE9</Button>-->
+    <!--<Button @click="test_login" style="position:absolute;z-index:99999">可见光</Button>-->
+    <div class="play_video">
+      <img src="../img/play.png" alt="">
+    </div>
+    <div id="divPlugin" style="width: 100%;height: 100%;"></div>
+  </div>
+</body>
+<script>
+  $(function () {
+      let _this = this
+      var hkUrl = '192.168.1.13'
+      var g_iWndIndex = null
+      play_but()
+      // 初始化插件参数及插入插件
+      WebVideoCtrl.I_InitPlugin('100%', '100%', {
+          iWndowType: 1,
+          cbSelWnd: function (xmlDoc) {
+              g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
+              var szInfo = "当前选择的窗口编号：" + g_iWndIndex;
+              console.log(szInfo);
+          }
+      });
+      WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
+      // 窗口事件绑定
+      $(window).bind({
+          resize: function () {
+              var $Restart = $("#restartDiv");
+              if ($Restart.length > 0) {
+                  var oSize = _this.getWindowSize();
+                  $Restart.css({
+                      width: oSize.width + "px",
+                      height: oSize.height + "px"
+                  });
+              }
+          }
+      });
+      $(window).resize(function() {
+          // 变化后需要做的事
+          play_but()
+      })
+      $('.play_video').on('click',function () {
+          test_login()
+      })
+      //视频窗口按钮
+      function play_but(){
+          var video_w = $('.play_video').parent().width()
+          var video_h = $('.play_video').parent().height()
+          var margin = (video_h/2-30) + 'px ' + (video_w/2-30) + 'px'
+          //console.log(margin)
+          $('.play_video').css({'margin':margin})
+      }
+      // 获取窗口尺寸
+      function getWindowSize() {
+          var nWidth = $(this).width() + $(this).scrollLeft(),
+              nHeight = $(this).height() + $(this).scrollTop();
+
+          return {width: nWidth, height: nHeight};
+      }
+      //可见光
+      function test_login(){
+          let _this = this
+          $('.play_video').hide()
+          var iRet = WebVideoCtrl.I_Login(hkUrl, 1, 80, 'admin', '1234asdf', {
+              success: function (xmlDoc) {
+                  console.log(" 登录成功！");
+                  /*$("#ip").prepend("<option value='" + szIP + "'>" + szIP + "</option>");
+                  setTimeout(function () {
+                    $("#ip").val(szIP);
+                    getChannelInfo();
+                  }, 100);*/
+                  clickStartRealPlay()
+
+              },
+              error: function () {
+                  console.log(" 登录失败！");
+              }
+          });
+          if (-1 == iRet) {
+              clickStartRealPlay()
+          }
+
+
+      }
+      function clickStartRealPlay() {
+          let _this = this
+          var oWndInfo = WebVideoCtrl.I_GetWindowStatus(g_iWndIndex),
+              szIP = hkUrl,//$("#ip").val(),
+              iStreamType = 1,//parseInt($("#streamtype").val(), 10),
+              iChannelID = 1,//parseInt($("#channels").val(), 10),
+              bZeroChannel = false,//$("#channels option").eq($("#channels").get(0).selectedIndex).attr("bZero") == "true" ? true : false,
+              szInfo = "";
+
+          if ("" == szIP) {
+              return;
+          }
+
+          if (oWndInfo != null) {// 已经在播放了，先停止
+              WebVideoCtrl.I_Stop();
+              console.log('已经在播放了，先停止');
+          }
+
+          var iRet = WebVideoCtrl.I_StartRealPlay(szIP, {
+              iStreamType: iStreamType,
+              iChannelID: iChannelID,
+              bZeroChannel: bZeroChannel
+          });
+
+          if (0 == iRet) {
+              szInfo = "开始预览成功！";
+          } else {
+              szInfo = "开始预览失败！";
+          }
+
+          console.log(szIP + " " + szInfo);
+      }
+  })
+</script>
+</html>

@@ -4,7 +4,9 @@
     <div style="display: flex" class="center_box">
       <div style="width: 60%;float: left">
         <XunjianContent :taskInfo="taskInfo"></XunjianContent>
-        <taskControl></taskControl>
+
+        <taskControl @isVideo="isVideo" class="task_control_wrap1"></taskControl>
+
       </div>
       <select style="display: none" id="ip" class="sel" onchange=""></select>
       <select style="display: none" id="channels" class="sel"></select>
@@ -14,17 +16,17 @@
           <div @click="test_login" class="play_video">
             <img src="../../static/img/play.png" alt="">
           </div>
-          <div id="divPlugin" style="width: 100%;height: 100%;"></div>
+          <div id="divPlugin" style="width: 100%;height: 100%;background:#343434"></div>
         </div>
         <div class="right_bottom" style="border:1px solid;height: 50%">
-          <Button @click="red_pic">红外</Button>
+          <Button class="red_pic_but" @click="red_pic">红外</Button>
           <img id="chatterMessage" :src="src" style="width: 100%;height: 100%" alt="">
         </div>
       </div>
     </div>
     <div style="display: flex;">
-      <div style="width: 60%; height: 300px;background: white;float: left">
-        <TabsBottom></TabsBottom>
+      <div style="width:60%;height:300px;background:white;float: left;">
+        <TabsBottom @isVideo="isVideo" class="tabs_wrap"></TabsBottom>
       </div>
       <div class="control_wrap">
         <div class="control_header">
@@ -189,7 +191,7 @@
         },
         src:'',
         listener:null,
-        hkUrl:'192.168.1.13',
+        hkUrl:hKUrl,
         voice_title:'录制音频',
         voice_img:"../../static/images/recordingvoice.png",
         video_title:'开始录像',
@@ -200,13 +202,14 @@
         taskInfo:{},
         robotId:'',
         g_iWndIndex:null,
-        url:'ws://192.168.1.10:9090',
+        url:robotUrl,
         time_id:null,
         time_id_key:null,
       }
     },
     methods:{
       red_pic(){
+          $('.red_pic_but').hide()
         let _this = this
         var ros = new ROSLIB.Ros({
           url : _this.url
@@ -274,7 +277,8 @@
       //可见光
       test_login(){
         let _this = this
-
+        WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
+        $('.play_video').hide()
         var iRet = WebVideoCtrl.I_Login(_this.hkUrl, 1, 80, 'admin', '1234asdf', {
           success: function (xmlDoc) {
             console.log(" 登录成功！");
@@ -863,14 +867,24 @@
 
       },
 
-        //视频窗口按钮
-        play_but(){
-            var video_w = $('.play_video').parent().width()
-            var video_h = $('.play_video').parent().height()
-            var margin = (video_h/2-30) + 'px ' + (video_w/2-30) + 'px'
-            //console.log(margin)
-            $('.play_video').css({'margin':margin})
-        },
+      //视频窗口按钮
+      play_but(){
+          var video_w = $('.play_video').parent().width()
+          var video_h = $('.play_video').parent().height()
+          var margin = (video_h/2-30) + 'px ' + (video_w/2-30) + 'px'
+          //console.log(margin)
+          $('.play_video').css({'margin':margin})
+      },
+      //视频窗口隐藏
+      isVideo(val){
+          //console.log(val)
+          if(!val){
+              $('.right_top').css({'visibility': 'hidden'})
+          }else {
+              $('.right_top').css({'visibility': 'visible'})
+          }
+
+      },
 
     },
     mounted() {
@@ -885,7 +899,7 @@
           console.log(szInfo);
         }
       });
-      WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
+
       // 窗口事件绑定
       $(window).bind({
         resize: function () {
@@ -1398,4 +1412,10 @@
           img
             width 100%
             height 100%
+      .task_control_wrap1
+        height calc(100% - 87px)
+        //border 1px solid
+      .tabs_wrap
+        height calc(100% - 87px)
+
 </style>

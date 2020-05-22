@@ -348,8 +348,9 @@
         value_time_huizong2:'',
         irProjTaskId:'',
         templateShow:true,
-        url:'ws://192.168.1.10:9090',
-        taskServer:null,
+        url: robotUrl,
+        taskServer: null,
+        taskServerClear:null,
       }
     },
 
@@ -730,20 +731,71 @@
         /*_this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId+'/execut-status',
             null,true,function (res) {
                 //console.log(res)
-            })
-        _this.ajax_api('post',url_api + '/task/'+ _this.irProjTaskId+'/execute',
+            })*/
+        /*_this.ajax_api('post',url_api + '/task/'+ _this.irProjTaskId+'/execute',
             {
                 "cumulativeRunTime": 0,
                 "hum": 0,
                 "irBaseRobotId": 1,
                 "irProjTaskId": _this.irProjTaskId,
-                "taskEndTime": "2020-05-18 17:25:44",
-                "taskStartTime": "2020-05-18 11:25:44",
+                "taskEndTime": _this.getdatatime10(),
+                "taskStartTime": _this.getdatatime(),
                 "taskStatus": "3",
                 "wind": 0
             },true,function (res) {
                 //console.log(11)
+                _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
+                    {},true,function (res) {
+                        console.log(res.data.path)
+                        //取到计划线路的点
+                        if(!res.data.path){
+                            console.log(res.data.path)
+                            return
+                        }
+                        var linePlanObj = JSON.parse(res.data.path)
+                        var lineArr = []
+                        if(lineArr.length>0){
+                            lineArr = []
+                        }
+                        for(var i=0;i<linePlanObj.Tasks.length;i++){
+                            var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
+                            var point = [pointArr[0]*1,pointArr[2]*1]
+                            lineArr.push(point)
+                        }
+                        planLinePointArr = lineArr
+                        var ros = new ROSLIB.Ros({
+                            url : _this.url
+                        });
+                        //console.log(ros)
+                        ros.on('connection', function() {
+                            console.log('任务.');
+                        });
+
+                        _this.taskServer = new ROSLIB.Service({
+                            ros : ros,
+                            name : '/tasklist',
+                            serviceType : 'yidamsg/TaskList'
+                        });
+                        _this.taskServerClear = new ROSLIB.Service({
+                            ros : ros,
+                            name : '/taskclear',
+                            serviceType : 'yidamsg/TaskList'
+                        });
+                        _this.taskServerClear.callService({flag:0},function(result) {
+                            console.log('Clear');
+                            var request = new ROSLIB.ServiceRequest({
+                                plan : res.data.path,
+                                //plan : JSON.stringify(aa),
+                            });
+
+                            _this.taskServer.callService(request, function(result) {
+                                console.log(result);
+                            });
+                        })
+
+                    })
             })*/
+
           _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
               {},true,function (res) {
                   console.log(res.data.path)

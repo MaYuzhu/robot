@@ -2,7 +2,7 @@
 	<div id="tabs">
     <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
       <el-tab-pane label="实时信息" name="first">
-        <div style="padding:0 0px;height:146px;overflow: auto"><!--height:144px;overflow: auto-->
+        <div style="padding:0 0px;" class="box_height"><!--height:144px;overflow: auto-->
           <el-table size="mini"
             :data="tableDataPointNow"
             border
@@ -37,11 +37,14 @@
               label="识别类型" :formatter="pointTypeText"
             >
             </el-table-column>
-            <!--<el-table-column
-              prop="address"
+            <el-table-column
+              prop="address" align="center"
               label="采集信息"
               >
-            </el-table-column>-->
+              <template slot-scope="scope">
+                <img :src="imgUrlBefore+scope.row.cameraPic||defaultImg" style="width: 50px;height:50px;" @click="openImg(imgUrlBefore+scope.row.cameraPic)">
+              </template>
+            </el-table-column>
           </el-table>
         </div>
       </el-tab-pane>
@@ -102,31 +105,31 @@
       <el-tab-pane label="系统警告信息" name="third">
         <div style="padding:0 4px">
           <el-table size="mini"
-
+                    :data="tableDataSysAlarmNow"
                     border
                     style="width: 100%">
             <el-table-column
-              prop="date"
-              label="序号"
+              prop="date" type="index"
+              label="序号" align="center"
               width="50">
             </el-table-column>
             <el-table-column
-              prop="address"
+              prop="address" align="center"
               label="报警类型"
             >
             </el-table-column>
             <el-table-column
-              prop="address"
+              prop="address" align="center"
               label="报警级别"
             >
             </el-table-column>
             <el-table-column
-              prop="address"
+              prop="address" align="center"
               label="报警内容"
             >
             </el-table-column>
             <el-table-column
-              prop="address"
+              prop="address" align="center"
               label="报警时间"
             >
             </el-table-column>
@@ -139,6 +142,11 @@
         <div style="height: 100px"></div>
       </el-tab-pane>-->
     </el-tabs>
+    <el-dialog width="500px" :visible.sync="imgVisible" class="img-dialog" @close="closeImg">
+      <el-card :body-style="{ padding: '0px' }">
+        <img :src="dialogImgUrl" width="100%" height="100%">
+      </el-card>
+    </el-dialog>
 	</div>
 </template>
 
@@ -147,17 +155,28 @@
     data() {
       return {
         activeName: 'first',
-          ajaxTablePointNowData:{page:1, size:3},
+          ajaxTablePointNowData:{page:1, size:20},
           tableDataPointNow:[],
           pointNowTimeId:null,
           tableDataPointAlarmNow:[],
           pointAlarmNowTimeId:null,
-
+          tableDataSysAlarmNow:[],
+          SysAlarmNowTimeId:null,
+          time:3000,
+          defaultImg:'../../static/img/play.png',
+          src: 'http://element.eleme.io/static/hamburger.50e4091.png',
+          tableData: [],
+          imgVisible: false,
+          dialogImgUrl:'',
+          imgUrlBefore: 'http://192.168.1.120:8090/smcsp/'
       };
     },
     mounted(){
         this.pointNow()
         this.pointAlarmNow()
+        this.pointSysAlarmNow()
+        let box_height = $('#tabs').height() - 31
+        $('.box_height').height(box_height+'px')
     },
     methods: {
       handleClick(tab, event) {
@@ -170,9 +189,9 @@
               true,
               function (res) {
                   if(res.code == 200){
-                      //console.log(res.data.items)
+                      console.log(res.data.items)
                       _this.tableDataPointNow = res.data.items
-                      //pointNowTime()
+                      pointNowTime()
                   }
               })
 
@@ -188,7 +207,7 @@
                           }
                       }
                   })
-              _this.pointNowTimeId = setTimeout(pointNowTime,2000)
+              _this.pointNowTimeId = setTimeout(pointNowTime,_this.time)
           }
       },
       pointTypeText(row){
@@ -202,9 +221,9 @@
                 true,
                 function (res) {
                     if(res.code == 200){
-                        console.log(res.data.items)
+                        //console.log(res.data.items)
                         _this.tableDataPointAlarmNow = res.data.items
-                        //pointAlarmNowTime()
+                        pointAlarmNowTime()
                     }
                 })
 
@@ -214,13 +233,13 @@
                     true,
                     function (res) {
                         if(res.code == 200){
-                            console.log(res.data.items)
+                            //console.log(res.data.items)
                             if(_this.tableDataPointAlarmNow[0].createTime!=res.data.items[0].createTime){
                                 _this.tableDataPointAlarmNow.unshift(res.data.items[0])
                             }
                         }
                     })
-                _this.pointAlarmNowTimeId = setTimeout(pointAlarmNowTime,2000)
+                _this.pointAlarmNowTimeId = setTimeout(pointAlarmNowTime,_this.time)
             }
         },
       alarmLevelText(row){
@@ -245,11 +264,78 @@
           return result
       },
 
+      pointSysAlarmNow(){
+          let _this = this
+          _this.ajax_api('get',url_api + '/sys-point-alarm-history',
+              {page:1, size:3},
+              true,
+              function (res) {
+                  if(res.code == 200){
+                      //console.log(res.data.items)
+                      _this.tableDataSysAlarmNow = res.data.items
+                      pointSysAlarmNowTime()
+                  }
+              })
+
+          function pointSysAlarmNowTime(){
+              _this.ajax_api('get',url_api + '/sys-point-alarm-history',
+                  {page:1, size:1},
+                  true,
+                  function (res) {
+                      if(res.code == 200){
+                          //console.log(res.data.items)
+                          if(res.data.items.length<1){
+                              return
+                          }
+                          if(_this.tableDataSysAlarmNow[0].createTime!=res.data.items[0].createTime){
+                              _this.tableDataSysAlarmNow.unshift(res.data.items[0])
+                          }
+                      }
+                  })
+              _this.SysAlarmNowTimeId = setTimeout(pointSysAlarmNowTime,_this.time)
+          }
+      },
+      alarmSysLevelText(row){
+          var result
+          switch (row.alarmLevel) {
+              case 0:
+                  result = '正常'
+                  break
+              case 1:
+                  result = '预警'
+                  break
+              case 2:
+                  result = '一般告警'
+                  break
+              case 3:
+                  result = '严重告警'
+                  break
+              case 4:
+                  result = '危机告警'
+                  break
+          }
+          return result
+      },
+
+      openImg(url) {
+          let _this = this
+          if (url) {
+              _this.imgVisible = true
+              _this.dialogImgUrl = url
+              _this.$emit('isVideo', false)
+          }
+      },
+      closeImg(){
+          let _this = this
+          _this.$emit('isVideo', true)
+      },
     },
     destroyed(){
         let _this = this
         //console.log(159)
         clearTimeout(_this.pointNowTimeId)
+        clearTimeout(_this.pointAlarmNowTimeId)
+        clearTimeout(_this.SysAlarmNowTimeId)
     },
 
   };
@@ -259,6 +345,7 @@
 
   #tabs
     /*background transparent*/
+    height 100%
     .el-tabs--card
       .el-tabs__header
         background: linear-gradient(#e3f2ee,#cae7ee)
@@ -276,5 +363,19 @@
           border: 1px solid #109cb4;
           border-bottom: none;
           background white
+
+    /deep/.el-tabs
+      height 100%
+    /deep/.el-tabs__content
+      height calc(100% - 31px)
+    .box_height
+      height 260px
+      overflow auto
+    /deep/.img-dialog
+      .el-dialog__header
+        padding: 0!important;
+        .el-dialog__headerbtn
+          right 10px
+          top 10px
 
 </style>

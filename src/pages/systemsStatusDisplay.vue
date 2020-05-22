@@ -193,8 +193,8 @@
     },
     mounted(){
       this.init()
-      this.weather()
-      this. power_now()
+      //this.weather()
+      this.power_now()
       this.speed_now()
     },
     methods:{
@@ -204,7 +204,6 @@
           {irBaseRobotId:1,size:20,page:1,},
           true, function (res) {
             //console.log(res.data)
-
             _this.yun_x = 1
             _this.yun_y = 1
             //_this.body_speed = 1
@@ -217,7 +216,7 @@
         });
         //console.log(ros)
         ros.on('connection', function() {
-          console.log('Connected to websocket server.');
+          console.log('weather server.');
         });
 
         _this.listener = new ROSLIB.Topic({

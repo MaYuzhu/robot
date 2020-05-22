@@ -12,7 +12,7 @@
         <li @click="taskStop">
           <el-button type="text" size="mini">{{taskStopText}}</el-button>
         </li>
-        <li><el-button type="text" size="mini">任务终止</el-button></li>
+        <li><el-button @click="clearTask" type="text" size="mini">任务终止</el-button></li>
         <li @click="addTask">
           <el-button type="text" size="mini" :disabled="addTaskDisabled">创建任务</el-button>
         </li>
@@ -32,15 +32,12 @@
             图层管理<i class="el-icon-arrow-down el-icon--right"></i>
           </span>
             <el-dropdown-menu slot="dropdown">
-              <el-dropdown-item>
-                <el-checkbox v-model="checked11" @change="change11">测试点</el-checkbox>
-              </el-dropdown-item>
 
               <el-dropdown-item>
-                <el-checkbox v-model="checked1">停靠点</el-checkbox>
+                <el-checkbox v-model="checked1" @change="change11('geoJsonLayerPoint3',checked1)">停靠点</el-checkbox>
               </el-dropdown-item>
               <el-dropdown-item>
-                <el-checkbox v-model="checked2">检测点</el-checkbox>
+                <el-checkbox v-model="checked2" @change="change11('geoJsonLayerPointTargets3',checked2)">检测点</el-checkbox>
               </el-dropdown-item>
               <el-dropdown-item>
                 <el-checkbox v-model="checked3">历史路径</el-checkbox>
@@ -61,9 +58,9 @@
             </el-dropdown-menu>
           </el-dropdown>
         </li>
-        <li @click="test(true)"><el-button type="text" size="mini">go</el-button></li>
+        <!--<li @click="test(true)"><el-button type="text" size="mini">go</el-button></li>
         <li @click="test(false)"><el-button type="text" size="mini">stop</el-button></li>
-        <li @click="plateShow"><el-button type="text" size="mini">区域</el-button></li>
+        <li @click="plateShow"><el-button type="text" size="mini">区域</el-button></li>-->
         <li><el-button type="text" size="mini"></el-button></li>
       </ul>
       <!--<img src="../../static/aaaa.jpg" style="width: 100%" alt="">-->
@@ -132,6 +129,8 @@
         map: null,
         geoJsonLayerRoute:null,
         geoJsonLayerPoint: null,
+        geoJsonLayerPoint3: null,
+        geoJsonLayerPointTargets3: null,
         addTaskDisabled:true,
         choosePointText:'地图选点',
         taskStopText:'任务暂停',
@@ -155,10 +154,12 @@
         timeId:null,
         vehVector:null,
         passRouteLayer:null,
-        url:'ws://192.168.1.10:9090',
+        url:robotUrl,
         planLinePoint:[],
         planLinePointVector:null,
 
+        taskServer:null,
+        taskServerClear:null,
       };
     },
     mounted(){
@@ -219,7 +220,7 @@
           title: 'add Layer',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
-            url: '../../static/route.json',
+            url: '../../static/geojson/route.json',
             //url: '../../static/geojson/route.geojson',
             format:new ol.format.GeoJSON()
           }),
@@ -234,11 +235,11 @@
           },
           visible: true
         });
-        var geoJsonLayerPoint3 = new ol.layer.Vector({
+        _this.geoJsonLayerPoint3 = new ol.layer.Vector({
           title: 'add Layer Point',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
-            url: '../../static/point.json',
+            url: '../../static/geojson/stops3.geojson',
             //url: '../../static/geojson/stops.geojson',
             format:new ol.format.GeoJSON()
           }),
@@ -255,13 +256,35 @@
           },
           visible: true
         });
+        _this.geoJsonLayerPointTargets3 = new ol.layer.Vector({
+            title: 'add Layer Point',
+            source: new ol.source.Vector({
+                //projection: 'EPSG:4326',
+                url: '../../static/geojson/targets3.geojson',
+                //url: '../../static/geojson/stops.geojson',
+                format:new ol.format.GeoJSON()
+            }),
+            style: function (feature, resolution) {
+                return new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 3,
+                        fill: new ol.style.Fill({
+                            color: '#ff5524'
+                        })
+                    }),
+
+                });
+            },
+            visible: true
+        });
 
         _this.map = new ol.Map({
           layers: [
             //_this.geoJsonLayerRoute,
             //_this.geoJsonLayerPoint,
             geoJsonLayerRoute3,
-            geoJsonLayerPoint3,
+            _this.geoJsonLayerPoint3,
+            _this.geoJsonLayerPointTargets3
           ],
           target: 'map',
           interactions: ol.interaction.defaults().extend([
@@ -729,12 +752,13 @@
       	let _this = this
         _this.$emit('isVideo', true)
       },
-      change11(val){
+      change11(val,is){
       	let _this = this
-        if(val){
-          _this.geoJsonLayerPoint.setVisible(true)
+        //console.log(val)
+        if(is){
+          _this[val].setVisible(true)
         }else{
-          _this.geoJsonLayerPoint.setVisible(false)
+          _this[val].setVisible(false)
         }
 
       },
@@ -1020,6 +1044,27 @@
         _this.planLinePointVector.getSource().addFeature(featurePlanLine);
 
       },
+
+      //清除任务
+      clearTask(){
+    	    let _this = this
+          var ros = new ROSLIB.Ros({
+              url : _this.url
+          });
+          //console.log(ros)
+          ros.on('connection', function() {
+              console.log('准备清除任务.');
+          });
+
+          _this.taskServerClear = new ROSLIB.Service({
+              ros : ros,
+              name : '/taskclear',
+              serviceType : 'yidamsg/TaskList'
+          });
+          _this.taskServerClear.callService({flag:0},function(result) {
+              console.log('Clear');
+          })
+      }
     },
     computed:{
       mapPlanLine:function(){
