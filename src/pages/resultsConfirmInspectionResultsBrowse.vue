@@ -12,7 +12,7 @@
     </div>-->
     <div class="results_browse_content">
       <div class="results_browse_left">
-        <devTreeNoCheck></devTreeNoCheck>
+        <devTreeNoCheck @childKey="childKeyId"></devTreeNoCheck>
       </div>
       <div class="results_browse_right">
         <div class="right_title_tool">
@@ -52,38 +52,44 @@
             </el-table-column>
             <el-table-column
               prop="task.name" align="center"
-              label="任务名称" width="300"
+              label="任务名称" width="200"
             >
             </el-table-column>
             <el-table-column
-              prop="point.displayName" align="center"
-              label="点位名称" width="300"
+              prop="point.deviceName" align="center"
+              label="点位名称" width="200"
             >
             </el-table-column>
             <el-table-column
               prop="createTime" align="center"
-              label="识别时间" width="260"
+              label="识别时间" width="200"
             >
             </el-table-column>
             <el-table-column
-              prop="modifyValue" align="center"
-              label="识别结果" width="110"
+              prop="value" align="center"
+              label="识别结果" width="90"
             >
             </el-table-column>
             <el-table-column
-              prop="address" align="center"
-              label="审核结果" width="110"
+              prop="checkStatus" align="center"
+              label="审核结果" width="100"
             >
+              <template slot-scope="scope">
+                <p>{{scope.row.checkStatus==0?'未审核':'已审核'}}</p>
+              </template>
             </el-table-column>
             <el-table-column
               prop="reconType.name" align="center"
-              label="识别类型" width="190"
+              label="识别类型" width="100"
             >
             </el-table-column>
             <el-table-column
               prop="address" align="center"
               label="采集信息"
             >
+              <template slot-scope="scope">
+                <p style="cursor:pointer;text-decoration:underline;color:blue" @click="openImg(imgUrlBefore+scope.row.cameraPic)">图片信息</p>
+              </template>
             </el-table-column>
 
           </el-table>
@@ -101,12 +107,12 @@
         </div>
         <div class="right_bottom" style="border: 0px solid">
           <ul class="ul_img_wrap">
-            <li v-for="(item, index) in imageArr" style="width:33.3333%;height:50%;float:left;
+            <li v-for="(item, index) in imgDataResults" style="width:33.3333%;height:50%;float:left;
                   box-sizing:border-box;border:1px solid #90e8c6">
-              <el-image class="li_img"
-                   :preview-src-list="srcList" style="width:100%;" :src="item.url" alt="">
+              <el-image class="li_img"  v-if="item.cameraPic"
+                   :preview-src-list="srcList" style="width:100%;" :src="imgUrlBefore+item.cameraPic" alt="">
               </el-image>
-              <p style="background: #D9ECEA;height: 22px;line-height: 22px">{{item.title}}</p>
+              <p v-if="item.point" style="background: #D9ECEA;height: 22px;line-height: 22px">{{item.point.name}}</p>
             </li>
           </ul>
           <div class="page_box">
@@ -114,7 +120,7 @@
               @size-change="handleSizeChange2"
               @current-change="handleCurrentChange2"
               :current-page="currentPage2"
-              :page-sizes="[6, 12, 24]"
+              :page-sizes="[6, 4, 3]"
               :page-size="6"
               layout="total, sizes, prev, pager, next, jumper"
               :total="total2">
@@ -138,7 +144,7 @@
             </div>
             <div style="height: 400px;overflow-y: auto">
               <ul>
-                <li v-for="(item, index) in imgArr" style="width:33.3333%;float:left;
+                <li v-for="(item, index) in imageArr" style="width:33.3333%;float:left;
                   box-sizing:border-box;border:1px solid #90e8c6">
                   <p style="background: #D9ECEA;height: 22px;line-height: 22px">{{item.title}}</p>
                   <img style="width:100%;height:100%;" :src="item.url" alt="">
@@ -234,6 +240,11 @@
       </span>
       </el-dialog>
     </div>
+    <el-dialog width="500px" :visible.sync="imgVisible" class="img-dialog">
+      <el-card :body-style="{ padding: '0px' }">
+        <img :src="dialogImgUrl" width="100%" height="100%">
+      </el-card>
+    </el-dialog>
   </div>
 </template>
 
@@ -256,6 +267,7 @@
           {address:'123',id:4},
           {address:'123',id:5},
         ],
+        imgDataResults:[],
         checkAllPoint: false,
         checkedPoints: [],
         pointsArr: pointsOptions,
@@ -293,9 +305,7 @@
             url:'../../static/abc.jpg'
           },
         ],
-        srcList: [
-          '/static/abc.jpg',
-        ],
+        srcList: [],
         dialogVisibleAlarm:false,
         point_info:'点位信息',
         imgArr:[
@@ -351,8 +361,14 @@
         disabled_input_value:true,
         textarea:'',
         ajaxTableData:{page:1, size:6},
+        ajaxTableImgData:{page:1, size:6},
         rowIndex:0,
         checkId:'',
+
+        imgVisible: false,
+        dialogImgUrl: '',
+        imgUrlBefore: url_img + '/smcsp/',
+        pointIds:'',
       }
     },
     components: {
@@ -365,6 +381,7 @@
     	this.value_end = this.getDateTime()
       this.value_start = this.convertToLateDate()
       this.getTableData()
+      this.getImgData()
     },
     methods:{
       getTableData(){
@@ -411,6 +428,29 @@
           })
 
       },
+      getImgData(){
+          let _this = this
+          _this.ajaxTableImgData.startTime = _this.value_start
+          _this.ajaxTableImgData.endTime = _this.value_end
+          _this.ajaxTableImgData.checkStatus = _this.radio*1
+
+          _this.ajax_api('post',url_api + '/point-history',
+              _this.ajaxTableImgData,
+              true,
+              function (res) {
+                  if(res.code == 200){
+                      //console.log(res.data.items)
+                      _this.total2 = res.data.total
+                      _this.imgDataResults = res.data.items
+                      _this.srcList = []
+                      for(let i=0;i<res.data.items.length;i++){
+                          _this.srcList.push(_this.imgUrlBefore + res.data.items[i].cameraPic)
+                      }
+
+                  }
+              })
+
+      },
       handleCheckAllChangePoint(val){
         this.checkedPoints = val ? pointsOptions : [];
         this.isIndeterminatePoint = false;
@@ -420,10 +460,20 @@
         this.checkAllPoint = checkedCount === this.pointsArr.length;
         this.isIndeterminatePoint = checkedCount > 0 && checkedCount < this.pointsArr.length;
       },
-
+      //点位ID
+      childKeyId(val){
+          let _this = this
+          //console.log(val)
+          _this.pointIds = val.id
+          _this.ajaxTableData.pointIds = _this.pointIds
+          _this.ajaxTableImgData.pointIds = _this.pointIds
+          _this.getTableData()
+          _this.getImgData()
+      },
       queryList(){
         let _this = this
         _this.getTableData()
+        _this.getImgData()
       },
 
       convertToLateDate(){
@@ -481,11 +531,13 @@
       },
       handleSizeChange2(val) {
         //console.log(`每页 ${val} 条`);
-
+          this.ajaxTableImgData.size = val
+          this.getImgData()
       },
       handleCurrentChange2(val) {
         //console.log(`当前页: ${val}`);
-
+          this.ajaxTableImgData.page = val
+          this.getImgData()
       },
       dblBoxShow(row){
       	let _this = this
@@ -495,9 +547,14 @@
         //console.log(row.index)
         //console.log(row.id) GET /ui/point-alarm-history/info/{id}
         _this.dialogVisibleAlarm = true
-        _this.point_info = row.point.displayName
+        _this.point_info = row.point.name
         _this.input_value_wrong = ''
-        _this.textarea=''
+        _this.textarea = ''
+        _this.imageArr = []
+        _this.imageArr.push({
+            title:row.point.name,
+            url:_this.imgUrlBefore + row.cameraPic
+        })
         _this.ajax_api('get',url_api + '/point-history/info/'+row.id,
           null,
           true,
@@ -541,10 +598,15 @@
         }
       },
       resetList(){
+
         this.radio = '0'
         this.value_end = this.getDateTime()
         this.value_start = this.convertToLateDate()
+        this.pointIds = ''
+        this.ajaxTableData.pointIds = this.pointIds
+        this.ajaxTableImgData.pointIds = this.pointIds
         this.getTableData()
+        this.getImgData()
       },
       prevData(){
         let _this = this
@@ -559,7 +621,12 @@
         }
         _this.input_value_wrong = ''
         _this.textarea=''
-        _this.point_info = _this.tableDataResults[_this.rowIndex].point.displayName
+        _this.point_info = _this.tableDataResults[_this.rowIndex].point.name
+        _this.imageArr = []
+        _this.imageArr.push({
+            title: _this.tableDataResults[_this.rowIndex].point.name,
+            url: _this.imgUrlBefore +_this.tableDataResults[_this.rowIndex].cameraPic//_this.imgUrlBefore + row.cameraPic
+        })
         let id = _this.tableDataResults[_this.rowIndex].id
         _this.checkId = id
         //console.log(id,'index'+_this.rowIndex)
@@ -604,7 +671,12 @@
         }
         _this.input_value_wrong = ''
         _this.textarea=''
-        _this.point_info = _this.tableDataResults[_this.rowIndex].point.displayName
+        _this.point_info = _this.tableDataResults[_this.rowIndex].point.name
+        _this.imageArr = []
+        _this.imageArr.push({
+            title: _this.tableDataResults[_this.rowIndex].point.name,
+            url: _this.imgUrlBefore +_this.tableDataResults[_this.rowIndex].cameraPic//_this.imgUrlBefore + row.cameraPic
+        })
         let id = _this.tableDataResults[_this.rowIndex].id
         _this.checkId = id
         //console.log(id,'index'+_this.rowIndex)
@@ -693,6 +765,14 @@
         //把每一行的索引放进row
         row.index = rowIndex;
       },
+      openImg(url) {
+          let _this = this
+          if (url) {
+              _this.imgVisible = true
+              _this.dialogImgUrl = url
+              _this.$emit('isVideo', false)
+          }
+      },
     },
   }
 </script>
@@ -718,6 +798,7 @@
           margin 0 30px
     .results_browse_content
       height calc(100% - 90px)
+      min-height 840px
       display flex
       .results_browse_left
         width 300px
@@ -745,11 +826,11 @@
             line-height 28px
           div
             float left
-            margin-right 20px
+            margin-right 10px
             ul
               float left
               display flex
-              padding-left 30px
+              padding-left 20px
               li
                 float left
                 margin-right 30px
@@ -772,7 +853,8 @@
           box-sizing border-box
 
         .table_box
-          height calc(100% - 588px)
+          height calc(100% - 618px)
+          min-height 234px
           /*overflow-y auto*/
           position relative
           /deep/ .el-table th
@@ -839,4 +921,14 @@
             padding 8px 22px
 
 
+    /deep/ .img-dialog
+      .el-dialog__header
+        padding: 0!important;
+        .el-dialog__headerbtn
+          right 10px
+          top 10px
+    /deep/ .el-image-viewer__close
+      color white
+    /deep/ .el-image-viewer__canvas img
+      transform scale(1)
 </style>

@@ -49,14 +49,14 @@
           </el-calendar>
         </div>
         <div style="background: #ecf6fa;padding: 5px">
-          <span style="margin-right: 22px;">备注：</span>
-          <span style="margin-right: 22px;color:rgb(60, 179, 113)">执行完成：绿色</span>
-          <span style="margin-right: 22px;color: rgb(210, 105, 30);">中途终止：棕色</span>
-          <span style="margin-right: 22px;color: rgb(0, 255, 255);">中途暂停：青色</span>
-          <span style="margin-right: 22px;color: rgb(255, 69, 0);">正在执行：红色</span>
-          <span style="margin-right: 22px;color: rgb(65, 105, 225);">等待执行：蓝色</span>
-          <span style="margin-right: 22px;color: rgb(255, 215, 0);">超期：黄色</span>
-          <span style="margin-right: 22px;color: rgb(218, 112, 214);">超时：紫色</span>
+          <span style="margin-right: 12px;">备注：</span>
+          <span style="margin-right: 12px;color:rgb(60, 179, 113)">执行完成：绿色</span>
+          <span style="margin-right: 12px;color: rgb(210, 105, 30);">中途终止：棕色</span>
+          <span style="margin-right: 12px;color: rgb(0, 255, 255);">中途暂停：青色</span>
+          <span style="margin-right: 12px;color: rgb(255, 69, 0);">正在执行：红色</span>
+          <span style="margin-right: 12px;color: rgb(65, 105, 225);">等待执行：蓝色</span>
+          <span style="margin-right: 12px;color: rgb(255, 215, 0);">超期：黄色</span>
+          <span style="margin-right: 12px;color: rgb(218, 112, 214);">超时：紫色</span>
         </div>
       </div>
       <div class="task_show_wrap_right">
@@ -99,7 +99,7 @@
             <li @click="delTaskPlan"><img src="../../static/images/remove.png" alt=""><span>删除</span></li>
           </ul>
         </div>
-        <div style="height: 520px;overflow-y: auto">
+        <div class="table_height" style="overflow-y: auto">
           <el-table
             :data="tableData" @selection-change="changeFun"
             border :cell-style="cellStyle"
@@ -145,7 +145,7 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[1, 10, 20, 50]"
+            :page-sizes="[10, 20, 50]"
             :page-size="10"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
@@ -208,7 +208,7 @@
         irBaseRobotId:1,
         monthArr:[],
         taskMonthData:{},
-        taskRightData:{},
+        taskRightData:{page:1,size:10},
         total:0,
         currentPage: 1,
         delTaskIdsArr:[],
@@ -223,6 +223,13 @@
       this.taskRightData.endTime = this.value_end
       this.getCurrMonth()
       this.getRightLi()
+      let table_h = $('.task_show_wrap_right').height()-214
+      $('.table_height').height(table_h +'px')
+      window.onresize = ()=>{
+          let table_h = $('.task_show_wrap_right').height()-214
+          $('.table_height').height(table_h +'px')
+      }
+
     },
     methods:{
     	getCurrMonth(){//GET /ui/task/month-show
@@ -475,7 +482,7 @@
               margin-right 4px
         .task_show_center_month
           height calc(100% - 54px)
-          min-height 685px
+          min-height 570px
           overflow-y auto
           div>>>
             .el-calendar__body

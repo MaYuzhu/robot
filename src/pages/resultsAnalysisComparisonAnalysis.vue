@@ -43,45 +43,48 @@
           </div>
           <div class="top3">
             <ul>
-              <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
+              <li @click="queryList"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
               <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
               <li><img src="../../static/images/export.png" alt=""><span>导出</span></li>
             </ul>
           </div>
           <div class="table">
-            <el-table size="mini"
-
+            <el-table size="mini" class="table_box"
+                      :data="tableData"
                       border
                       style="width: 100%">
               <el-table-column
-                prop="date"
-                label="序号"
+                prop="date" type="index" :index="index1"
+                label="序号" align="center"
                 width="50">
               </el-table-column>
               <el-table-column type="selection"
-                prop="address"
+                prop="address" align="center"
                 label=""
               >
               </el-table-column>
               <el-table-column
-                prop="address"
+                prop="createTime" align="center"
                 label="识别时间"
               >
               </el-table-column>
               <el-table-column
-                prop="address"
+                prop="point.deviceName" align="center"
                 label="点位名称"
               >
               </el-table-column>
               <el-table-column
-                prop="address"
+                prop="value" align="center"
                 label="识别结果"
               >
               </el-table-column>
               <el-table-column
-                prop="address"
+                prop="address" align="center"
                 label="采集信息"
               >
+                <template slot-scope="scope">
+                  <p style="cursor:pointer;text-decoration:underline;color:blue" @click="openImg(imgUrlBefore+scope.row.cameraPic)">图片信息</p>
+                </template>
               </el-table-column>
             </el-table>
             <div class="page">
@@ -89,8 +92,8 @@
                 @size-change="handleSizeChange1"
                 @current-change="handleCurrentChange1"
                 :current-page="currentPage1"
-                :page-sizes="[1, 10, 20, 50]"
-                :page-size="10"
+                :page-sizes="[7, 10, 20]"
+                :page-size="7"
                 layout="total, sizes, prev, pager, next, jumper"
                 :total="total1">
               </el-pagination>
@@ -103,15 +106,16 @@
         <div class="right">
           <div class="right_top">
             <el-radio v-model="radio_n" v-for="item in radio_items_n"
-                      :key="item.value"
+                      :key="item.value" @change="radioChangeN"
                       :label="item.value"
                       :value="item.value">{{item.label}}</el-radio>
           </div>
           <div class="right_content">
             <ul>
-              <li :class="'r'+radio_n" v-for="(item, index) in right_show_img" :key="index">
-                <el-image :src="item.url" style="width:100%;"></el-image>
-                <p>{{item.name}}</p>
+              <li :class="'r'+radio_n" v-for="(item, index) in imgDataResults" :key="index">
+                <el-image v-if="item.cameraPic" :src="imgUrlBefore+item.cameraPic"
+                          :preview-src-list="srcList" style="width:100%;"></el-image>
+                <p v-if="item.point" style="background: #D9ECEA;height: 22px;line-height: 22px">{{item.point.name}}</p>
               </li>
             </ul>
           </div>
@@ -120,15 +124,20 @@
               @size-change="handleSizeChange2"
               @current-change="handleCurrentChange2"
               :current-page="currentPage2"
-              :page-sizes="[4, 6, 9]"
-              :page-size="4"
-              layout="total, sizes, prev, pager, next, jumper"
+              :page-sizes="[6, 9, 20]"
+              :page-size="6"
+              layout="total, sizes, prev, pager, next"
               :total="total2">
             </el-pagination>
           </div>
         </div>
       </div>
     </div>
+    <el-dialog width="500px" :visible.sync="imgVisible" class="img-dialog">
+      <el-card :body-style="{ padding: '0px' }">
+        <img :src="dialogImgUrl" width="100%" height="100%">
+      </el-card>
+    </el-dialog>
     <menuBottom></menuBottom>
   </div>
 </template>
@@ -192,15 +201,15 @@
         radio_items_n:[
           {
             value:1,
-            label:' 2 * 2 '
+            label:' 2 * n '
           },
-          {
+          /*{
             value:2,
             label:'  2 * 3 '
-          },
+          },*/
           {
             value:3,
-            label:'  3 * 3 '
+            label:'  3 * n '
           }
         ],
         currentPage1:1,
@@ -208,6 +217,14 @@
         currentPage2:1,
         total2:1,
         right_show_img:[],
+        tableData:[],
+        imgUrlBefore: url_img + '/smcsp/',
+        dialogImgUrl: '',
+        imgVisible:false,
+        ajaxTableData:{page:1, size:7},
+        ajaxTableImgData:{page:1, size:6},
+        imgDataResults:null,
+        srcList:[],
       }
     },
     components: {
@@ -220,8 +237,58 @@
       this.value_end = this.getDateTime()
       this.getRightData()
       this.drawLine()
+      this.getTableData()
+      this.getImgData()
+
     },
     methods: {
+      getTableData(){
+          let _this = this
+          _this.ajaxTableData.startTime = _this.value_start
+          _this.ajaxTableData.endTime = _this.value_end
+          //_this.ajaxTableData.checkStatus = _this.radio*1
+          _this.ajax_api('post',url_api + '/point-history',
+              _this.ajaxTableData,
+              true,
+              function (res) {
+                  if(res.code == 200){
+                      //console.log(res.data.items)
+                      _this.tableData = res.data.items
+                      _this.total1 = res.data.total
+                  }
+              })
+
+      },
+      getImgData(){
+          let _this = this
+          _this.ajaxTableImgData.startTime = _this.value_start
+          _this.ajaxTableImgData.endTime = _this.value_end
+          //_this.ajaxTableImgData.checkStatus = _this.radio*1
+
+          _this.ajax_api('post',url_api + '/point-history',
+              _this.ajaxTableImgData,
+              true,
+              function (res) {
+                  if(res.code == 200){
+                      //console.log(res.data.items)
+                      _this.total2 = res.data.total
+                      _this.imgDataResults = res.data.items
+                      _this.srcList = []
+                      for(let i=0;i<res.data.items.length;i++){
+                          _this.srcList.push(_this.imgUrlBefore + res.data.items[i].cameraPic)
+                      }
+                      if(_this.radio_n==1){
+                          let r_w = $('.right_content').width()/2
+                          setTimeout(()=>{$('.right_content li>div').height(r_w*0.7)},10)
+                      }else if(_this.radio_n==3){
+                          let r_w = $('.right_content').width()/3
+                          setTimeout(()=>{$('.right_content li>div').height(r_w*0.7)},10)
+                      }
+
+                  }
+              })
+
+      },
       handleCheckAllChangePoint(val){
         this.checkedPoints = val ? pointsOptions : [];
         this.isIndeterminatePoint = false;
@@ -270,17 +337,28 @@
         //return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
         return y + "-" + m + "-" + d
       },
+      index1(val){
+          return (this.ajaxTableData.page - 1)*this.ajaxTableData.size + val + 1
+      },
       handleSizeChange1(val) {
         //console.log(`每页 ${val} 条`);
+          this.ajaxTableData.size = val
+          this.getTableData()
       },
       handleCurrentChange1(val) {
         //console.log(`当前页: ${val}`);
+          this.ajaxTableData.page = val
+          this.getTableData()
       },
       handleSizeChange2(val) {
         //console.log(`每页 ${val} 条`);
+          this.ajaxTableImgData.size = val
+          this.getImgData()
       },
       handleCurrentChange2(val) {
         //console.log(`当前页: ${val}`);
+          this.ajaxTableImgData.page = val
+          this.getImgData()
       },
 
       getRightData(){
@@ -305,6 +383,31 @@
           }]
         });
       },
+      openImg(url) {
+          let _this = this
+          if (url) {
+              _this.imgVisible = true
+              _this.dialogImgUrl = url
+              _this.$emit('isVideo', false)
+          }
+      },
+      queryList(){
+          let _this = this
+          _this.getTableData()
+          _this.getImgData()
+      },
+      radioChangeN(val){
+        //console.log(val)
+        if(val == 1){
+            let r_w = $('.right_content').width()/2
+            //console.log(r_w)
+            setTimeout(()=>{$('.right_content li>div').height(r_w*0.7)},10)
+        }else if(val == 3){
+            let r_w = $('.right_content').width()/3
+            //console.log(r_w)
+            setTimeout(()=>{$('.right_content li>div').height(r_w*0.7)},10)
+        }
+      },
     }
   }
 </script>
@@ -312,6 +415,8 @@
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .analysis_wrap
     height calc(100% - 90px)
+    min-height 700px
+    overflow hidden
     .analysis_top
       margin 10px 0
       display flex
@@ -341,7 +446,7 @@
         border 1px solid #cae7ee
         box-sizing border-box
       .center
-        width calc(100% - 900px)
+        width 45%
         height 100%
         border 1px solid #cae7ee
         float left
@@ -380,6 +485,11 @@
           height 340px
           border 1px solid #a9afee
           position relative
+          /deep/ ::before
+            height 0
+          .table_box
+            height calc(100% - 30px)
+            overflow-y auto
           .page
             position absolute
             bottom 0
@@ -388,7 +498,7 @@
           height calc(100% - 436px)
 
       .right
-        width 600px
+        width calc(100% - 300px - 45%)
         height 100%
         border 1px solid #cae7ee
         float left
@@ -401,8 +511,12 @@
           background linear-gradient(#e3f2ee,#cae7ee);
           box-sizing border-box
         .right_content
+          height calc(100% - 64px)
+          overflow-y auto
           li
             float left
+            border 1px solid #d9d9d9
+            box-sizing border-box
           .r1
             width 50%
           .r2
@@ -412,4 +526,6 @@
         .page
           position absolute
           bottom 0
+    /deep/ .el-image-viewer__close
+      color white
 </style>

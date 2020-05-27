@@ -834,7 +834,7 @@
                       serviceType : 'yidamsg/TaskList'
                   });
                   _this.taskServerClear.callService({flag:0},function(result) {
-                      console.log('Clear');
+                      console.log('new plan before Clear');
                       var request = new ROSLIB.ServiceRequest({
                           plan : res.data.path,
                           //plan : JSON.stringify(aa),

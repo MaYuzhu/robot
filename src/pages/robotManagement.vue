@@ -72,6 +72,8 @@
         robotId:'',
         taskInfo:{},
         g_iWndIndex:null,
+        currentTaskInfoTimeId:null,
+        time:3000,
       }
     },
     mounted() {
@@ -349,8 +351,30 @@
 
               }
               //console.log(_this.taskInfo)
+              currentTaskInfo()
             }
           })
+          function currentTaskInfo() {
+              _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
+                  null,
+                  true,function (res) {
+                      if(res.code == 200){
+                          //console.log(res)
+                          _this.taskInfo = {
+                              name:res.data.taskName,
+                              taskStatus:res.data.taskStatus,
+                              abnormalPointNum:res.data.abnormalPointNum,
+                              pointTotal:res.data.pointTotal,
+                              currentPoint:res.data.currentPoint,
+                              passPointNum:res.data.passPointNum,
+                              totalRunTime:res.data.totalRunTime,
+                              cumulativeRunTime:res.data.cumulativeRunTime,
+
+                          }
+                      }
+                  })
+              _this.currentTaskInfoTimeId = setTimeout(currentTaskInfo,_this.time)
+          }
 
       },
       changeId(val){
@@ -411,6 +435,10 @@
         $('.play_video').css({'margin':margin})
       },
 
+    },
+    destroyed(){
+        let _this = this
+        clearTimeout(_this.currentTaskInfoTimeId)
     },
 
     beforeRouteLeave(to, form, next) {

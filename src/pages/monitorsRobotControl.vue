@@ -56,7 +56,7 @@
           </div>
           <div class="control_content_box">
             <div class="control_title">
-              <div>
+              <div v-if="false">
                 <el-select v-model="value" placeholder="请选择" size="mini"
                            style="width: 50px;float: left">
                   <el-option
@@ -68,7 +68,7 @@
                 </el-select>
               </div>
               <span style="float: left">车体控制</span>
-              <el-button type="info" size="mini" class="xunhuan_button">循环</el-button>
+              <el-button v-if="false" type="info" size="mini" class="xunhuan_button">循环</el-button>
             </div>
             <div class="car-direction">
               <el-tooltip class="item car-direction-but car-top-but car-direction-but-disabled"
@@ -112,7 +112,7 @@
             <div class="control_title">
               <div style="width: 50px"></div>
               <span>云台控制</span>
-              <el-button type="info" size="mini" class="xunhuan_button">单点</el-button>
+              <el-button style="opacity: 0" type="info" size="mini" class="xunhuan_button">单点</el-button>
             </div>
             <div style="height: 27px"></div>
             <div class="holder-direction">
@@ -205,6 +205,8 @@
         url:robotUrl,
         time_id:null,
         time_id_key:null,
+        currentTaskInfoTimeId:null,
+        time:3000,
       }
     },
     methods:{
@@ -270,8 +272,30 @@
 
               }
               //console.log(_this.taskInfo)
+              currentTaskInfo()
             }
           })
+          function currentTaskInfo() {
+              _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
+                  null,
+                  true,function (res) {
+                      if(res.code == 200){
+                          //console.log(res)
+                          _this.taskInfo = {
+                              name:res.data.taskName,
+                              taskStatus:res.data.taskStatus,
+                              abnormalPointNum:res.data.abnormalPointNum,
+                              pointTotal:res.data.pointTotal,
+                              currentPoint:res.data.currentPoint,
+                              passPointNum:res.data.passPointNum,
+                              totalRunTime:res.data.totalRunTime,
+                              cumulativeRunTime:res.data.cumulativeRunTime,
+
+                          }
+                      }
+                  })
+              _this.currentTaskInfoTimeId = setTimeout(currentTaskInfo,_this.time)
+          }
 
       },
       //可见光
@@ -1043,6 +1067,10 @@
 
 
     },
+    destroyed(){
+        let _this = this
+        clearTimeout(_this.currentTaskInfoTimeId)
+    },
     beforeRouteLeave(to, form, next) {
       next()
       if(this.listener){
@@ -1063,7 +1091,10 @@
 
 <style lang="stylus" rel="stylesheet/stylus" scoped>
   .monitors_robot_wrap
+    width 100%
     height 100%
+    overflow hidden
+
     .center_box
       height calc(100% - 390px)
     >div
@@ -1086,7 +1117,7 @@
             flex-wrap wrap
             .button_control_header
               float left
-              width 60px
+              width 50px
               height 26px
               background #1e1e1e
               cursor pointer
@@ -1104,18 +1135,18 @@
             display flex
             flex-wrap wrap
             width 240px
-            margin-left 40px
+            margin-left 10px
             box-sizing border-box
             >p
               float left
-              width 100px
+              width 90px
               height 27px
               border-radius 3px
               background #109cb4
               color white
               line-height 27px
               text-align center
-              margin 0 10px
+              margin 0 5px
               margin-bottom 8px
         .control_content
           display flex
@@ -1146,17 +1177,28 @@
                 margin-top 3px
                 float right
             .radar
-              /*width: 120px;
-              height: 120px;*/
+              width: 120px;
+              height: 120px;
+              //height calc(100% - 26px)
               position: relative;
               text-align center
+              top: calc(50% - 60px - 0px);
+              margin: auto;
+              overflow: hidden;
               /*background: -webkit-radial-gradient(center,rgba(32,255,77,.3) 0,rgba(32,255,77,0) 75%),-webkit-repeating-radial-gradient(rgba(32,255,77,0) 5.8%,rgba(32,255,77,0) 18%,#109cb4 18.6%,rgba(32,255,77,0) 18.9%),-webkit-linear-gradient(90deg,rgba(32,255,77,0) 49.5%,#109cb4 50%,#109cb4 0,rgba(32,255,77,0) 50.2%),-webkit-linear-gradient(0deg,rgba(32,255,77,0) 49.5%,#109cb4 50%,#109cb4 0,rgba(32,255,77,0) 50.2%);
               margin: auto;
               top: calc(50% - 60px - 0px);
               border-radius: 50%;
               border: .2rem solid #109cb4;
               overflow: hidden;*/
-
+              img
+                width 200px
+                height 170px
+                margin 0 auto
+                display block
+                position absolute
+                top -40px
+                left -40px
             .radar::before
               content: " ";
               display: block;

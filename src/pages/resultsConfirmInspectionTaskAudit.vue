@@ -30,7 +30,7 @@
     </div>
     <div class="right_title">任务审核</div>
     <div class="table_wrap">
-      <el-table size="mini" @row-dblclick="dblGoBrowse"
+      <el-table size="mini" @row-dblclick="dblGoBrowse" class="table_box"
                 :data="dataTable"
                 border
                 style="width: 100%;">
@@ -358,10 +358,13 @@
       height calc(100% - 180px)
       background #fff
       position relative
+
       .page_box
         position absolute
         bottom 0
-
+      .table_box
+        height calc(100% - 30px)
+        overflow-y auto
     .audit_dialog /deep/
       .el-dialog
         background #d7efec

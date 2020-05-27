@@ -16,7 +16,9 @@
         <li @click="addTask">
           <el-button type="text" size="mini" :disabled="addTaskDisabled">创建任务</el-button>
         </li>
-        <li><el-button type="text" size="mini">一键返航</el-button></li>
+        <li @click="backStartPoint">
+          <el-button type="text" size="mini">一键返航</el-button>
+        </li>
         <li @click="choosePoint">
           <el-button type="text" size="mini">{{choosePointText}}</el-button>
         </li>
@@ -39,7 +41,7 @@
               <el-dropdown-item>
                 <el-checkbox v-model="checked2" @change="change11('geoJsonLayerPointTargets3',checked2)">检测点</el-checkbox>
               </el-dropdown-item>
-              <el-dropdown-item>
+              <!--<el-dropdown-item>
                 <el-checkbox v-model="checked3">历史路径</el-checkbox>
               </el-dropdown-item>
               <el-dropdown-item>
@@ -53,7 +55,7 @@
               </el-dropdown-item>
               <el-dropdown-item>
                 <el-checkbox v-model="checked7">当前点</el-checkbox>
-              </el-dropdown-item>
+              </el-dropdown-item>-->
 
             </el-dropdown-menu>
           </el-dropdown>
@@ -160,6 +162,7 @@
 
         taskServer:null,
         taskServerClear:null,
+
       };
     },
     mounted(){
@@ -308,7 +311,7 @@
             source: planLineSource,
             style: new ol.style.Style({
                 stroke: new ol.style.Stroke({ //边界样式
-                    color: '#a1ac82',
+                    color: '#3a4c69',
                     width: 3
                 })
             })
@@ -486,10 +489,118 @@
       	let _this = this
       	if(_this.taskStopText == '任务暂停'){
           _this.taskStopText = '任务继续'
+          var ros = new ROSLIB.Ros({
+              url : _this.url
+          });
+          //console.log(ros)
+          ros.on('connection', function() {
+              console.log('准备暂停任务.');
+          });
+
+          _this.taskServerClear = new ROSLIB.Service({
+              ros : ros,
+              name : '/taskclear',
+              serviceType : 'yidamsg/TaskControl'
+          });
+          _this.taskServerClear.callService({flag:1},function(result) {
+              console.log('任务暂停');
+              _this.$message('任务暂停');
+          })
         }else {
           _this.taskStopText = '任务暂停'
+          var ros = new ROSLIB.Ros({
+              url : _this.url
+          });
+          //console.log(ros)
+          ros.on('connection', function() {
+              console.log('准备暂停任务.');
+          });
+
+          _this.taskServerClear = new ROSLIB.Service({
+              ros : ros,
+              name : '/taskclear',
+              serviceType : 'yidamsg/TaskControl'
+          });
+          _this.taskServerClear.callService({flag:2},function(result) {
+              console.log('任务继续');
+              _this.$message('任务继续');
+          })
         }
 
+      },
+      //一键返航
+      backStartPoint(){
+        let _this = this
+        this.$confirm('该操作将终止当前任务返回充电房, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+        }).then(() => {
+            //_this.$message('任务终止'); GET /ui/robot/{id}/turn-back
+            _this.ajax_api('get',url_api + '/robot/' + robotIdCurrent + '/turn-back',
+                null,true,function (res) {
+                    console.log(res)
+                    if(res.data=='null'){
+                        console.log('没有data')
+                        return
+                    }
+                    if(!res.data){
+                        console.log(res.data)
+                        return
+                    }
+                    var linePlanObj = JSON.parse(res.data)
+                    var lineArr = []
+                    if(lineArr.length>0){
+                        lineArr = []
+                    }
+                    for(var i=0;i<linePlanObj.Tasks.length;i++){
+                        var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
+                        var point = [pointArr[0]*1,pointArr[2]*1]
+                        lineArr.push(point)
+                    }
+                    planLinePointArr = lineArr
+                    _this.planLinePoint = lineArr
+                    console.log(_this.planLinePointVector) //.refresh()
+                    _this.planLinePointVector.getSource().refresh()
+                    //_this.init()
+                    var ros = new ROSLIB.Ros({
+                        url : _this.url
+                    });
+                    //console.log(ros)
+                    ros.on('connection', function() {
+                        console.log('准备返回.');
+                    });
+
+                    _this.taskServer = new ROSLIB.Service({
+                        ros : ros,
+                        name : '/tasklist',
+                        serviceType : 'yidamsg/TaskList'
+                    });
+                    _this.taskServerClear = new ROSLIB.Service({
+                        ros : ros,
+                        name : '/taskclear',
+                        serviceType : 'yidamsg/TaskList'
+                    });
+                    /*_this.taskServerClear.callService({flag:0},function(result) {
+                        console.log('Clear');
+                        var request = new ROSLIB.ServiceRequest({
+                            plan : res.data.path,
+                            //plan : JSON.stringify(aa),
+                        });
+
+                        _this.taskServer.callService(request, function(result) {
+                            console.log(result);
+                        });
+                    })*/
+
+                })
+
+        }).catch(() => {
+            this.$message({
+                type: 'info',
+                message: '已取消'
+            });
+        });
       },
 
       test(e){
@@ -1062,7 +1173,8 @@
               serviceType : 'yidamsg/TaskList'
           });
           _this.taskServerClear.callService({flag:0},function(result) {
-              console.log('Clear');
+              console.log('任务终止');
+              _this.$message('任务终止');
           })
       }
     },

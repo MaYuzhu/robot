@@ -302,6 +302,7 @@
     .systems_content
       display flex
       height calc(100% - 90px)
+      min-height 700px
       overflow hidden
       .left,.right
         float left

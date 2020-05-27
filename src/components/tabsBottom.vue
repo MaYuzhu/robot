@@ -155,7 +155,7 @@
     data() {
       return {
         activeName: 'first',
-          ajaxTablePointNowData:{page:1, size:20},
+          ajaxTablePointNowData:{page:1, size:10},
           tableDataPointNow:[],
           pointNowTimeId:null,
           tableDataPointAlarmNow:[],
@@ -168,7 +168,7 @@
           tableData: [],
           imgVisible: false,
           dialogImgUrl:'',
-          imgUrlBefore: 'http://192.168.1.120:8090/smcsp/'
+          imgUrlBefore: url_img + '/smcsp/'
       };
     },
     mounted(){
@@ -189,7 +189,7 @@
               true,
               function (res) {
                   if(res.code == 200){
-                      console.log(res.data.items)
+                      //console.log(res.data.items)
                       _this.tableDataPointNow = res.data.items
                       pointNowTime()
                   }

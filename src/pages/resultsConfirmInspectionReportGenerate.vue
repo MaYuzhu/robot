@@ -38,7 +38,7 @@
     </div>
     <div class="right_title">巡检报告生成</div>
     <div class="table_wrap">
-      <el-table size="mini" id="outInspectionReport"
+      <el-table size="mini" id="outInspectionReport" class="table_box"
                 :data="tableData"
                 border @selection-change="handleSelectionChangeTable"
                 style="width: 100%;">
@@ -478,6 +478,12 @@
       height calc(100% - 208px)
       position relative
       background white
+      /deep/ ::before
+        height 0px
+      .table_box
+        height calc(100% - 30px)
+        overflow-y auto
+
       .page
         position absolute
         bottom 0
