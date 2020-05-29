@@ -52,11 +52,15 @@
         g_iWndIndex:null,
         currentTaskInfoTimeId:null,
         time:3000,
+        ros:null,
       }
     },
 
     mounted(){
     	let _this = this
+      _this.ros = new ROSLIB.Ros({
+          url : _this.url
+      });
     	if(robotIdCurrent){
     		_this.robotId = robotIdCurrent
         _this.getTaskInfo()
@@ -155,16 +159,16 @@
       red_pic(){
           $('.red_pic_but').hide()
             let _this = this
-            var ros = new ROSLIB.Ros({
+            /*var ros = new ROSLIB.Ros({
                 url : _this.url
-            });
+            });*/
             //console.log(ros)
             /*ros.on('connection', function() {
               console.log('Connected to websocket server.');
             });*/
 
             _this.listener = new ROSLIB.Topic({
-                ros : ros,
+                ros : _this.ros,
                 name : '/thermal/image_proc/compressed',// /thermal/image_proc/compressed
                 messageType : 'sensor_msgs/CompressedImage', // sensor_msgs::CompressedImage
                 /*name : '/navigation/cmd_vel',// /thermal/image_proc/compressed
@@ -318,6 +322,7 @@
     destroyed(){
         let _this = this
         clearTimeout(_this.currentTaskInfoTimeId)
+        _this.ros.close()
     },
     beforeRouteLeave(to, form, next) {
         next()

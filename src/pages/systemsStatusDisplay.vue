@@ -1,6 +1,7 @@
 <template>
   <div class="systems_display_wrap">
     <HeaderTop :title="title"></HeaderTop>
+
     <div class="systems_content">
       <div class="left">
         <div class="left_top">机器人状态</div>
@@ -8,23 +9,25 @@
           <p>运行状态信息</p>
           <div class="yunxing_info">
             <div><p>机身温度: <span>{{body_wendu}} ℃</span></p></div>
-            <div><p>云台水平位置: <span>{{yun_x}}</span></p></div>
+            <div><p>云台水平位置: <span>{{yun_x}} °</span></p></div>
             <div><p>运行速度: <span>{{body_speed}} m/s</span></p></div>
-            <div><p>云台垂直位置: <span>{{yun_y}}</span></p></div>
+            <div><p>云台垂直位置: <span>{{yun_y}} °</span></p></div>
             <div><p>相机倍数: <span>{{zoom}}</span></p></div>
           </div>
           <p>通讯状态信息</p>
           <div class="tong_info">
-            <div><p>无线基站: <span>0</span></p></div>
-            <div><p>控制系统: <span>0</span></p></div>
-            <div><p>可见光摄像: <span>0</span></p></div>
-            <div><p>充电系统: <span>0</span></p></div>
-            <div><p>红外摄像: <span>0</span></p></div>
+            <div><p><span>无线基站: </span><img src="../../static/img/signal_no.png" alt=""></p></div>
+            <div><p><span>控制系统: </span><img src="../../static/img/signal_no.png" alt=""></p></div>
+            <div><p><span>可见光摄像: </span><img :src="require('../../static/img/'+videoImgSrc+'.png')" alt=""></p></div>
+            <div><p><span>充电系统: </span><img src="../../static/img/signal_no.png" alt=""></p></div>
+            <div><p><span>红外摄像: </span><img :src="require('../../static/img/'+redImgSrc+'.png')" alt=""></p></div>
           </div>
           <p>电池状态信息</p>
           <div class="dian_info">
-            <span>电压{{dianya}}V</span>
-            <div><p>当前电池电量: <span>{{power}} %</span></p></div>
+            <div style="width: 100%">
+              <p style="float: left;width: 50%">当前电池电量: <span>{{power}} %</span></p>
+              <p style="float: left;">电压: {{dianya}} V</p>
+            </div>
           </div>
           <p>机器人自身模块信息</p>
           <div class="mokuai_info">
@@ -144,7 +147,9 @@
         </div>
       </div>
     </div>
+
     <menuBottom></menuBottom>
+    <div id="divPlugin" style="width: 10px;height: 10px;background: #99885e;margin:-100px 0 0 -100px"></div>
   </div>
 </template>
 
@@ -183,19 +188,41 @@
         yun_y: '',
         zoom: '',
         listener:null,
+        listenerYun:null,
         temperature:0,
         humidity:0,
         wind_speed:0,
-        power:'',
-        dianya:0,
-        url:'ws://192.168.1.10:9090',
+        power: '',
+        dianya: '',
+        url: robotUrl,
+        redImgSrc:'signal_no',
+        ros:null,
+        ros_server:null,
+        hkUrl: hKUrl,
+        videoImgSrc:'signal_no',
+        webVideoCtrl:null,
       }
     },
     mounted(){
+      //window.location.reload()
+      let _this = this
+      _this.ros = new ROSLIB.Ros({
+          url : _this.url
+      });
+      _this.ros.on('connection', function() {
+          console.log('ros.');
+      });
+      _this.ros.on('close', function() {
+          console.log('Connection to websocket server closed.');
+      });
+
       this.init()
-      //this.weather()
+      this.weather()
       this.power_now()
       this.speed_now()
+      this.yun_xy_now()
+      this.isRed()
+      this.isVideo()
     },
     methods:{
     	init(){
@@ -204,29 +231,27 @@
           {irBaseRobotId:1,size:20,page:1,},
           true, function (res) {
             //console.log(res.data)
-            _this.yun_x = 1
-            _this.yun_y = 1
             //_this.body_speed = 1
           })
       },
       weather(){
         let _this = this
-        var ros = new ROSLIB.Ros({
-          url : _this.url
-        });
-        //console.log(ros)
-        ros.on('connection', function() {
-          console.log('weather server.');
-        });
+          /*var ros = new ROSLIB.Ros({
+            url : _this.url
+          });
+          //console.log(ros)
+          ros.on('connection', function() {
+            console.log('weather server.');
+          });*/
 
         _this.listener = new ROSLIB.Topic({
-          ros : ros,
+          ros : _this.ros,
           name : '/car_status_now',
           messageType : 'yidamsg/weather'
         });
 
         _this.listener.subscribe(function(message) {
-          console.log(message);
+          //console.log(message);
           //_this.listener.unsubscribe();
           _this.temperature = message.temperature
           _this.humidity = message.humidity
@@ -235,16 +260,16 @@
       },
       power_now(){
         let _this = this
-        var ros = new ROSLIB.Ros({
+        /*var ros = new ROSLIB.Ros({
             url : _this.url
         });
         //console.log(ros)
         ros.on('connection', function() {
-            console.log('power server.');
-        });
+            console.log('power.');
+        });*/
 
         _this.listener = new ROSLIB.Topic({
-            ros : ros,
+            ros : _this.ros,
             name : '/car_status_now',
             messageType : 'yidamsg/nrcar_status'
         });
@@ -259,25 +284,108 @@
       },
       speed_now(){
             let _this = this
-            var ros = new ROSLIB.Ros({
+            /*var ros = new ROSLIB.Ros({
                 url : _this.url
             });
             //console.log(ros)
             ros.on('connection', function() {
-                console.log('speed server.');
-            });
+                console.log('speed.');
+            });*/
 
             _this.listener = new ROSLIB.Topic({
-                ros : ros,
+                ros : _this.ros,
                 name : '/cmd_vel',
                 messageType : 'geometry_msgs/Twist'
             });
 
             _this.listener.subscribe(function(message) {
-                console.log(message.linear.x);
+                //console.log(message.linear.x);
                 _this.body_speed = message.linear.x
             });
         },
+      yun_xy_now(){
+          let _this = this
+          /*var ros = new ROSLIB.Ros({
+              url : _this.url
+          });
+          //console.log(ros)
+          ros.on('connection', function() {
+              console.log('yuntai.');
+          });*/
+
+          _this.listenerYun = new ROSLIB.Service({
+              ros : _this.ros,
+              name : '/cloudplatform_control',
+              serviceType : 'cloud_platform/CloudPlatControl'
+          });
+
+          var request_x = new ROSLIB.ServiceRequest({
+              id:0 ,action:0 ,type:0 ,velue:0
+          });
+          var request_y = new ROSLIB.ServiceRequest({
+              id:0 ,action:0 ,type:1 ,velue:0
+          });
+          var request_zoom = new ROSLIB.ServiceRequest({
+              id:0 ,action:0 ,type:2 ,velue:0
+          });
+          _this.listenerYun.callService(request_x, function(result) {
+              //console.log(result);
+              _this.yun_x = result.result/100
+              _this.listenerYun.callService(request_y, function(result) {
+                  //console.log(result);
+                  _this.yun_y = result.result/100
+                  _this.listenerYun.callService(request_zoom, function(result) {
+                      //console.log(result);
+                      _this.zoom = result.result
+                  });
+              });
+          });
+      },
+      isRed(){
+          let _this = this
+          /*var ros = new ROSLIB.Ros({
+              url : _this.url
+          });
+          ros.on('connection', function() {
+              console.log('red server.');
+          });*/
+          _this.listener = new ROSLIB.Topic({
+              ros : _this.ros,
+              name : '/thermal/image_proc/compressed',
+              messageType : 'sensor_msgs/CompressedImage'
+          });
+
+          _this.listener.subscribe(function(message) {
+              //console.log(message)
+              if(message.data){
+                  _this.redImgSrc = 'signal'
+              }else {
+                  _this.redImgSrc = 'signal_no'
+              }
+              _this.listener.unsubscribe();
+          });
+      },
+      isVideo(){
+          let _this = this
+
+          _this.webVideoCtrl = null
+          _this.webVideoCtrl = WebVideoCtrl
+          _this.webVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
+          var iRet = _this.webVideoCtrl.I_Login(_this.hkUrl, 1, 80, 'admin', '1234asdf', {
+              success: function (xmlDoc) {
+                  console.log(" 登录成功！");
+                  localStorage.setItem("videoIs",true);
+                  _this.videoImgSrc = 'signal'
+              },
+              error: function () {
+                  console.log(" 登录失败！");
+                  localStorage.setItem("videoIs",false);
+                  _this.videoImgSrc = 'signal_no'
+              }
+          });
+          //window.location.reload()
+      },
+
     },
     components: {
       HeaderTop,
@@ -290,7 +398,10 @@
         console.log('连接已断开')
         _this.listener.unsubscribe();
       }
-
+    },
+    destroyed(){
+        let _this = this
+        _this.ros.close()
     },
   }
 </script>
@@ -342,7 +453,13 @@
           .tong_info
             >div
               width 33%
-              margin 10px 0
+              margin 7px 0
+              span
+                vertical-align middle
+              img
+                width 20px
+                height 20px
+                vertical-align middle
           .mokuai_info
             display block
             .mokuai_info_li

@@ -207,29 +207,30 @@
         time_id_key:null,
         currentTaskInfoTimeId:null,
         time:3000,
+        ros:null,
       }
     },
     methods:{
       red_pic(){
           $('.red_pic_but').hide()
         let _this = this
-        var ros = new ROSLIB.Ros({
+        /*var ros = new ROSLIB.Ros({
           url : _this.url
         });
         //console.log(ros)
         ros.on('connection', function() {
           console.log('red server.');
-        });
+        });*/
 
         _this.listener = new ROSLIB.Topic({
-          ros : ros,
+          ros : _this.ros,
           name : '/thermal/image_proc/compressed',
           messageType : 'sensor_msgs/CompressedImage'
         });
 
         _this.listener.subscribe(function(message) {
           //console.log('Received message on ' +': ' + message.data);
-          var  url = "data:image/png;base64,";
+          var url = "data:image/png;base64,";
           var i = message.data
           _this.src = url+ i
           setTimeout(function () {
@@ -913,7 +914,10 @@
     },
     mounted() {
       let _this = this
-        _this.play_but()
+      _this.play_but()
+      _this.ros = new ROSLIB.Ros({
+          url : _this.url
+      });
       // 初始化插件参数及插入插件
       WebVideoCtrl.I_InitPlugin('100%', '100%', {
         iWndowType: 1,
@@ -1070,6 +1074,7 @@
     destroyed(){
         let _this = this
         clearTimeout(_this.currentTaskInfoTimeId)
+        _this.ros.close()
     },
     beforeRouteLeave(to, form, next) {
       next()

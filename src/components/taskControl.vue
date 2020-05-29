@@ -163,15 +163,26 @@
         taskServer:null,
         taskServerClear:null,
 
+        ros:null,
       };
     },
     mounted(){
     	let _this = this
+
+      _this.ros = new ROSLIB.Ros({
+          url : _this.url
+      });
+      console.log(_this.ros)
+      _this.ros.on('connection', function() {
+          console.log('point.server');
+      });
+
       _this.init()
       _this.plateShow()
       _this.point_now()
       //_this.planLineShow()
       _this.planLinePoint = planLinePointArr
+
     },
 
     methods:{
@@ -489,16 +500,16 @@
       	let _this = this
       	if(_this.taskStopText == '任务暂停'){
           _this.taskStopText = '任务继续'
-          var ros = new ROSLIB.Ros({
+          /*var ros = new ROSLIB.Ros({
               url : _this.url
           });
           //console.log(ros)
           ros.on('connection', function() {
               console.log('准备暂停任务.');
-          });
+          });*/
 
           _this.taskServerClear = new ROSLIB.Service({
-              ros : ros,
+              ros : _this.ros,
               name : '/taskclear',
               serviceType : 'yidamsg/TaskControl'
           });
@@ -508,16 +519,16 @@
           })
         }else {
           _this.taskStopText = '任务暂停'
-          var ros = new ROSLIB.Ros({
+          /*var ros = new ROSLIB.Ros({
               url : _this.url
           });
           //console.log(ros)
           ros.on('connection', function() {
               console.log('准备暂停任务.');
-          });
+          });*/
 
           _this.taskServerClear = new ROSLIB.Service({
-              ros : ros,
+              ros : _this.ros,
               name : '/taskclear',
               serviceType : 'yidamsg/TaskControl'
           });
@@ -563,21 +574,21 @@
                     console.log(_this.planLinePointVector) //.refresh()
                     _this.planLinePointVector.getSource().refresh()
                     //_this.init()
-                    var ros = new ROSLIB.Ros({
+                    /*var ros = new ROSLIB.Ros({
                         url : _this.url
                     });
                     //console.log(ros)
                     ros.on('connection', function() {
                         console.log('准备返回.');
-                    });
+                    });*/
 
                     _this.taskServer = new ROSLIB.Service({
-                        ros : ros,
+                        ros : _this.ros,
                         name : '/tasklist',
                         serviceType : 'yidamsg/TaskList'
                     });
                     _this.taskServerClear = new ROSLIB.Service({
-                        ros : ros,
+                        ros : _this.ros,
                         name : '/taskclear',
                         serviceType : 'yidamsg/TaskList'
                     });
@@ -1069,16 +1080,16 @@
           _this.map.addLayer(_this.passRouteLayer);
           _this.map.addLayer(_this.vehVector);
 
-          var ros = new ROSLIB.Ros({
+          /*var ros = new ROSLIB.Ros({
               url : _this.url
           });
           //console.log(ros)
           ros.on('connection', function() {
               console.log('point.server');
-          });
+          });*/
 
           _this.listener = new ROSLIB.Topic({
-              ros : ros,
+              ros : _this.ros,
               name : '/robot_pose',
               messageType : 'yidamsg/Yida_pose'
           });
@@ -1159,16 +1170,16 @@
       //清除任务
       clearTask(){
     	    let _this = this
-          var ros = new ROSLIB.Ros({
+          /*var ros = new ROSLIB.Ros({
               url : _this.url
           });
           //console.log(ros)
           ros.on('connection', function() {
               console.log('准备清除任务.');
-          });
+          });*/
 
           _this.taskServerClear = new ROSLIB.Service({
-              ros : ros,
+              ros : _this.ros,
               name : '/taskclear',
               serviceType : 'yidamsg/TaskList'
           });
@@ -1189,6 +1200,14 @@
             this.planLineShow(val)
             //console.log(val,oval)
         }
+    },
+    destroyed(){
+      let _this = this
+      if(_this.listener){
+          console.log('unsub')
+          _this.listener.unsubscribe();
+      }
+      _this.ros.close()
     },
   }
 </script>

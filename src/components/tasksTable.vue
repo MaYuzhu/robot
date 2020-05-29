@@ -841,6 +841,7 @@
                       });
 
                       _this.taskServer.callService(request, function(result) {
+                          console.log(request);
                           console.log(result);
                       });
                   })

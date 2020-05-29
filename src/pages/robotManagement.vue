@@ -74,10 +74,14 @@
         g_iWndIndex:null,
         currentTaskInfoTimeId:null,
         time:3000,
+        ros:null,
       }
     },
     mounted() {
       let _this = this
+      _this.ros = new ROSLIB.Ros({
+          url : _this.url
+      });
       _this.getRobotList()
       _this.play_but()
       // 初始化插件参数及插入插件
@@ -86,7 +90,7 @@
         cbSelWnd: function (xmlDoc) {
           _this.g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
           var szInfo = "当前选择的窗口编号：" + _this.g_iWndIndex;
-          console.log(szInfo);
+          //console.log(szInfo);
         }
       });
       //WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
@@ -109,23 +113,22 @@
       })
 
       //this.createWebSocket();
-
-
+      //_this.test_login()
     },
     methods: {
     	red_pic(){
         $('.red_pic_but').hide()
     		let _this = this
-        var ros = new ROSLIB.Ros({
+        /*var ros = new ROSLIB.Ros({
           url : _this.url
-        });
+        });*/
     		//console.log(ros)
         /*ros.on('connection', function() {
           console.log('Connected to websocket server.');
         });*/
 
         _this.listener = new ROSLIB.Topic({
-          ros : ros,
+          ros : _this.ros,
           name : '/thermal/image_proc/compressed',// /thermal/image_proc/compressed
           messageType : 'sensor_msgs/CompressedImage', // sensor_msgs::CompressedImage
           /*name : '/navigation/cmd_vel',// /thermal/image_proc/compressed
@@ -249,6 +252,7 @@
       //可见光
       test_login(){
       	let _this = this
+
         $('.play_video').hide()
         WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
         var iRet = WebVideoCtrl.I_Login(_this.hkUrl, 1, 80, 'admin', '1234asdf', {
@@ -270,7 +274,7 @@
           _this.clickStartRealPlay()
         }
 
-
+        //console.log(iRet)
       },
       clickStartRealPlay() {
         let _this = this
@@ -338,7 +342,7 @@
           null,
           true,function (res) {
             if(res.code == 200){
-            	console.log(res)
+            	//console.log(res)
               _this.taskInfo = {
             		name:res.data.taskName,
                 taskStatus:res.data.taskStatus,
@@ -439,6 +443,7 @@
     destroyed(){
         let _this = this
         clearTimeout(_this.currentTaskInfoTimeId)
+        _this.ros.close()
     },
 
     beforeRouteLeave(to, form, next) {
