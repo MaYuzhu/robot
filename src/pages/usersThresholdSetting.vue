@@ -5,8 +5,8 @@
       <div class="top_left">
         <el-input v-model="input" placeholder="请输入内容" style="width: 130px;float: left" size="mini"></el-input>
         <ul>
-          <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
-          <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
+          <li @click="queryTree"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
+          <li @click="resetTree"><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
         </ul>
       </div>
       <div class="top_right">
@@ -22,7 +22,7 @@
     </div>
     <div class="threshold_content">
       <div class="content_left">
-        <devTreeNoCheck @childKey="childKey"></devTreeNoCheck>
+        <devTreeNoCheck @childKey="childKey" :toTreeData="toTreeData"></devTreeNoCheck>
       </div>
       <div class="content_right">
         <div class="alarm_box">
@@ -461,6 +461,8 @@
         message2:'',
         message3:'',
         message4:'',
+
+        toTreeData:{},
       }
     },
     mounted(){
@@ -471,27 +473,30 @@
         let _this = this
         _this.alarmData.irProjPointId = _this.irProjPointId
         _this.ajax_api('get',url_api + '/point-alarm-setting',_this.alarmData,true,function (res) {
-          //console.log(res.data)
+          console.log(res.data)
+          if(!res.data.items.length<0){
+            return
+          }
           let result = res.data.items.filter(item => {
-            return item.alarmType.id == 1
+            return item.irBaseAlarmTypeId == 1
           })
           //_this.tableDataChao = result
           _this.tableDataChaoOld = result
 
           let result2 = res.data.items.filter(item => {
-            return item.alarmType.id == 2
+            return item.irBaseAlarmTypeId == 2
           })
           //_this.tableDataWen = result2
           _this.tableDataWenOld = result2
 
           let result3 = res.data.items.filter(item => {
-            return item.alarmType.id == 3
+            return item.irBaseAlarmTypeId == 3
           })
           //_this.tableDataDui = result3
           _this.tableDataDuiOld = result3
 
           let result4 = res.data.items.filter(item => {
-            return item.alarmType.id == 4
+            return item.irBaseAlarmTypeId == 4
           })
           //_this.tableDataCha = result4
           _this.tableDataChaOld = result4
@@ -503,23 +508,26 @@
         _this.alarmData.irProjPointId = _this.irProjPointId
         _this.ajax_api('get',url_api + '/point-alarm-setting',_this.alarmData,true,function (res) {
           //console.log(res.data)
+          if(!res.data.items.length<0){
+            return
+          }
           let result = res.data.items.filter(item => {
-          	return item.alarmType.id == 1
+          	return item.irBaseAlarmTypeId == 1
           })
           _this.tableDataChao = result
 
           let result2 = res.data.items.filter(item => {
-            return item.alarmType.id == 2
+            return item.irBaseAlarmTypeId == 2
           })
           _this.tableDataWen = result2
 
           let result3 = res.data.items.filter(item => {
-            return item.alarmType.id == 3
+            return item.irBaseAlarmTypeId == 3
           })
           _this.tableDataDui = result3
 
           let result4 = res.data.items.filter(item => {
-            return item.alarmType.id == 4
+            return item.irBaseAlarmTypeId == 4
           })
           _this.tableDataCha = result4
           //console.log(result)
@@ -896,7 +904,16 @@
           }
         }
         return bol
-      }
+      },
+      queryTree(){
+        let _this = this
+        _this.toTreeData = _this.input
+      },
+      resetTree(){
+        let _this = this
+        _this.input = ''
+        _this.toTreeData = ''
+      },
     },
     components: {
       HeaderTop,
@@ -966,6 +983,7 @@
 
     .threshold_content
       height calc(100% - 120px)
+      min-height 700px
       .content_left
         width 300px
         height calc(100% - 0px)

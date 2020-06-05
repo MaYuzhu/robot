@@ -7,7 +7,7 @@
         :data="data"
         @node-click="nodeClick()"
         :default-expand-all="false"
-        node-key="id"
+        node-key="id" @check="checkedNode"
         ref="tree" show-checkbox
         highlight-current
         :props="defaultProps">
@@ -19,7 +19,7 @@
             <span class="color_alarm" style="width:13px;height:13px;display:inline-block"></span>
             {{ node.data.name }}
           </span>
-          <!--<span>{{node.data.id}}</span>-->
+          <span>{{node.data.id}}</span>
         </span>
 
       </el-tree>
@@ -64,9 +64,12 @@
         defaultProps: {
           children: 'children',
           label: 'label'
-        }
+        },
+        checkedId:[],
+
       };
     },
+    props:['pointIds'],
 
     mounted(){
       this.getAllDev()
@@ -85,6 +88,16 @@
             }
           })
       },
+      checkedNode(data,isCheck){
+        this.checkedId = []
+        this.checkedId.push(isCheck.checkedKeys)
+        //console.log(data,isCheck)
+        this.checkedId = distinct(this.checkedId)
+        this.$emit('devTreeKey', this.checkedId)
+        function distinct(arr) {
+          return Array.from(new Set(arr))
+        }
+      },
 
       //node-click节点点击事件
       nodeClick(){
@@ -94,6 +107,7 @@
           name:this.$refs.tree.getCurrentNode().name
         })
       },
+
 
       getCheckedNodes() {
         console.log(this.$refs.tree.getCheckedNodes());
@@ -115,8 +129,19 @@
       },
       resetChecked() {
         this.$refs.tree.setCheckedKeys([]);
-      }
+      },
     },
+    watch: {
+      pointIds:{
+        handler(n,o){
+          //console.log(n)
+          if(n=='0'){
+            this.resetChecked()
+          }
+        }
+      }
+
+    }
   }
 </script>
 

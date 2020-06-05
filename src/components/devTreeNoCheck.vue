@@ -64,12 +64,16 @@
         defaultProps: {
           children: 'children',
           label: 'label'
-        }
+        },
+        getTreeDataDev:{},
       };
     },
     props:{
       isTitle:{
         default:true
+      },
+      toTreeData:{
+
       }
     },
 
@@ -81,7 +85,7 @@
       getAllDev(){
         let _this = this
         _this.ajax_api('get',url_api + '/point/tree',
-          null,
+          _this.getTreeDataDev,
           true,
           function (res) {
             if(res.code == 200){
@@ -120,6 +124,18 @@
       },
       resetChecked() {
         this.$refs.tree.setCheckedKeys([]);
+      }
+    },
+    watch:{
+      toTreeData:{
+        handler(n,o){
+          console.log(n,o)
+          let _this = this
+          _this.getTreeDataDev.devName = n
+          _this.getAllDev()
+        },
+        //immediate: true,
+        deep: true
       }
     },
   }

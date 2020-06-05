@@ -14,48 +14,48 @@
       <p>开始时间：</p>
       <el-date-picker size="mini" style="width: 160px;float: left"
                       v-model="value1"
-                      type="date"
+                      type="date" value-format="yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd"
                       placeholder="选择日期">
       </el-date-picker>
       <p>结束时间：</p>
       <el-date-picker size="mini" style="width: 160px;float: left"
                       v-model="value2"
-                      type="date"
+                      type="date" value-format="yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd"
                       placeholder="选择日期">
       </el-date-picker>
       <ul>
-        <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
+        <li @click="queryList"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
       </ul>
     </div>
     <div class="log_title">日志列表</div>
     <div class="table_box">
-      <el-table size="mini"
+      <el-table size="mini" class="table_height"
         :data="tableData"
         border
         style="width: 100%">
-        <el-table-column
+        <el-table-column  align="center"
           type="index" :index="index"
           label="序号"
           width="50">
         </el-table-column>
         <el-table-column
-          prop="type"
+          prop="type" align="center" width="100"
           label="日志类型" :formatter="formatStatus">
         </el-table-column>
         <el-table-column
-          prop="content"
+          prop="content" align="center"
           label="日志内容">
         </el-table-column>
-        <el-table-column
-          prop="createTime"
+        <el-table-column width="210"
+          prop="createTime" align="center"
           label="日志时间">
         </el-table-column>
-        <el-table-column
-          prop="user.name"
+        <el-table-column width="120"
+          prop="user.name" align="center"
           label="创建者">
         </el-table-column>
-        <el-table-column
-          prop="content"
+        <el-table-column width="220"
+          prop="" align="center"
           label="变电站">
         </el-table-column>
 
@@ -65,7 +65,7 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
-          :page-sizes="[1, 5, 10, 20]"
+          :page-sizes="[5, 10, 20, 50]"
           :page-size="10"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total">
@@ -88,16 +88,13 @@
         value2:'',
         options: [
         	{
-          value: '选项1',
+          value: 0,
           label: '系统'
         }, {
-          value: '选项2',
+          value: 1,
           label: '机器人'
-        }, {
-          value: '选项3',
-          label: '客户端'
         }],
-        value: '',
+        value: 0,
         tableData: [
         	{
           date: '1',
@@ -130,17 +127,29 @@
       menuBottom
     },
     mounted(){
-      this.getLogList()
+      let _this = this
+      _this.value1 = _this.convertToLateDate()
+      _this.value2 = _this.nowTime()
+      _this.getLogList()
     },
     methods:{
     	getLogList(){
     		let _this = this
-        this.ajax_api('get',url_api + '/operation-log/logList',_this.logData,true,function (res) {
-          //console.log(res)
+        _this.logData.startTime = _this.value1
+        _this.logData.endTime = _this.value2
+        _this.logData.type = _this.value
+        _this.ajax_api('get',url_api + '/operation-log/logList',_this.logData,true,function (res) {
+          console.log(res)
+          if(res.code!==200){
+            return
+          }
           _this.total = res.data.total
           _this.tableData = res.data.items
         })
 
+      },
+      queryList(){
+        this.getLogList()
       },
       formatStatus(row, column) {
         return row.type == 0 ? '系统' : row.type == 1 ? '机器人' : '客户端'
@@ -158,6 +167,44 @@
         //console.log(`当前页: ${val}`);
         this.logData.page  =  val
         this.getLogList()
+      },
+      convertToLateDate(){
+        var data = new Date();
+        var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
+        // 以上两行代码为关键代码，若想要返回一天后的时间，则可以将第二行代码更换为下面代码
+        // var Da = new Date(data.getTime() + 24 * 60 * 60 * 1000);
+        // 若是想要返回值为当前时间，则上面两行代码可以直接修改为下面代码即可。
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var s = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        s = s < 10 ? "0" + s : s;
+        return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + s;
+
+      },
+      nowTime(){
+        var Da = new Date();
+        // 以上两行代码为关键代码，若想要返回一天后的时间，则可以将第二行代码更换为下面代码
+        // var Da = new Date(data.getTime() + 24 * 60 * 60 * 1000);
+        // 若是想要返回值为当前时间，则上面两行代码可以直接修改为下面代码即可。
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var s = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        s = s < 10 ? "0" + s : s;
+        return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + s;
       },
     },
   }
@@ -205,6 +252,9 @@
       border 1px solid #cae7ee
       position relative
       background white
+      .table_height
+        height calc(100% - 40px)
+        overflow-y auto
       .page_box
         width 100%
         position absolute

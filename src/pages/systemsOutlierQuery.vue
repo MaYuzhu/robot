@@ -18,8 +18,8 @@
                       placeholder="选择日期">
       </el-date-picker>
       <ul>
-        <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
-        <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
+        <li @click="queryList"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
+        <li @click="resetList"><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
         <li><img src="../../static/images/export.png" alt=""><span>导出</span></li>
       </ul>
     </div>
@@ -43,34 +43,40 @@
                            label="">
           </el-table-column>-->
           <el-table-column align="center"
-                           prop="alarmType.name"
+                           prop="reconType.name"
                            label="识别类型"
                            width="150">
           </el-table-column>
           <el-table-column align="center"
-                           prop="limitValue"
+                           prop="point.deviceName"
                            label="点位名称">
           </el-table-column>
-          <el-table-column align="center"
-                           prop="name"
+          <el-table-column align="center" width="100"
+                           prop="pointHistory.value"
                            label="识别结果">
           </el-table-column>
-          <el-table-column align="center"
+          <el-table-column align="center" width="120"
                            prop="resultStatus"
                            label="审核结果">
+            <template slot-scope="scope">
+              <span>{{scope.resultStatus==0?'已审核':'未审核'}}</span>
+            </template>
           </el-table-column>
           <el-table-column align="center"
-                           prop="account"
+                           prop="account" :formatter="alarmLevelText"
                            label="告警等级"
                            width="150">
           </el-table-column>
           <el-table-column align="center"
-                           prop="createTime"
+                           prop="reconTime"
                            label="识别时间">
           </el-table-column>
           <el-table-column align="center"
                            prop="name"
                            label="采集信息">
+            <template slot-scope="scope">
+              <span style="color:blue;cursor:pointer" @click="openImg(imgUrlBefore+scope.row.pointHistory.cameraPic)">{{scope.row.saveType.name}}</span>
+            </template>
           </el-table-column>
 
         </el-table>
@@ -79,8 +85,8 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[1, 5, 10, 20]"
-            :page-size="1"
+            :page-sizes="[10, 20, 50]"
+            :page-size="10"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
           </el-pagination>
@@ -88,7 +94,11 @@
       </div>
     </div>
     <menuBottom></menuBottom>
-
+    <el-dialog width="500px" :visible.sync="imgVisible" class="img-dialog">
+      <el-card :body-style="{ padding: '0px' }">
+        <img :src="dialogImgUrl" width="100%" height="100%">
+      </el-card>
+    </el-dialog>
   </div>
 </template>
 
@@ -120,25 +130,44 @@
         tableData:[],
         alarmData:{
           page: 1,
-          size: 1
+          size: 10
         },
         currentPage: 1,
         total:0,
+        imgUrlBefore: url_img + '/smcsp/',
+        imgVisible:false,
+        dialogImgUrl:'',
       }
     },
     mounted(){
       var vm = this;
-      vm.value2 = new Date();// 默认显示为当天时间
+      vm.value2 = vm.nowTime();// 默认显示为当天时间
       vm.value1 = vm.convertToLateDate();
+      //vm.alarmData.startTime = vm.value1
+      //vm.alarmData.endTime = vm.value2
+      vm.alarmData.resultStatus = 1
       vm.allData()
     },
     methods:{
       childKey(childValue){
-        this.irProjPointId = childValue.id
-        //this.irProjPointName = childValue.name
+        let _this = this
+        _this.irProjPointId = childValue.id
+        _this.alarmData.pointIds = _this.irProjPointId
+        _this.allData()
       },
       allData(){
       	let _this = this
+        //_this.alarmData.startTime = _this.value1
+        //_this.alarmData.endTime = _this.value2
+        if(_this.checked1 && _this.checked2){
+            _this.alarmData.resultStatus = null
+        }else if(!_this.checked1 && !_this.checked2){
+            _this.alarmData.resultStatus = null
+        }else if(_this.checked1){
+            _this.alarmData.resultStatus = 0
+        }else if(_this.checked2){
+            _this.alarmData.resultStatus = 1
+        }
         _this.ajax_api('post',url_api + '/point-alarm-history',
           _this.alarmData,
           true,function (res) {
@@ -176,11 +205,72 @@
         var d = Da.getDate();
         var H = Da.getHours();
         var mm = Da.getMinutes();
+        var s = Da.getSeconds();
         m = m < 10 ? "0" + m : m;
         d = d < 10 ? "0" + d : d;
         H = H < 10 ? "0" + H : H;
-        return y + "-" + m + "-" + d + " " + H + ":" + mm;
+        s = s < 10 ? "0" + s : s;
+        return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + s;
 
+      },
+      nowTime(){
+          var Da = new Date();
+          // 以上两行代码为关键代码，若想要返回一天后的时间，则可以将第二行代码更换为下面代码
+          // var Da = new Date(data.getTime() + 24 * 60 * 60 * 1000);
+          // 若是想要返回值为当前时间，则上面两行代码可以直接修改为下面代码即可。
+          // var Da = new Date()
+          var y = Da.getFullYear();
+          var m = Da.getMonth() + 1;
+          var d = Da.getDate();
+          var H = Da.getHours();
+          var mm = Da.getMinutes();
+          var s = Da.getSeconds();
+          m = m < 10 ? "0" + m : m;
+          d = d < 10 ? "0" + d : d;
+          H = H < 10 ? "0" + H : H;
+          s = s < 10 ? "0" + s : s;
+          return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + s;
+      },
+
+      alarmLevelText(row){
+            var result
+            switch (row.alarmLevel) {
+                case 0:
+                    result = '正常'
+                    break
+                case 1:
+                    result = '预警'
+                    break
+                case 2:
+                    result = '一般告警'
+                    break
+                case 3:
+                    result = '严重告警'
+                    break
+                case 4:
+                    result = '危机告警'
+                    break
+            }
+            return result
+      },
+      openImg(url) {
+          let _this = this
+          if (url) {
+              _this.imgVisible = true
+              _this.dialogImgUrl = url
+          }
+      },
+      queryList(){
+          let _this = this
+          _this.allData()
+      },
+      resetList(){
+          this.alarmData.startTime = this.convertToLateDate();
+          this.alarmData.endTime = this.nowTime()
+          this.alarmData.resultStatus = 1
+          this.pointIds = ''
+          this.alarmData.pointIds = this.pointIds
+          this.allData()
       },
     },
     components: {
@@ -230,6 +320,7 @@
         height calc(100% - 1px)
         float left
         box-sizing border-box
+        border-right 0px solid #3d8fff
       .right
         width calc(100% - 300px)
         height 100%
@@ -238,6 +329,9 @@
         overflow-y auto
         position relative
         background white
+        .table_box
+          height calc(100% - 60px)
+          overflow-y auto
         p
           height 30px
           line-height 30px
@@ -253,4 +347,10 @@
             padding 4px 0
     div>>>.el-table td
             padding 3px 0
+    /deep/.img-dialog
+      .el-dialog__header
+        padding: 0!important;
+        .el-dialog__headerbtn
+          right 10px
+          top 10px
 </style>

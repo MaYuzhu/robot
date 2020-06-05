@@ -40,7 +40,7 @@
         irBaseInspectTypeId:1,
         saveData:{
           description:'',
-          irBaseInspectTypeId:'',
+          irBaseInspectTypeId:'1',
           irBaseRobotId:1,
           isCustom:'0',
           name:'地图创建',
@@ -52,6 +52,7 @@
     },
     mounted(){
       console.log(this.ids)
+      this.saveData.points = this.ids
     },
     methods:{
       treeCheck(data){

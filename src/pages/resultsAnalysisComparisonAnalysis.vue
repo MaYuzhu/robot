@@ -13,7 +13,7 @@
       </div>
       <div class="analysis_content">
         <div class="left" style="float: left">
-          <DevTree></DevTree>
+          <DevTree @devTreeKey="devTreeKey" :pointIds="pointIds"></DevTree>
         </div>
         <div class="center">
           <div class="center_top">
@@ -44,7 +44,7 @@
           <div class="top3">
             <ul>
               <li @click="queryList"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
-              <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
+              <li @click="resetList"><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
               <li><img src="../../static/images/export.png" alt=""><span>导出</span></li>
             </ul>
           </div>
@@ -74,6 +74,11 @@
               >
               </el-table-column>
               <el-table-column
+                  prop="point.id" align="center"
+                  label="id"
+              >
+              </el-table-column>
+              <el-table-column
                 prop="value" align="center"
                 label="识别结果"
               >
@@ -92,9 +97,9 @@
                 @size-change="handleSizeChange1"
                 @current-change="handleCurrentChange1"
                 :current-page="currentPage1"
-                :page-sizes="[7, 10, 20]"
+                :page-sizes="[7, 10, 20, 50]"
                 :page-size="7"
-                layout="total, sizes, prev, pager, next, jumper"
+                layout="total, sizes, prev, pager, next"
                 :total="total1">
               </el-pagination>
             </div>
@@ -124,7 +129,7 @@
               @size-change="handleSizeChange2"
               @current-change="handleCurrentChange2"
               :current-page="currentPage2"
-              :page-sizes="[6, 9, 20]"
+              :page-sizes="[6, 9, 20, 50]"
               :page-size="6"
               layout="total, sizes, prev, pager, next"
               :total="total2">
@@ -153,20 +158,10 @@
   // 引入提示框和title组件
   require('echarts/lib/component/tooltip')
   require('echarts/lib/component/title')
+  require('echarts/lib/component/legend')
 
   const pointsOptions = ['点', '面' ]
   const arrImg = [
-    {name:'aaa',url:'../../static/abc.jpg'},
-    {name:'aaa',url:'../../static/abc.jpg'},
-    {name:'aaa',url:'../../static/abc.jpg'},
-    {name:'aaa',url:'../../static/abc.jpg'},
-    {name:'aaa',url:'../../static/abc.jpg'},
-    {name:'aaa',url:'../../static/abc.jpg'},
-    {name:'aaa',url:'../../static/abc.jpg'},
-    {name:'aaa',url:'../../static/abc.jpg'},
-    {name:'aaa',url:'../../static/abc.jpg'},
-    {name:'aaa',url:'../../static/abc.jpg'},
-    {name:'aaa',url:'../../static/abc.jpg'},
     {name:'aaa',url:'../../static/abc.jpg'},
   ]
 
@@ -225,6 +220,9 @@
         ajaxTableImgData:{page:1, size:6},
         imgDataResults:null,
         srcList:[],
+        pointIds:'',
+        chartsDateX:[],
+        chartsDataY:[],
       }
     },
     components: {
@@ -236,7 +234,6 @@
       this.value_start = this.convertToLateDate()
       this.value_end = this.getDateTime()
       this.getRightData()
-      this.drawLine()
       this.getTableData()
       this.getImgData()
 
@@ -245,7 +242,8 @@
       getTableData(){
           let _this = this
           _this.ajaxTableData.startTime = _this.value_start
-          _this.ajaxTableData.endTime = _this.value_end
+          _this.ajaxTableData.endTime = _this.value_end //+ ' 23:59:59'
+          //console.log(_this.ajaxTableData)
           //_this.ajaxTableData.checkStatus = _this.radio*1
           _this.ajax_api('post',url_api + '/point-history',
               _this.ajaxTableData,
@@ -365,22 +363,60 @@
       	let _this = this
         _this.right_show_img = arrImg.slice(0,4)
       },
-      drawLine(){
+      drawLine(dateX,dataY){
+        let _this = this
+        console.log(dataY)
+        let legend = []
+        for(let i=0;i<dataY.length;i++){
+          legend.push(dataY[i].name)
+          console.log(dataY[i].name)
+        }
+        console.log(legend)
         // 基于准备好的dom，初始化echarts实例
         let myChart = this.$echarts.init(document.getElementById('center_chart'))
         // 绘制图表
         myChart.setOption({
           title: { text: 'echarts' },
-          tooltip: {},
-          xAxis: {
-            data: ["11-01","11-02","11-03","11-04","11-05","11-06"]
+          legend: {
+            //data: ['开关压力表2','开关压力表4','开关压力表7']
+            data: legend
           },
-          yAxis: {},
-          series: [{
-            name: ' ',
+          grid: {
+            left: '13%',
+            right: '14%',
+            bottom: '13%',
+            containLabel: true
+          },
+          toolbox: {
+            feature: {
+              saveAsImage: {}
+            }
+          },
+          tooltip: {
+            trigger: 'axis'
+          },
+          xAxis: {
+            data: dateX,
+            type: 'category',
+            //data: ["2020-06-04 16:19:56", "2020-06-04 15:55:48", "2020-06-03 07:13:35"]
+          },
+          yAxis: {
+            type: 'value'
+          },
+          series: dataY
+          /*series: [{
+            name: '1',
+            stack: '总量',
+            type: 'line',
+            //data: [5, 16, 36, 10, 14, 25]
+            data: _this.chartsDataY
+          },{
+            name: '2',
+            stack: '总量',
             type: 'line',
             data: [5, 16, 36, 10, 14, 25]
-          }]
+            //data: _this.chartsDataY
+          }]*/
         });
       },
       openImg(url) {
@@ -392,9 +428,20 @@
           }
       },
       queryList(){
-          let _this = this
-          _this.getTableData()
-          _this.getImgData()
+        let _this = this
+        _this.getTableData()
+        _this.getImgData()
+      },
+      resetList(){
+        let _this = this
+        _this.value_start = _this.convertToLateDate()
+        _this.value_end = _this.getDateTime()
+        //_this.ajaxTableData.checkStatus = _this.radio*1
+        _this.pointIds = '0'
+        _this.ajaxTableData.pointIds = ''
+        _this.ajaxTableImgData.pointIds = ''
+        _this.getTableData()
+        _this.getImgData()
       },
       radioChangeN(val){
         //console.log(val)
@@ -407,6 +454,54 @@
             //console.log(r_w)
             setTimeout(()=>{$('.right_content li>div').height(r_w*0.7)},10)
         }
+      },
+      devTreeKey(val){
+        let _this = this
+        let testPoint = [2,7,4]
+        //console.log(val.toString())
+        _this.pointIds = testPoint.toString()
+        _this.ajaxTableData.pointIds = _this.pointIds
+        _this.ajaxTableImgData.pointIds = _this.pointIds
+        _this.getTableData()
+        _this.getImgData()
+        _this.chartsData(testPoint)
+
+      },
+      chartsData(pointIdsArr){
+        let _this = this
+        let dateX = []
+        let dataY = []
+        let dataYArr = []
+        let dataYData = []
+        for(let i=0;i<pointIdsArr.length;i++) {
+          _this.ajax_api('post',url_api + '/point-history',
+            {pointIds:pointIdsArr[i]},
+            true,
+            function (res) {
+              if(res.code == 200){
+                console.log(res.data.items)
+                dateX = []
+                dataY = {}
+                dataYData = []
+                  for(let j=0;j<res.data.items.length;j++){
+                    dateX.push(res.data.items[j].createTime)
+                    dataYData.push(res.data.items[j].value)
+                    dataY = {
+                      time: res.data.items[j].createTime,
+                      name: res.data.items[j].point.deviceName,
+                      stack: '总量',
+                      type: 'line',
+                      data: dataYData
+                    }
+                  }
+              }
+              dataYArr.push(dataY)
+              console.log(dateX)
+              _this.drawLine(dateX,dataYArr)
+          })
+
+        }
+
       },
     }
   }
@@ -493,6 +588,9 @@
           .page
             position absolute
             bottom 0
+            width 100%
+            min-width 300px
+            overflow-x auto
         .charts
           border 1px solid #a9afee
           height calc(100% - 436px)
@@ -526,6 +624,9 @@
         .page
           position absolute
           bottom 0
+          width 100%
+          min-width 300px
+          overflow-x auto
     /deep/ .el-image-viewer__close
       color white
 </style>

@@ -732,7 +732,7 @@
             null,true,function (res) {
                 //console.log(res)
             })*/
-        /*_this.ajax_api('post',url_api + '/task/'+ _this.irProjTaskId+'/execute',
+        _this.ajax_api('post',url_api + '/task/'+ _this.irProjTaskId+'/execute',
             {
                 "cumulativeRunTime": 0,
                 "hum": 0,
@@ -794,7 +794,7 @@
                         })
 
                     })
-            })*/
+            })
 
           _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
               {},true,function (res) {

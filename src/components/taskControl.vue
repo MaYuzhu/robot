@@ -234,7 +234,7 @@
           title: 'add Layer',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
-            url: '../../static/geojson/route.json',
+            url: '../../static/geojson/route3.geojson',
             //url: '../../static/geojson/route.geojson',
             format:new ol.format.GeoJSON()
           }),
@@ -357,16 +357,16 @@
           _this.isShowStopPoint = true
           _this.pointmove = new ol.interaction.Select({
             condition: ol.events.condition.pointerMove,
-            layers: [_this.geoJsonLayerPoint]
+            layers: [_this.geoJsonLayerPointTargets3]
           })
-          var pointFeatures = _this.geoJsonLayerPoint.getSource().getFeatures()
+          var pointFeatures = _this.geoJsonLayerPointTargets3.getSource().getFeatures()
           var vectorSource = new ol.source.Vector({
             features: pointFeatures
           })
           var pointIdsArr = []
           //框选
           _this.boxSelect = new ol.interaction.Select({
-            layers: [_this.geoJsonLayerPoint]
+            layers: [_this.geoJsonLayerPointTargets3]
           });
           _this.selectedFeatures = _this.boxSelect.getFeatures();
           _this.dragBoxPoint = new ol.interaction.DragBox({
@@ -378,7 +378,7 @@
             var extent = _this.dragBoxPoint.getGeometry().getExtent();
             vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
               _this.selectedFeatures.push(feature)
-              pointIdsArr.push(feature.getId().slice(6))
+              pointIdsArr.push(feature.getId().slice(8))
             });
             //console.log(selectedFeatures)
             _this.pointIds = pointIdsArr.toString()

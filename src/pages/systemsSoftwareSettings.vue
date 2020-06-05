@@ -42,7 +42,7 @@
             <p>模式识别版本: <span>0</span></p>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="远程访问设置">
+        <!--<el-tab-pane label="远程访问设置">
           <div class="items items_3">
             <div>
               <p>可见光ip地址：</p>
@@ -115,7 +115,7 @@
             <el-button class="update_position" size="mini">保存</el-button>
           </div>
 
-        </el-tab-pane>
+        </el-tab-pane>-->
       </el-tabs>
     </div>
     <menuBottom></menuBottom>

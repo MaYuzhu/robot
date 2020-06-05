@@ -131,10 +131,10 @@
       }
     },
     mounted(){
-      var vm = this;
-      vm.endTime = vm.todayDate();// 默认显示为当天时间
-      vm.startTime = vm.convertToLateDate();
-      vm.getAllData()
+      var _this = this;
+      _this.endTime = _this.todayDate();// 默认显示为当天时间
+      _this.startTime = _this.convertToLateDate();
+      _this.getAllData()
     },
     methods:{
     	getAllData(){

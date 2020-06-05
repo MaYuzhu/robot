@@ -33,8 +33,8 @@
             >
             </el-table-column>
             <el-table-column
-              prop="pointType" align="center"
-              label="识别类型" :formatter="pointTypeText"
+              prop="reconType.name" align="center"
+              label="识别类型"
             >
             </el-table-column>
             <el-table-column
@@ -200,7 +200,8 @@
                   {page:1, size:1},
                   true,
                   function (res) {
-                      if(res.code == 200){
+                      //console.log(res.data.items)
+                      if(res.code == 200 && res.data.items.length>0){
                           //console.log(res.data.items)
                           if(_this.tableDataPointNow[0].createTime!=res.data.items[0].createTime){
                               _this.tableDataPointNow.unshift(res.data.items[0])
@@ -232,7 +233,7 @@
                     {page:1, size:1},
                     true,
                     function (res) {
-                        if(res.code == 200){
+                        if(res.code == 200 && res.data.items.length>0){
                             //console.log(res.data.items)
                             if(_this.tableDataPointAlarmNow[0].createTime!=res.data.items[0].createTime){
                                 _this.tableDataPointAlarmNow.unshift(res.data.items[0])

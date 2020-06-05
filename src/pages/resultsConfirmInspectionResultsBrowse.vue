@@ -120,7 +120,7 @@
               @size-change="handleSizeChange2"
               @current-change="handleCurrentChange2"
               :current-page="currentPage2"
-              :page-sizes="[6, 4, 3]"
+              :page-sizes="[6, 10, 20]"
               :page-size="6"
               layout="total, sizes, prev, pager, next, jumper"
               :total="total2">
@@ -598,7 +598,6 @@
         }
       },
       resetList(){
-
         this.radio = '0'
         this.value_end = this.getDateTime()
         this.value_start = this.convertToLateDate()
@@ -873,6 +872,7 @@
           height 528px
           .ul_img_wrap
             height calc(100% - 30px)
+            overflow-y auto
             .li_img
               height calc(100% - 22px)
     .alarm_dialog /deep/

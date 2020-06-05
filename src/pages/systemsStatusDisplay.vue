@@ -17,7 +17,7 @@
           <p>通讯状态信息</p>
           <div class="tong_info">
             <div><p><span>无线基站: </span><img src="../../static/img/signal_no.png" alt=""></p></div>
-            <div><p><span>控制系统: </span><img src="../../static/img/signal_no.png" alt=""></p></div>
+            <div><p><span>控制系统: </span><img :src="require('../../static/img/'+kongzhiImgSrc+'.png')" alt=""></p></div>
             <div><p><span>可见光摄像: </span><img :src="require('../../static/img/'+videoImgSrc+'.png')" alt=""></p></div>
             <div><p><span>充电系统: </span><img src="../../static/img/signal_no.png" alt=""></p></div>
             <div><p><span>红外摄像: </span><img :src="require('../../static/img/'+redImgSrc+'.png')" alt=""></p></div>
@@ -42,7 +42,7 @@
               <p>电源模块</p>
               <div>
                 <div><p>外供电源: <span>0</span></p></div>
-                <div><p>充电状态: <span>0</span></p></div>
+                <div><p>充电状态: <span>{{chongdian}}</span></p></div>
                 <div><p>充电: <span>0</span></p></div>
               </div>
             </div>
@@ -200,7 +200,9 @@
         ros_server:null,
         hkUrl: hKUrl,
         videoImgSrc:'signal_no',
+        kongzhiImgSrc:'signal_no',
         webVideoCtrl:null,
+        chongdian:'',
       }
     },
     mounted(){
@@ -275,11 +277,12 @@
         });
 
         _this.listener.subscribe(function(message) {
-            //console.log(message);
-            //_this.listener.unsubscribe();
-            _this.power = message.battery_info
-            _this.body_wendu = message.incar_temperature
-            _this.dianya = message.battery_voltage
+          //console.log(message);
+          //_this.listener.unsubscribe();
+          _this.power = message.battery_info
+          _this.body_wendu = message.incar_temperature
+          _this.dianya = message.battery_voltage
+          _this.chongdian = message.fall?'正在充电':'未充电'
         });
       },
       speed_now(){
@@ -342,48 +345,39 @@
           });
       },
       isRed(){
-          let _this = this
-          /*var ros = new ROSLIB.Ros({
-              url : _this.url
-          });
-          ros.on('connection', function() {
-              console.log('red server.');
-          });*/
-          _this.listener = new ROSLIB.Topic({
-              ros : _this.ros,
-              name : '/thermal/image_proc/compressed',
-              messageType : 'sensor_msgs/CompressedImage'
-          });
 
-          _this.listener.subscribe(function(message) {
-              //console.log(message)
-              if(message.data){
-                  _this.redImgSrc = 'signal'
-              }else {
-                  _this.redImgSrc = 'signal_no'
-              }
-              _this.listener.unsubscribe();
-          });
       },
       isVideo(){
-          let _this = this
+        let _this = this
+        _this.listener = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/self_check',
+          messageType : 'yidamsg/connection_status'
+        });
 
-          _this.webVideoCtrl = null
-          _this.webVideoCtrl = WebVideoCtrl
-          _this.webVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
-          var iRet = _this.webVideoCtrl.I_Login(_this.hkUrl, 1, 80, 'admin', '1234asdf', {
-              success: function (xmlDoc) {
-                  console.log(" 登录成功！");
-                  localStorage.setItem("videoIs",true);
-                  _this.videoImgSrc = 'signal'
-              },
-              error: function () {
-                  console.log(" 登录失败！");
-                  localStorage.setItem("videoIs",false);
-                  _this.videoImgSrc = 'signal_no'
-              }
-          });
-          //window.location.reload()
+        _this.listener.subscribe(function(message) {
+          //console.log(message)
+          //可见光
+          if(message.camera){
+            _this.videoImgSrc = 'signal'
+          }else {
+            _this.videoImgSrc = 'signal_no'
+          }
+          //红外
+          if(message.infrared_camera){
+            _this.redImgSrc = 'signal'
+          }else {
+            _this.redImgSrc = 'signal_no'
+          }
+          //控制系统
+          if(message.ipc){
+            _this.kongzhiImgSrc = 'signal'
+          }else {
+            _this.kongzhiImgSrc = 'signal_no'
+          }
+          _this.listener.unsubscribe();
+        });
+
       },
 
     },

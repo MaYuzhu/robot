@@ -358,13 +358,15 @@
       height calc(100% - 180px)
       background #fff
       position relative
-
+      /deep/ .el-table::before
+        height 0px
       .page_box
         position absolute
         bottom 0
       .table_box
         height calc(100% - 30px)
         overflow-y auto
+
     .audit_dialog /deep/
       .el-dialog
         background #d7efec

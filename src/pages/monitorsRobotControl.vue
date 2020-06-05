@@ -477,7 +477,7 @@
           _this.clickStopRecord()
         }else {
           _this.voice_title = '停止录制'
-          _this.voice_img = "../../static/images/recordingvoice1.png"
+          _this.voice_img = "../../static/images/recordStop.png"
           _this.clickOpenSound()
           _this.clickStartRecord()
         }
@@ -489,11 +489,11 @@
         if(_this.video_title == '停止录像'){
           _this.video_title = '开始录像'
           _this.video_img = "../../static/images/recordingvideo.png"
-          _this.clickStopRecord()
+          //_this.clickStopRecord()
         }else {
           _this.video_title = '停止录像'
-          _this.video_img = "../../static/images/recordingvoice1.png"
-          _this.clickStartRecord()
+          _this.video_img = "../../static/images/info.png"
+          //_this.clickStartRecord()
         }
       },
       //回放录像
@@ -1131,10 +1131,12 @@
               display flex
               align-items center
               justify-content center
+              text-align center
               img
                 width 36%
-                display block
-                margin 0 auto
+                display inline-block
+                line-height 26px
+                //margin 0 auto
           >.control_header_right
             float left
             display flex
