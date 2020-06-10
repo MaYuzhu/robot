@@ -4,7 +4,7 @@
     line-height:30px;background:linear-gradient(#e3f2ee,#cae7ee);">设备树</p>
     <div style="height: calc(100% - 30px);max-height: calc(100% - 30px);overflow: auto">
       <el-tree
-        :data="data"
+        :data="dataTree" :default-expanded-keys="idArr"
         @node-click="nodeClick()"
         :default-expand-all="false"
         node-key="id"
@@ -42,7 +42,7 @@
 
     data() {
       return {
-        data: [{name: '加载中...',
+        dataTree: [{name: '加载中...',
           /*id: 1,
           icon:"el-icon-menu",
           label: '变电站',
@@ -65,7 +65,13 @@
           children: 'children',
           label: 'label'
         },
+        dataTreeAll:[],
+        treeQuery:'111',
         getTreeDataDev:{},
+        idArr:[],
+        checkedId:[],
+        checkedIdArr:[],
+        taskId:'',
       };
     },
     props:{
@@ -78,7 +84,16 @@
     },
 
     mounted(){
-      this.getAllDev()
+      let _this = this
+      _this.getAllDev()
+      _this.ajax_api('get',url_api + '/point/tree',
+        null,
+        true,
+        function (res) {
+          if(res.code == 200){
+            _this.dataTreeAll = res.data
+          }
+        })
     },
 
     methods: {
@@ -89,15 +104,52 @@
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res)
-              _this.data = res.data
+              //console.log(res.data)
+              _this.dataTree = res.data
+              _this.dataTree.forEach(m=>{
+                _this.idArr.push(m.id) //默认展开
+              })
+              if(_this.toTreeData.quyu.length>0){
+                let newDataQuyu = []
+                for(let i=0;i<_this.toTreeData.quyu.length;i++){
+                  //console.log(_this.dataTreeAll)
+                  if(_this.dataTreeAll.length>0){
+                    let li = _this.dataTreeAll[0].children.filter(item => {
+                      return item.id == _this.toTreeData.quyu[i].id
+                    })
+                    //console.log(li)
+                    newDataQuyu.push(li[0])
+                  }
+
+                }
+                //console.log(newDataQuyu)
+                _this.dataTree = [{
+                  id: 4,
+                  name: "变电站",
+                  irBaseDeviceTypeId: 4,
+                  modelLevel: 1000,
+                  parentId: 3,
+                  children:newDataQuyu
+                }]
+              }
+
+              //回显任务包含的points
+              if(_this.taskId){
+                _this.showTaskPoint()
+              }
+
             }
           })
       },
 
       //node-click节点点击事件
       nodeClick(){
-        //console.log(this.$refs.tree.getCurrentKey())
+        let _this = this
+        //console.log(this.$refs.tree.getCurrentNode().children!=undefined)
+        let isLeaf = this.$refs.tree.getCurrentNode().children!=undefined
+        if(isLeaf && _this.toTreeData.checkLeaf==undefined){
+          return
+        }
         this.$emit('childKey', {
           id:this.$refs.tree.getCurrentKey(),
           name:this.$refs.tree.getCurrentNode().name
@@ -129,10 +181,65 @@
     watch:{
       toTreeData:{
         handler(n,o){
-          console.log(n,o)
+          //console.log(n)
           let _this = this
-          _this.getTreeDataDev.devName = n
-          _this.getAllDev()
+          _this.treeQuery = n
+          if(n.quyu.length>0){
+            let newDataQuyu = []
+
+            if(_this.dataTreeAll.length<1){
+              _this.getAllDev()
+
+            }else {
+              for(let i=0;i<n.quyu.length;i++){
+                //console.log(_this.dataTreeAll)
+                let li = _this.dataTreeAll[0].children.filter(item => {
+                  return item.id == n.quyu[i].id
+                })
+                newDataQuyu.push(li[0])
+              }
+              //console.log(newDataQuyu)
+              _this.dataTree = [{
+                id: 4,
+                name: "变电站",
+                irBaseDeviceTypeId: 4,
+                modelLevel: 1000,
+                parentId: 3,
+                children:newDataQuyu
+              }]
+            }
+          }else if(n.quyu.length<1){
+            _this.dataTree = _this.dataTreeAll
+          }
+
+          if(_this.dataTreeAll.length<1){
+            _this.getAllDev()
+          }else {
+            let typeIds = []
+            n.type.forEach(m=>{
+              typeIds.push(m.id)
+            })
+            let reconTypeIds = []
+            n.recon.forEach(m=>{
+              reconTypeIds.push(m.id)
+            })
+            let meterTypeIds = []
+            n.meter.forEach(m=>{
+              meterTypeIds.push(m.id)
+            })
+            let faceTypeIds = []
+            n.face.forEach(m=>{
+              faceTypeIds.push(m.id)
+            })
+            _this.getTreeDataDev.devTypeIds = typeIds.toString()
+            _this.getTreeDataDev.reconTypeIds = reconTypeIds.toString()
+            _this.getTreeDataDev.meterTypeIds = meterTypeIds.toString()
+            _this.getTreeDataDev.faceTypeIds = faceTypeIds.toString()
+
+            _this.getAllDev()
+          }
+
+
         },
         //immediate: true,
         deep: true

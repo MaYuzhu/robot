@@ -104,7 +104,7 @@
     </div>
     <div class="content">
       <div class="left">
-        <devTreeNoCheck></devTreeNoCheck>
+        <devTreeNoCheck @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTreeNoCheck>
       </div>
       <div class="right">
         <p class="title">生成报表</p>
@@ -372,6 +372,14 @@
 
         currentPage:1,
         total:1,
+
+        toTreeData:{
+          quyu:[],
+          type:[],
+          recon:[],
+          meter:[],
+          face:[]
+        },
       }
     },
     components: {
@@ -515,6 +523,9 @@
         }else {
           $('.all_content_face_type').height('20px')
         }
+      },
+      treeCheck(data){
+        //console.log(data)
       },
 
       alertBox(){
@@ -672,7 +683,50 @@
         return y + "-" + m + "-" + d
       },
 
-    }
+    },
+    watch:{
+
+      checkedQuyu:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.quyu = newVal
+      },
+      checkedDevType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.type = newVal
+      },
+      checkedReconType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.recon = newVal
+      },
+      checkedMeterType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.meter = newVal
+      },
+      checkedFaceType:function (newVal,oldVal) {
+        let _this = this
+        //console.log(newVal,oldVal)
+        _this.toTreeData.face = newVal
+      },
+
+      saveData:{
+        handler(newVal,oldVal){
+          //console.log(newVal.points)
+        },
+        immediate: true,
+        deep: true
+      },
+      savePutData:{
+        handler(newVal,oldVal){
+          //console.log(newVal.points)
+        },
+        immediate: true,
+        deep: true
+      },
+    },
   }
 </script>
 

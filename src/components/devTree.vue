@@ -80,10 +80,15 @@
     props:['toTreeData'],
     created() {
       this.$root.eventHub.$on('eventName',(target) => {
+        if(target==''){
+          this.checkedIdArr = []
+        }
+        this.taskId = target
         this.findNewTree(target)
+        //console.log(this.checkedIdArr)
       });
       this.$root.eventHub.$on('editTaskDbl',(target) => {
-        console.log(target)
+        //console.log(target)
         this.editTaskId(target)
       });
     },

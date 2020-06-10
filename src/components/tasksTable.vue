@@ -82,8 +82,8 @@
             align="center">
             <template slot-scope="scope">
               <el-date-picker size="mini" style="width: 300px"
-                v-model="scope.row.createTime"
-                type="datetime" format="yyyy 年 MM 月 dd 日 HH时 mm分 ss秒"
+                v-model="scope.row.executeTime"
+                type="datetime" format="yyyy-MM-dd HH:mm:ss"
                               value-format="yyyy-MM-dd HH:mm:ss"
                 placeholder="选择日期时间">
               </el-date-picker>
@@ -351,6 +351,7 @@
         url: robotUrl,
         taskServer: null,
         taskServerClear:null,
+        ros:null,
       }
     },
 
@@ -369,6 +370,17 @@
 
     },
     mounted(){
+      let _this = this
+      _this.ros = new ROSLIB.Ros({
+        url : _this.url
+      });
+      _this.ros.on('connection', function() {
+        console.log('任务ros.');
+      });
+      _this.ros.on('close', function() {
+        console.log('任务ros closed.');
+      });
+
       this.getTableData()
       this.value_time2 = this.getdatatime()
       this.value_time_huizong1 = this.getdatatime()
@@ -416,7 +428,7 @@
         },
         true,
         function (res) {
-          //console.log(res.data)
+          console.log(res.data)
           _this.tableDataFix = res.data.items
 
         })
@@ -452,7 +464,7 @@
         _this.addFixIdNum++
         _this.tableDataFix.push({
           id:_this.addFixIdNum+'my',
-          createTime:''
+          executeTime:''
         })
       },
       //保存定期执行时间表
@@ -465,13 +477,14 @@
         }
         for(var item in _this.tableDataFix){
           addSaveFixTimeData.taskRegularRequests.push({
-            executeTime:_this.getTimeMy(_this.tableDataFix[item].createTime)
+            //executeTime:_this.getTimeMy(_this.tableDataFix[item].createTime)
+            executeTime:_this.tableDataFix[item].executeTime
           })
         }
         //console.log(addSaveFixTimeData)
         _this.ajax_api('put',url_api + '/task-regular/batch',
           addSaveFixTimeData,true,function (res) {
-          //console.log(res.data.items)
+          //console.log(res)
           if(res.code==200){
             _this.$message({
               message: '新增成功',
@@ -736,20 +749,20 @@
             {
                 "cumulativeRunTime": 0,
                 "hum": 0,
-                "irBaseRobotId": 1,
+                "irBaseRobotId": _this.irBaseRobotId,
                 "irProjTaskId": _this.irProjTaskId,
                 "taskEndTime": _this.getdatatime10(),
                 "taskStartTime": _this.getdatatime(),
                 "taskStatus": "3",
                 "wind": 0
-            },true,function (res) {
-                //console.log(11)
+            },true,function (resData) {
+                console.log(resData)
                 _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
                     {},true,function (res) {
                         console.log(res.data.path)
                         //取到计划线路的点
                         if(!res.data.path){
-                            console.log(res.data.path)
+                            //console.log(res.data.path)
                             return
                         }
                         var linePlanObj = JSON.parse(res.data.path)
@@ -763,21 +776,14 @@
                             lineArr.push(point)
                         }
                         planLinePointArr = lineArr
-                        var ros = new ROSLIB.Ros({
-                            url : _this.url
-                        });
-                        //console.log(ros)
-                        ros.on('connection', function() {
-                            console.log('任务.');
-                        });
 
                         _this.taskServer = new ROSLIB.Service({
-                            ros : ros,
+                            ros : _this.ros,
                             name : '/tasklist',
                             serviceType : 'yidamsg/TaskList'
                         });
                         _this.taskServerClear = new ROSLIB.Service({
-                            ros : ros,
+                            ros : _this.ros,
                             name : '/taskclear',
                             serviceType : 'yidamsg/TaskList'
                         });
@@ -791,17 +797,17 @@
                             _this.taskServer.callService(request, function(result) {
                                 console.log(result);
                             });
-                        })
+                        });
 
                     })
             })
 
-          _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
+          /*_this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
               {},true,function (res) {
                   console.log(res.data.path)
                   //取到计划线路的点
                   if(!res.data.path){
-                      console.log(res.data.path)
+                      //console.log(res.data.path)
                       return
                   }
                   var linePlanObj = JSON.parse(res.data.path)
@@ -815,21 +821,14 @@
                       lineArr.push(point)
                   }
                   planLinePointArr = lineArr
-                  var ros = new ROSLIB.Ros({
-                      url : _this.url
-                  });
-                  //console.log(ros)
-                  ros.on('connection', function() {
-                      console.log('任务.');
-                  });
 
                   _this.taskServer = new ROSLIB.Service({
-                      ros : ros,
+                      ros : _this.ros,
                       name : '/tasklist',
                       serviceType : 'yidamsg/TaskList'
                   });
                   _this.taskServerClear = new ROSLIB.Service({
-                      ros : ros,
+                      ros : _this.ros,
                       name : '/taskclear',
                       serviceType : 'yidamsg/TaskList'
                   });
@@ -846,7 +845,7 @@
                       });
                   })
 
-              })
+              })*/
       },
 
 
@@ -896,6 +895,10 @@
 
     computed: {
 
+    },
+    destroyed(){
+      let _this = this
+      _this.ros.close()
     },
 
   }

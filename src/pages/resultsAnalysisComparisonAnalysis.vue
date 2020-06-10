@@ -223,6 +223,8 @@
         pointIds:'',
         chartsDateX:[],
         chartsDataY:[],
+        screenWidth: document.body.clientWidth,
+        myChart:null,
       }
     },
     components: {
@@ -231,12 +233,18 @@
       menuBottom
     },
     mounted(){
+      let _this = this
       this.value_start = this.convertToLateDate()
       this.value_end = this.getDateTime()
       this.getRightData()
       this.getTableData()
       this.getImgData()
-
+      window.onresize = () => {
+        return (() => {
+          window.screenWidth = document.body.clientWidth
+          _this.screenWidth = window.screenWidth
+        })()
+      }
     },
     methods: {
       getTableData(){
@@ -365,26 +373,33 @@
       },
       drawLine(dateX,dataY){
         let _this = this
-        console.log(dataY)
+        //console.log(dataY)
         let legend = []
         for(let i=0;i<dataY.length;i++){
           legend.push(dataY[i].name)
-          console.log(dataY[i].name)
+          //console.log(dataY[i].name)
         }
-        console.log(legend)
+        //console.log(legend)
         // 基于准备好的dom，初始化echarts实例
-        let myChart = this.$echarts.init(document.getElementById('center_chart'))
+        _this.myChart = this.$echarts.init(document.getElementById('center_chart'))
         // 绘制图表
-        myChart.setOption({
-          title: { text: 'echarts' },
+        _this.myChart.setOption({
+          title: { text: '' },
           legend: {
-            //data: ['开关压力表2','开关压力表4','开关压力表7']
-            data: legend
+            //data: ['开关压力表112','开关压力表114','开关压力表117'],
+            data: legend,
+            padding:[15,0,15,0],
+            orient: 'horizontal',//vertical
+            type: 'scroll',
+            bottom:10,
+            //x:'center',      //可设定图例在左、右、居中
+            y:'bottom',     //可设定图例在上、下、居中
           },
           grid: {
-            left: '13%',
-            right: '14%',
-            bottom: '13%',
+            top: '5%',
+            left: '3%',
+            right: '4%',
+            bottom: '10%',
             containLabel: true
           },
           toolbox: {
@@ -457,7 +472,7 @@
       },
       devTreeKey(val){
         let _this = this
-        let testPoint = [2,7,4]
+        let testPoint = [2,4,7,37,36,28,26,19]
         //console.log(val.toString())
         _this.pointIds = testPoint.toString()
         _this.ajaxTableData.pointIds = _this.pointIds
@@ -479,7 +494,7 @@
             true,
             function (res) {
               if(res.code == 200){
-                console.log(res.data.items)
+                //console.log(res.data.items)
                 dateX = []
                 dataY = {}
                 dataYData = []
@@ -489,20 +504,26 @@
                     dataY = {
                       time: res.data.items[j].createTime,
                       name: res.data.items[j].point.deviceName,
-                      stack: '总量',
+                      //stack: '总量',
                       type: 'line',
                       data: dataYData
                     }
                   }
               }
               dataYArr.push(dataY)
-              console.log(dateX)
+              //console.log(dateX)
               _this.drawLine(dateX,dataYArr)
           })
 
         }
 
       },
+    },
+    watch:{
+      screenWidth(val){
+        let _this = this
+        _this.myChart.resize()
+      }
     }
   }
 </script>

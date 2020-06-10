@@ -12,7 +12,7 @@
     </div>-->
     <div class="results_browse_content">
       <div class="results_browse_left">
-        <devTreeNoCheck @childKey="childKeyId"></devTreeNoCheck>
+        <devTreeNoCheck @childKey="childKeyId" :toTreeData="toTreeData"></devTreeNoCheck>
       </div>
       <div class="results_browse_right">
         <div class="right_title_tool">
@@ -98,7 +98,7 @@
               @size-change="handleSizeChange1"
               @current-change="handleCurrentChange1"
               :current-page="currentPage1"
-              :page-sizes="[2, 6, 10]"
+              :page-sizes="[6, 10, 20, 50]"
               :page-size="6"
               layout="total, sizes, prev, pager, next, jumper"
               :total="total1">
@@ -120,7 +120,7 @@
               @size-change="handleSizeChange2"
               @current-change="handleCurrentChange2"
               :current-page="currentPage2"
-              :page-sizes="[6, 10, 20]"
+              :page-sizes="[6, 10, 20, 50]"
               :page-size="6"
               layout="total, sizes, prev, pager, next, jumper"
               :total="total2">
@@ -157,26 +157,42 @@
             </div>
             <div>
               <p style="background: #D9ECEA;height: 26px;line-height: 26px;padding-left: 10px">阈值信息</p>
-              <p>
+              <p style="padding: 6px 3px">
                 <span>环境信息</span>
                 <span>环境温度0摄氏度</span>
               </p>
-              <p>
-                <span>环境信息</span>
-                <span>环境温度0摄氏度</span>
-              </p>
-              <p>
-                <span>环境信息</span>
-                <span>环境温度0摄氏度</span>
-              </p>
-              <p>
-                <span>环境信息</span>
-                <span>环境温度0摄氏度</span>
-              </p>
-              <p>
-                <span>环境信息</span>
-                <span>环境温度0摄氏度</span>
-              </p>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataDuiOld[0]" >{{tableDataDuiOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataDuiOld">
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{item.limitValue}}
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataChaOld[0]" >{{tableDataChaOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataChaOld">
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{item.limitValue}}
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataWenOld[0]" >{{tableDataWenOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataWenOld">
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{item.limitValue}}
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataChaoOld[0]" >{{tableDataChaoOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataChaoOld">
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{item.limitValue}}
+                </span>
+              </ul>
             </div>
           </div>
           <div class="dialog_right">
@@ -364,11 +380,30 @@
         ajaxTableImgData:{page:1, size:6},
         rowIndex:0,
         checkId:'',
+        toTreeData:{
+          quyu:[],
+          type:[],
+          recon:[],
+          meter:[],
+          face:[]
+        },
+        alarmData:{
+          pageSize:1000
+        },
 
         imgVisible: false,
         dialogImgUrl: '',
         imgUrlBefore: url_img + '/smcsp/',
         pointIds:'',
+
+        tableDataChao:[],
+        tableDataWen:[],
+        tableDataDui:[],
+        tableDataCha:[],
+        tableDataChaoOld:[],
+        tableDataWenOld:[],
+        tableDataDuiOld:[],
+        tableDataChaOld:[],
       }
     },
     components: {
@@ -582,6 +617,7 @@
               _this.input_value_wrong = res.data.modifyValue
             }
           })
+        _this.getAlarmDataOld(row.id)
       },
       radioResultChange(val){
         if(val==1){
@@ -656,6 +692,7 @@
               _this.input_value_wrong = res.data.modifyValue
             }
           })
+        _this.getAlarmDataOld(id)
 
       },
       nextData(){
@@ -706,6 +743,7 @@
               _this.input_value_wrong = res.data.modifyValue
             }
           })
+        _this.getAlarmDataOld(id)
       },
       checkConfirm(){
       	/*"cameraPic": "string",
@@ -771,6 +809,61 @@
               _this.dialogImgUrl = url
               _this.$emit('isVideo', false)
           }
+      },
+      getAlarmDataOld(irProjPointId){
+        let _this = this
+        _this.alarmData.irProjPointId = irProjPointId
+        _this.ajax_api('get',url_api + '/point-alarm-setting',_this.alarmData,true,function (res) {
+          console.log(res.data)
+          if(!res.data.items.length<0){
+            return
+          }
+          let result = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 1
+          })
+          //_this.tableDataChao = result
+          _this.tableDataChaoOld = result
+
+          let result2 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 2
+          })
+          //_this.tableDataWen = result2
+          _this.tableDataWenOld = result2
+
+          let result3 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 3
+          })
+          //_this.tableDataDui = result3
+          _this.tableDataDuiOld = result3
+
+          let result4 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 4
+          })
+          //_this.tableDataCha = result4
+          _this.tableDataChaOld = result4
+          //console.log(result)
+        })
+      },
+      alarmLevel(num){
+        let result = ''
+        switch(num){
+          case 1:
+            result = '预警'
+            break
+          case 2:
+            result = '一般告警'
+            break
+          case 3:
+            result = '严重告警'
+            break
+          case 4:
+            result = '危险告警'
+            break
+          case 5:
+            result = '？'
+            break
+        }
+        return result
       },
     },
   }

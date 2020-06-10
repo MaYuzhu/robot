@@ -462,7 +462,14 @@
         message3:'',
         message4:'',
 
-        toTreeData:{},
+        toTreeData:{
+          quyu:[],
+          type:[],
+          recon:[],
+          meter:[],
+          face:[],
+          checkLeaf:true
+        },
       }
     },
     mounted(){
