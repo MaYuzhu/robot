@@ -20,7 +20,7 @@
               <p>系统图标：</p>
               <el-upload style="width: 180px"
                 class="avatar-uploader"
-                :action=pictureUpdate
+                :action=pictureUpdate :headers="importHeaders"
                 :show-file-list="false"
                 :on-success="handleAvatarSuccess"
                 :before-upload="beforeAvatarUpload">
@@ -133,10 +133,12 @@
         imageUrl: '',
         imageUrlUpload:'',
         DestroyIncomeStatistics:true,
-        pictureUpdate: url_api+ '/file',
+        pictureUpdate: url_api + '/file',
         companyName: '',
         companyArea: '',
-
+        importHeaders: {
+          token: localStorage.getItem('token')
+        },
       }
     },
     mounted(){
@@ -145,13 +147,16 @@
     methods: {
       handleAvatarSuccess(res, file) {
         this.imageUrl = URL.createObjectURL(file.raw);
+        console.log(res)
         //action="https://jsonplaceholder.typicode.com/posts/" 37位//8b79b27e7d14cb6569400958ee474c56.jpg
         //console.log(file.response.data.localUrl)
         //console.log(file.response.data.localUrl.slice(-37))
-        //本地测试this.imageUrlUpload = 'http://localhost:8080/smcsp/file' + file.response.data.localUrl.slice(-37)
-        this.imageUrlUpload = 'http://localhost:8080/smcsp/file' + file.response.data.localUrl.slice(-37)
+        //本地测试
+        //this.imageUrlUpload = 'http://localhost:8080/smcsp/file' + file.response.data.localUrl.slice(-37)
+        this.imageUrlUpload = url_img+'/smcsp/file' + file.response.data.localUrl.slice(-37)
       },
       beforeAvatarUpload(file) {
+        console.log(file)
         const isJPG = file.type === 'image/jpeg';
         const isLt2M = file.size / 1024 / 1024 < 2;
 

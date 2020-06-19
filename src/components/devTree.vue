@@ -115,7 +115,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res.data)
+              console.log(res.data)
               _this.dataTree = res.data
               _this.dataTree.forEach(m=>{
                 _this.idArr.push(m.id) //默认展开
@@ -154,7 +154,7 @@
       },
 
       getCheckedNodes() {
-        console.log(this.$refs.tree.getCheckedNodes());
+        console.log(this.$refs.tree.getCheckedNodes(true));
       },
       getCheckedKeys() {
         console.log(this.$refs.tree.getCheckedKeys());
@@ -175,14 +175,16 @@
         this.$refs.tree.setCheckedKeys([]);
       },
       checkedNode(data,isCheck){
-        this.checkedId = []
+        this.checkedId = this.$refs.tree.getCheckedKeys(true)
+        this.$emit('devTreeKey', this.checkedId)
+        /*this.checkedId = []
         this.checkedId.push(isCheck.checkedKeys)
-        //console.log(data,isCheck)
+        console.log(data,isCheck)
         this.checkedId = distinct(this.checkedId)
         this.$emit('devTreeKey', this.checkedId)
         function distinct(arr) {
           return Array.from(new Set(arr))
-        }
+        }*/
       },
       findNewTree(target) {
         //console.log(target);

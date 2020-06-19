@@ -167,6 +167,7 @@
                 <span v-for="(item, index) in tableDataDuiOld">
                   {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
                   {{item.limitValue}}
+                  <span v-if="tableDataDuiOld.length!==index+1"> | </span>
                 </span>
               </ul>
               <ul style="padding: 6px 3px">
@@ -175,6 +176,7 @@
                 <span v-for="(item, index) in tableDataChaOld">
                   {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
                   {{item.limitValue}}
+                  <span v-if="tableDataChaOld.length!==index+1"> | </span>
                 </span>
               </ul>
               <ul style="padding: 6px 3px">
@@ -183,6 +185,7 @@
                 <span v-for="(item, index) in tableDataWenOld">
                   {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
                   {{item.limitValue}}
+                  <span v-if="tableDataWenOld.length!==index+1"> | </span>
                 </span>
               </ul>
               <ul style="padding: 6px 3px">
@@ -191,6 +194,7 @@
                 <span v-for="(item, index) in tableDataChaoOld">
                   {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
                   {{item.limitValue}}
+                  <span v-if="tableDataChaoOld.length!==index+1"> | </span>
                 </span>
               </ul>
             </div>
@@ -275,14 +279,7 @@
     data(){
       return{
         title:'巡检结果浏览 > 巡检结果浏览',
-        tableDataResults:[
-        	{address:'123',id:0},
-          {address:'123',id:1},
-          {address:'123',id:2},
-          {address:'123',id:3},
-          {address:'123',id:4},
-          {address:'123',id:5},
-        ],
+        tableDataResults:[],
         imgDataResults:[],
         checkAllPoint: false,
         checkedPoints: [],
@@ -814,7 +811,7 @@
         let _this = this
         _this.alarmData.irProjPointId = irProjPointId
         _this.ajax_api('get',url_api + '/point-alarm-setting',_this.alarmData,true,function (res) {
-          console.log(res.data)
+          //console.log(irProjPointId)
           if(!res.data.items.length<0){
             return
           }
@@ -962,12 +959,12 @@
             position absolute
             bottom 0
         .right_bottom
-          height 528px
+          height 545px
           .ul_img_wrap
             height calc(100% - 30px)
             overflow-y auto
             .li_img
-              height calc(100% - 22px)
+              height calc(100% - 25px)
     .alarm_dialog /deep/
       .el-dialog
         background #d7efec

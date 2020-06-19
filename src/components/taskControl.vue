@@ -172,7 +172,7 @@
       _this.ros = new ROSLIB.Ros({
           url : _this.url
       });
-      console.log(_this.ros)
+      //console.log(_this.ros)
       _this.ros.on('connection', function() {
           console.log('point.server');
       });
@@ -571,7 +571,7 @@
                     }
                     planLinePointArr = lineArr
                     _this.planLinePoint = lineArr
-                    console.log(_this.planLinePointVector) //.refresh()
+                    //console.log(_this.planLinePointVector) //.refresh()
                     _this.planLinePointVector.getSource().refresh()
                     //_this.init()
                     /*var ros = new ROSLIB.Ros({
@@ -592,17 +592,17 @@
                         name : '/taskclear',
                         serviceType : 'yidamsg/TaskList'
                     });
-                    /*_this.taskServerClear.callService({flag:0},function(result) {
+                    _this.taskServerClear.callService({flag:0},function(result) {
                         console.log('Clear');
                         var request = new ROSLIB.ServiceRequest({
-                            plan : res.data.path,
+                            plan : res.data,
                             //plan : JSON.stringify(aa),
                         });
 
                         _this.taskServer.callService(request, function(result) {
                             console.log(result);
                         });
-                    })*/
+                    })
 
                 })
 
@@ -1066,7 +1066,7 @@
               source: passRouteSource,
               style: new ol.style.Style({
                   stroke: new ol.style.Stroke({ //边界样式
-                      color: '#a42cac',
+                      color: '#4ec0df',
                       width: 3
                   }),
                   image: new ol.style.Circle({

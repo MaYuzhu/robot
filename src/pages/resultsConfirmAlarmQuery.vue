@@ -133,14 +133,14 @@
             label="识别类型" width="100">
           </el-table-column>
           <el-table-column
-            prop="point.displayName"
+            prop="point.deviceName"
             label="点位名称" align="center"
             width="320">
           </el-table-column>
           <el-table-column
-            prop="resultStatus"
+            prop="pointHistory.value"
             label="识别结果" align="center"
-            width="120">
+            width="100">
           </el-table-column>
           <el-table-column
             prop="alarmLevel" :formatter="alarmLevelShow"
@@ -161,6 +161,9 @@
             prop=""
             label="采集信息" align="center"
             >
+            <template slot-scope="scope">
+              <p style="background:transparent;cursor:pointer;text-decoration:underline;color:blue" @click="openImg(imgUrlBefore+scope.row.pointHistory.cameraPic)">图片信息</p>
+            </template>
           </el-table-column>
 
         </el-table>
@@ -169,7 +172,7 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[5, 10, 20]"
+            :page-sizes="[10, 20, 50, 80]"
             :page-size="10"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
@@ -206,26 +209,46 @@
             </div>
             <div>
               <p style="background: #D9ECEA;height: 26px;line-height: 26px;padding-left: 10px">阈值信息</p>
-              <p>
+              <p style="padding: 6px 3px">
                 <span>环境信息</span>
                 <span>环境温度0摄氏度</span>
               </p>
-              <p>
-                <span>环境信息</span>
-                <span>环境温度0摄氏度</span>
-              </p>
-              <p>
-                <span>环境信息</span>
-                <span>环境温度0摄氏度</span>
-              </p>
-              <p>
-                <span>环境信息</span>
-                <span>环境温度0摄氏度</span>
-              </p>
-              <p>
-                <span>环境信息</span>
-                <span>环境温度0摄氏度</span>
-              </p>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataDuiOld[0]" >{{tableDataDuiOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataDuiOld">
+                  {{alarmLevelShow(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataDuiOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataChaOld[0]" >{{tableDataChaOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataChaOld">
+                  {{alarmLevelShow(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataChaOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataWenOld[0]" >{{tableDataWenOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataWenOld">
+                  {{alarmLevelShow(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataWenOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataChaoOld[0]" >{{tableDataChaoOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataChaoOld">
+                  {{alarmLevelShow(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataChaoOld.length!==index+1"> | </span>
+                </span>
+              </ul>
             </div>
           </div>
           <div class="dialog_right">
@@ -301,7 +324,11 @@
         </span>
       </el-dialog>
     </div>
-
+    <el-dialog width="500px" :visible.sync="imgVisible" class="img-dialog">
+      <el-card :body-style="{ padding: '0px' }">
+        <img :src="dialogImgUrl" width="100%" height="100%">
+      </el-card>
+    </el-dialog>
   </div>
 </template>
 
@@ -417,6 +444,18 @@
         checkId:'',
         dialogVisibleMoreCheck:false,
         multipleSelection: [],
+        imgVisible: false,
+        dialogImgUrl: '',
+        imgUrlBefore: url_img + '/smcsp/',
+
+        tableDataChao:[],
+        tableDataWen:[],
+        tableDataDui:[],
+        tableDataCha:[],
+        tableDataChaoOld:[],
+        tableDataWenOld:[],
+        tableDataDuiOld:[],
+        tableDataChaOld:[],
       }
     },
     mounted(){
@@ -504,6 +543,14 @@
         //console.log(_this.ajaxTableData)
         _this.ajax_api('post',url_api + '/point-alarm-history',
           _this.ajaxTableData,
+          /*{
+            alarmLevel: null,
+            checkStatus: 0,
+            endTime: "2020-06-15 00:00:00",
+            page: 1,
+            size: 10,
+            startTime: "2020-05-15 00:00:00",
+          },*/
           true,
           function (res) {
             if(res.code == 200){
@@ -628,6 +675,13 @@
           this.disabled_input_value = true
         }
       },
+      openImg(url) {
+        let _this = this
+        if (url) {
+          _this.imgVisible = true
+          _this.dialogImgUrl = url
+        }
+      },
 
       queryList(){
         let _this = this
@@ -661,9 +715,14 @@
         //console.log(row.index)
         //console.log(row.id) GET /ui/point-alarm-history/info/{id}
         _this.dialogVisibleAlarm = true
-        _this.point_info = row.point.displayName
+        _this.point_info = row.point.deviceName
         _this.input_value_wrong = ''
         _this.textarea=''
+        _this.imgArr = []
+        _this.imgArr.push({
+          title:row.point.name,
+          url:_this.imgUrlBefore + row.pointHistory.cameraPic
+        })
         _this.ajax_api('get',url_api + '/point-alarm-history/info/'+row.id,
           null,
           true,
@@ -690,7 +749,7 @@
               }
             }
           })
-
+        _this.getAlarmDataOld(row.pointHistory.id)
       },
       prevData(){
         let _this = this
@@ -705,7 +764,12 @@
         }
         _this.input_value_wrong = ''
         _this.textarea=''
-        _this.point_info = _this.tableDataAlarm[_this.rowIndex].point.displayName
+        _this.point_info = _this.tableDataAlarm[_this.rowIndex].point.deviceName
+        _this.imgArr = []
+        _this.imgArr.push({
+          title: _this.tableDataAlarm[_this.rowIndex].point.name,
+          url: _this.imgUrlBefore +_this.tableDataAlarm[_this.rowIndex].pointHistory.cameraPic//_this.imgUrlBefore + row.cameraPic
+        })
         let id = _this.tableDataAlarm[_this.rowIndex].id
         _this.checkId = id
         //console.log(id,'index'+_this.rowIndex)
@@ -735,7 +799,7 @@
               }
             }
           })
-
+        _this.getAlarmDataOld(_this.tableDataAlarm[_this.rowIndex].pointHistory.id)
       },
       nextData(){
       	let _this = this
@@ -749,7 +813,12 @@
         }
         _this.input_value_wrong = ''
         _this.textarea=''
-        _this.point_info = _this.tableDataAlarm[_this.rowIndex].point.displayName
+        _this.point_info = _this.tableDataAlarm[_this.rowIndex].point.deviceName
+        _this.imgArr = []
+        _this.imgArr.push({
+          title: _this.tableDataAlarm[_this.rowIndex].point.name,
+          url: _this.imgUrlBefore +_this.tableDataAlarm[_this.rowIndex].pointHistory.cameraPic//_this.imgUrlBefore + row.cameraPic
+        })
         let id = _this.tableDataAlarm[_this.rowIndex].id
         _this.checkId = id
         //console.log(id,'index'+_this.rowIndex)
@@ -779,6 +848,7 @@
               }
             }
           })
+        _this.getAlarmDataOld(_this.tableDataAlarm[_this.rowIndex].pointHistory.id)
       },
       checkConfirm(){
       	let _this = this
@@ -911,6 +981,40 @@
       },
       treeCheck(data){
         //console.log(data)
+      },
+      getAlarmDataOld(irProjPointId){
+        let _this = this
+        _this.ajaxTableData.irProjPointId = irProjPointId
+        _this.ajax_api('get',url_api + '/point-alarm-setting',_this.ajaxTableData,true,function (res) {
+          //console.log(irProjPointId)
+          if(!res.data.items.length<0){
+            return
+          }
+          let result = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 1
+          })
+          //_this.tableDataChao = result
+          _this.tableDataChaoOld = result
+
+          let result2 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 2
+          })
+          //_this.tableDataWen = result2
+          _this.tableDataWenOld = result2
+
+          let result3 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 3
+          })
+          //_this.tableDataDui = result3
+          _this.tableDataDuiOld = result3
+
+          let result4 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 4
+          })
+          //_this.tableDataCha = result4
+          _this.tableDataChaOld = result4
+          //console.log(result)
+        })
       },
     },
     components: {

@@ -55,7 +55,7 @@
         >
         </el-table-column>
         <el-table-column
-          prop="restartStartTime" align="center"
+          prop="taskStartTime" align="center"
           label="开始时间"
         >
         </el-table-column>
@@ -91,7 +91,7 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
-          :page-sizes="[5, 10, 20]"
+          :page-sizes="[10, 20, 50]"
           :page-size="10"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total">
@@ -392,7 +392,6 @@
             padding 50px 50px 70px
             overflow hidden
             border 1px solid #90e8c6
-
 
         .el-dialog__footer
           background #fff

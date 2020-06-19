@@ -132,7 +132,7 @@
                   <el-time-picker size="mini"
                     v-model="value_time1" format="HH时 mm分 ss秒"
                                   value-format="HH:mm:ss"
-                    placeholder="">
+                    placeholder="159">
                   </el-time-picker>
                 </p>
                 <p style="background: #d7efec;padding: 4px">
@@ -197,8 +197,11 @@
                     align="center">
                   </el-table-column>
                   <el-table-column
-                    prop="startTime" label="开始时间"
+                    prop="" label="开始时间"
                     align="center" width="220">
+                    <template slot-scope="scope">
+                      <span>{{scope.row.startTime || scope.row.executeTime}}</span>
+                    </template>
                   </el-table-column>
                   <el-table-column
                     prop="endTime" label="结束时间"
@@ -330,16 +333,18 @@
         value_time3:'',
         num:1,
         options_cycle_day: [
-        	{
-            value: '2',
-            label: '天'
-          }, {
-            value: '1',
-            label: '时'
-          }, {
+          {
             value: '0',
             label: '分钟'
-          }
+          },
+          {
+            value: '1',
+            label: '小时'
+          },
+          {
+            value: '2',
+            label: '天'
+          },
         ],
         cycle_day:'2',
         addCycleIdNum:0,
@@ -381,10 +386,11 @@
         console.log('任务ros closed.');
       });
 
-      this.getTableData()
-      this.value_time2 = this.getdatatime()
-      this.value_time_huizong1 = this.getdatatime()
-      this.value_time_huizong2 = this.getdatatime10()
+      _this.getTableData()
+      _this.value_time2 = _this.getdatatime()
+      _this.value_time3 = _this.getdatatime10()
+      _this.value_time_huizong1 = _this.getdatatime()
+      _this.value_time_huizong2 = _this.getdatatime10()
     },
 
     methods: {
@@ -428,7 +434,7 @@
         },
         true,
         function (res) {
-          console.log(res.data)
+          //console.log(res.data)
           _this.tableDataFix = res.data.items
 
         })
@@ -439,7 +445,7 @@
         let _this = this
         _this.checkMonth = []
         _this.checkWeek = []
-        _this.value_time1 = ''
+        _this.value_time1 = _this.getdatatimehh()
         _this.irProjTaskId = row.id
         _this.dialogVisibleCycle = true
         _this.ajax_api('get',url_api + '/task-cycle/taskCycleList',
@@ -451,7 +457,7 @@
           },
           true,
           function (res) {
-            //console.log(res.data)
+            console.log(res.data)
             _this.tableDataCycle = res.data.items
 
           })
@@ -562,7 +568,15 @@
           addSaveCycleData.month = _this.checkMonth.length>0 ? _this.checkMonth.toString() : '1,2,3,4,5,6,7,8,9,10,11,12'
           addSaveCycleData.week =  _this.checkWeek.length>0 ? _this.checkWeek.toString() : '1,2,3,4,5,6,7'
           addSaveCycleData.executeTime = _this.value_time1 ? _this.value_time1 : '00:00:00'
-          addSaveCycleData.name = '任务周期'
+          //addSaveCycleData.name = '任务周期'
+          addSaveCycleData.name = '每年'+_this.checkMonth.toString()+'月,'+'每周'+_this.checkWeek.toString()+','+
+            addSaveCycleData.executeTime+',执行一次'
+          if(!addSaveCycleData.executeTime){
+            _this.$message({
+              message: '请选择时间',
+            });
+            return
+          }
         }else if(_this.radio == 2){
           addSaveCycleData.irBaseRobotId = 1
           addSaveCycleData.irProjTaskId = _this.irProjTaskId
@@ -571,9 +585,17 @@
           addSaveCycleData.intervalTime = _this.num
           addSaveCycleData.startTime = _this.value_time2
           addSaveCycleData.endTime = _this.value_time3
-          addSaveCycleData.name = '间隔任务'
+          //addSaveCycleData.name = '间隔任务'
+          addSaveCycleData.name = '每隔 ' + _this.num + _this.options_cycle_day[_this.cycle_day].label + ' 执行一次'
+          if(!addSaveCycleData.startTime || !addSaveCycleData.endTime){
+            _this.$message({
+              message: '请选择时间',
+            });
+            return
+          }
         }
-        //console.log(addSaveCycleData)//POST /ui/task-cycle/addTaskCycle
+        //console.log(addSaveCycleData)  //POST /ui/task-cycle/addTaskCycle
+
         _this.ajax_api('post',url_api + '/task-cycle/addTaskCycle',
           addSaveCycleData,true,function (res) {
             //console.log(res.data.items)
@@ -759,11 +781,14 @@
                 console.log(resData)
                 _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
                     {},true,function (res) {
+                        console.log(res)
                         console.log(res.data.path)
                         //取到计划线路的点
                         if(!res.data.path){
-                            //console.log(res.data.path)
-                            return
+                          _this.$message({
+                            message: '未获取到有效路径',
+                          });
+                          return
                         }
                         var linePlanObj = JSON.parse(res.data.path)
                         var lineArr = []
@@ -872,6 +897,8 @@
         m = m < 10 ? "0" + m : m;
         d = d < 10 ? "0" + d : d;
         H = H < 10 ? "0" + H : H;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
         return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
         //return y + "-" + m + "-" + d
       },
@@ -888,7 +915,28 @@
         m = m < 10 ? "0" + m : m;
         d = d < 10 ? "0" + d : d;
         H = H < 10 ? "0" + H : H;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
         return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
+      },
+
+      getdatatimehh(){ //默认显示今天
+        var Da = new Date();
+        //var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var ss = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
+        return  H + ":" + mm + ":" + ss;
+        //return y + "-" + m + "-" + d
       },
 
     },

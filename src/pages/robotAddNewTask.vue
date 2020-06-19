@@ -43,7 +43,7 @@
           irBaseInspectTypeId:'1',
           irBaseRobotId:1,
           isCustom:'0',
-          name:'地图创建',
+          name:'map_test',
           points:'',
         },
         savePutData:{},
@@ -53,6 +53,7 @@
     mounted(){
       console.log(this.ids)
       this.saveData.points = this.ids
+      //this.saveData.points = '32,37'
     },
     methods:{
       treeCheck(data){
@@ -60,9 +61,9 @@
       },
       //刷新任务列表
       xunjianFind(){
-        this.taskTableReset= false;
+        this.taskTableReset = false;
         this.$nextTick(() => {
-          this.taskTableReset= true;
+          this.taskTableReset = true;
         });
       },
     },

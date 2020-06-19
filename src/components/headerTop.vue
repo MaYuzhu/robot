@@ -399,7 +399,7 @@
         companyArea:'',
         countAlarm:0,
         //../../static/images/logo.jpg
-        logoUrl:'',
+        logoUrl:'../../static/images/logo.jpg',
       }
 
     },
