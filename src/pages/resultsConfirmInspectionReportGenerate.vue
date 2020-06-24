@@ -58,6 +58,11 @@
         >
         </el-table-column>
         <el-table-column
+            prop="task.id" align="center"
+            label="任务id"
+        >
+        </el-table-column>
+        <el-table-column
           prop="" :formatter="taskStatusFun"
           label="任务状态" width="100" align="center"
         >

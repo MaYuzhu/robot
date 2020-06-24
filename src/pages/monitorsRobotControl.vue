@@ -41,10 +41,10 @@
             <p @click="clickPlayback" :title="playback_title" class="button_control_header"><img :src="playback_img" alt=""></p>
           </div>
           <div class="control_header_right">
-            <p>任务模式</p>
-            <p>紧急定位模式</p>
-            <p>后台遥控模式</p>
-            <p>手持遥控模式</p>
+            <p class="mo_but" @click="mo_change(0)" :class="{'active':mo_but==0}">任务模式</p>
+            <p class="mo_but" @click="mo_change(1)" :class="{'active':mo_but==1}">紧急定位模式</p>
+            <p class="mo_but" @click="mo_change(2)" :class="{'active':mo_but==2}">后台遥控模式</p>
+            <p class="mo_but" @click="mo_change(3)" :class="{'active':mo_but==3}">手持遥控模式</p>
           </div>
         </div>
         <div class="control_content">
@@ -107,6 +107,7 @@
                 </div>
               </el-tooltip>
             </div>
+            <div class="car_direction_mask" v-show="car_direction_mask"></div>
           </div>
           <div class="control_content_box">
             <div class="control_title">
@@ -155,6 +156,7 @@
                 </div>
               </div>
             </div>
+            <div class="car_direction_mask" v-show="car_direction_mask"></div>
           </div>
         </div>
       </div>
@@ -208,6 +210,8 @@
         currentTaskInfoTimeId:null,
         time:3000,
         ros:null,
+        mo_but:0,
+        car_direction_mask: true,
       }
     },
     methods:{
@@ -427,6 +431,7 @@
           bZeroChannel: bZeroChannel
         });
 
+        console.log(iRet)
         if (0 == iRet) {
           szInfo = "开始预览成功！";
         } else {
@@ -911,6 +916,19 @@
 
       },
 
+      mo_change(val){
+        this.mo_but = val
+        if(val == 0){
+          this.car_direction_mask = true
+        }
+        if(val == 1){
+          this.car_direction_mask = false
+        }
+        if(val == 2){
+          this.car_direction_mask = false
+        }
+      }
+
     },
     mounted() {
       let _this = this
@@ -1155,6 +1173,10 @@
               text-align center
               margin 0 5px
               margin-bottom 8px
+            .mo_but
+              cursor pointer
+            .active
+              background #0c3a47
         .control_content
           display flex
           justify-content space-between
@@ -1165,6 +1187,7 @@
             border 1px solid #bae9d8
             background white
             box-sizing border-box
+            position relative
             .control_title
               height 26px
               line-height 26px
@@ -1330,6 +1353,14 @@
                   margin-top: 13px;
 
 
+            .car_direction_mask
+              position: absolute;
+              width: 100%;
+              height: calc(100% - 26px);
+              margin: auto;
+              top: 26px;
+              background: rgba(153, 183, 230, 0.1);
+              cursor not-allowed
             .holder-direction
               width: 120px;
               height: 120px;
