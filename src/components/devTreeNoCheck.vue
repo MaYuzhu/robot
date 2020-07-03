@@ -15,7 +15,7 @@
 
           <!--<span style="width: 10px;height:10px;background: red;display: inline-block"></span>-->
           <span :title="node.data.name">
-            <i :class="node.data.children?'el-icon-s-cooperation':'el-icon-s-order'"></i>
+            <i :class="node.data.treeNode?'el-icon-s-cooperation':'el-icon-s-order'"></i>
             <span class="color_alarm" style="width: 13px;height:13px;display: inline-block"></span>
             {{ node.data.name }}
           </span>
@@ -62,7 +62,7 @@
           }]*/
         }],
         defaultProps: {
-          children: 'children',
+          children: 'treeNode',
           label: 'label'
         },
         dataTreeAll:[],
@@ -114,7 +114,7 @@
                 for(let i=0;i<_this.toTreeData.quyu.length;i++){
                   //console.log(_this.dataTreeAll)
                   if(_this.dataTreeAll.length>0){
-                    let li = _this.dataTreeAll[0].children.filter(item => {
+                    let li = _this.dataTreeAll[0].treeNode.filter(item => {
                       return item.id == _this.toTreeData.quyu[i].id
                     })
                     //console.log(li)
@@ -129,7 +129,7 @@
                   irBaseDeviceTypeId: 4,
                   modelLevel: 1000,
                   parentId: 3,
-                  children:newDataQuyu
+                  treeNode:newDataQuyu
                 }]
               }
 
@@ -146,7 +146,7 @@
       nodeClick(){
         let _this = this
         //console.log(this.$refs.tree.getCurrentNode().children!=undefined)
-        let isLeaf = this.$refs.tree.getCurrentNode().children!=undefined
+        let isLeaf = this.$refs.tree.getCurrentNode().treeNode!=undefined
         if(isLeaf && _this.toTreeData.checkLeaf==undefined){
           return
         }
@@ -193,7 +193,7 @@
             }else {
               for(let i=0;i<n.quyu.length;i++){
                 //console.log(_this.dataTreeAll)
-                let li = _this.dataTreeAll[0].children.filter(item => {
+                let li = _this.dataTreeAll[0].treeNode.filter(item => {
                   return item.id == n.quyu[i].id
                 })
                 newDataQuyu.push(li[0])
@@ -205,7 +205,7 @@
                 irBaseDeviceTypeId: 4,
                 modelLevel: 1000,
                 parentId: 3,
-                children:newDataQuyu
+                treeNode:newDataQuyu
               }]
             }
           }else if(n.quyu.length<1){

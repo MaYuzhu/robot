@@ -12,8 +12,9 @@
     </div>
     <div>
       <p><span>预计巡检时间:</span><span>{{taskInfo.totalRunTime}}</span></p>
-      <p><span>巡检进度:</span><span>{{taskInfo.passPointNum}}</span></p>
+      <p><span>巡检进度:</span><span>{{taskInfo.passPointNum?Math.round(taskInfo.passPointNum/taskInfo.pointTotal*100)+'%':''}}</span></p>
       <p><span>已巡检点数:</span><span>{{taskInfo.passPointNum}}</span></p>
+      <!--<p><span>巡检进度:</span><span>{{Math.round(0.953/5*100)+'%'}}</span></p>-->
     </div>
 	</div>
 </template>

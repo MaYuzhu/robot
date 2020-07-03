@@ -84,15 +84,15 @@
       });
       _this.getRobotList()
       _this.play_but()
-      // 初始化插件参数及插入插件
+      /*// 初始化插件参数及插入插件
       WebVideoCtrl.I_InitPlugin('100%', '100%', {
         iWndowType: 1,
         cbSelWnd: function (xmlDoc) {
           _this.g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
           var szInfo = "当前选择的窗口编号：" + _this.g_iWndIndex;
-          //console.log(szInfo);
+          console.log(11111111111);
         }
-      });
+      });*/
       //WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
       // 窗口事件绑定
       $(window).bind({
@@ -138,7 +138,10 @@
 
         _this.listener.subscribe(function(message) {
           //console.log('Received message on ' +': ' + message.data);
-          var  url = "data:image/png;base64,";
+          if(!message.data){
+            console.log('no picture')
+          }
+          var url = "data:image/png;base64,";
           var i = message.data
           _this.src = url+ i
           setTimeout(function () {
@@ -254,6 +257,15 @@
       	let _this = this
 
         $('.play_video').hide()
+        // 初始化插件参数及插入插件
+        WebVideoCtrl.I_InitPlugin('100%', '100%', {
+          iWndowType: 1,
+          cbSelWnd: function (xmlDoc) {
+            _this.g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
+            var szInfo = "当前选择的窗口编号：" + _this.g_iWndIndex;
+            //console.log(11111111111);
+          }
+        });
         WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
         var iRet = WebVideoCtrl.I_Login(_this.hkUrl, 1, 80, 'admin', '1234asdf', {
             success: function (xmlDoc) {
@@ -271,10 +283,11 @@
             }
           });
         if (-1 == iRet) {
-          _this.clickStartRealPlay()
+          setTimeout(function () {
+            _this.clickStartRealPlay()
+          },500)
+          //_this.clickStartRealPlay()
         }
-
-        //console.log(iRet)
       },
       clickStartRealPlay() {
         let _this = this
@@ -325,13 +338,19 @@
 
       getRobotList(){
       	let _this = this
+
         _this.ajax_api('get',url_api + '/robot',
           {page:1,size:100},
           true,function (res) {
             if(res.code == 200){
               _this.options = res.data.items
-              _this.robotId = _this.options[0].id
-              robotIdCurrent = _this.robotId
+              //已选中的机器人
+              if(robotIdCurrent){
+                _this.robotId = robotIdCurrent
+              }else {
+                _this.robotId = _this.options[0].id
+                robotIdCurrent = _this.robotId
+              }
               _this.getTaskInfo()
             }
           })
@@ -342,7 +361,7 @@
           null,
           true,function (res) {
             if(res.code == 200){
-            	//console.log(res)
+            	console.log(res)
               _this.taskInfo = {
             		name:res.data.taskName,
                 taskStatus:res.data.taskStatus,
@@ -352,7 +371,6 @@
                 passPointNum:res.data.passPointNum,
                 totalRunTime:res.data.totalRunTime,
                 cumulativeRunTime:res.data.cumulativeRunTime,
-
               }
               //console.log(_this.taskInfo)
               currentTaskInfo()
@@ -386,6 +404,37 @@
       	//console.log(val)
         robotIdCurrent = _this.robotId
         _this.getTaskInfo()
+
+        _this.ajax_api('get',url_api + '/robot-param',
+          {irBaseRobotId:robotIdCurrent,page:1,size:1000},
+          true,function (res) {
+            if(res.code == 200){
+
+              let robot_ip = res.data.items.filter(item => {
+                return item.name == 'IP'
+              })
+              let hKUrl_ip = res.data.items.filter(item => {
+                return item.name == 'visible_light_ip'
+              })
+              robotUrl = 'ws://' + robot_ip[0].value
+              _this.ros.close()
+              _this.ros = new ROSLIB.Ros({
+                url : robotUrl
+              });
+              $('.red_pic_but').show()
+              setTimeout(function () {
+                $("#chatterMessage").attr("src", '');
+              },100)
+
+              //更改可见光ip
+              hKUrl = _this.hkUrl = hKUrl_ip[0].value
+              console.log(hKUrl)
+              console.log(_this.hkUrl)
+              WebVideoCtrl.I_Stop();
+              $('.play_video').show()
+              $('#divPlugin').empty()
+            }
+          })
       },
 
       //视频窗口隐藏

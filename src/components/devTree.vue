@@ -16,7 +16,7 @@
 
           <!--<span style="width: 10px;height:10px;background: red;display: inline-block"></span>-->
           <span>
-            <i :class="node.data.children?'el-icon-s-cooperation':'el-icon-s-order'"></i>
+            <i :class="node.data.treeNode?'el-icon-s-cooperation':'el-icon-s-order'"></i>
             <span style="width: 13px;height:13px;background:#329632;display: inline-block"></span>
             {{ node.data.name }}
           </span>
@@ -67,7 +67,7 @@
         dataTreeAll:[],
         treeQuery:'111',
         defaultProps: {
-          children: 'children',
+          children: 'treeNode',
           label: 'label'
         },
         getTreeDataDev:{},
@@ -120,12 +120,13 @@
               _this.dataTree.forEach(m=>{
                 _this.idArr.push(m.id) //默认展开
               })
+              console.log(_this.idArr)
               if(_this.toTreeData.quyu.length>0){
                 let newDataQuyu = []
                 for(let i=0;i<_this.toTreeData.quyu.length;i++){
                   //console.log(_this.dataTreeAll)
                   if(_this.dataTreeAll.length>0){
-                    let li = _this.dataTreeAll[0].children.filter(item => {
+                    let li = _this.dataTreeAll[0].treeNode.filter(item => {
                       return item.id == _this.toTreeData.quyu[i].id
                     })
                     //console.log(li)
@@ -140,7 +141,7 @@
                   irBaseDeviceTypeId: 4,
                   modelLevel: 1000,
                   parentId: 3,
-                  children:newDataQuyu
+                  treeNode:newDataQuyu
                 }]
               }
 
@@ -231,7 +232,7 @@
             }else {
               for(let i=0;i<n.quyu.length;i++){
                 //console.log(_this.dataTreeAll)
-                let li = _this.dataTreeAll[0].children.filter(item => {
+                let li = _this.dataTreeAll[0].treeNode.filter(item => {
                   return item.id == n.quyu[i].id
                 })
                 newDataQuyu.push(li[0])
@@ -243,7 +244,7 @@
                 irBaseDeviceTypeId: 4,
                 modelLevel: 1000,
                 parentId: 3,
-                children:newDataQuyu
+                treeNode:newDataQuyu
               }]
             }
           }else if(n.quyu.length<1){

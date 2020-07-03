@@ -569,7 +569,34 @@
           addSaveCycleData.week =  _this.checkWeek.length>0 ? _this.checkWeek.toString() : '1,2,3,4,5,6,7'
           addSaveCycleData.executeTime = _this.value_time1 ? _this.value_time1 : '00:00:00'
           //addSaveCycleData.name = '任务周期'
-          addSaveCycleData.name = '每年'+_this.checkMonth.toString()+'月,'+'每周'+_this.checkWeek.toString()+','+
+          let week_name = []
+          for(let i=0;i<_this.checkWeek.length;i++){
+            switch (_this.checkWeek[i]) {
+              case 2:
+                week_name.push('一')
+                break
+              case 3:
+                week_name.push('二')
+                break
+              case 4:
+                week_name.push('三')
+                break
+              case 5:
+                week_name.push('四')
+                break
+              case 6:
+                week_name.push('五')
+                break
+              case 7:
+                week_name.push('六')
+                break
+              case 1:
+                week_name.push('日')
+                break
+            }
+          }
+          //console.log(week_name)
+          addSaveCycleData.name = '每年'+_this.checkMonth.toString()+'月,'+'每周'+week_name.toString()+','+
             addSaveCycleData.executeTime+',执行一次'
           if(!addSaveCycleData.executeTime){
             _this.$message({

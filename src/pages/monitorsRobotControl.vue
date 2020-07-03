@@ -494,11 +494,11 @@
         if(_this.video_title == '停止录像'){
           _this.video_title = '开始录像'
           _this.video_img = "../../static/images/recordingvideo.png"
-          //_this.clickStopRecord()
+          _this.clickStopRecord()
         }else {
           _this.video_title = '停止录像'
           _this.video_img = "../../static/images/info.png"
-          //_this.clickStartRecord()
+          _this.clickStartRecord()
         }
       },
       //回放录像
@@ -1086,7 +1086,6 @@
               window.clearInterval(_this.time_id_key)
           }
       });
-
 
     },
     destroyed(){

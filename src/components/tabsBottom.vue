@@ -37,12 +37,14 @@
               label="识别类型"
             >
             </el-table-column>
+
             <el-table-column
               prop="address" align="center"
               label="采集信息"
               >
               <template slot-scope="scope">
-                <img :src="imgUrlBefore+scope.row.cameraPic||defaultImg" style="width: 50px;height:50px;" @click="openImg(imgUrlBefore+scope.row.cameraPic)">
+                <img :src="scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic" style="width: 50px;height:50px;"
+                     @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic)">
               </template>
             </el-table-column>
           </el-table>
@@ -155,7 +157,7 @@
     data() {
       return {
         activeName: 'first',
-          ajaxTablePointNowData:{page:1, size:10},
+          ajaxTablePointNowData:{page:1, size:40},
           tableDataPointNow:[],
           pointNowTimeId:null,
           tableDataPointAlarmNow:[],

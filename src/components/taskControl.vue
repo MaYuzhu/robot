@@ -279,6 +279,7 @@
                 format:new ol.format.GeoJSON()
             }),
             style: function (feature, resolution) {
+                //console.log(feature)
                 return new ol.style.Style({
                     image: new ol.style.Circle({
                         radius: 3,
@@ -286,6 +287,19 @@
                             color: '#ff5524'
                         })
                     }),
+                    text: new ol.style.Text({
+                      textAlign: 'center',            //位置
+                      textBaseline: 'middle',         //基准线
+                      font: 'normal 14px 微软雅黑',    //文字样式
+                      text: feature.getId().substring(8),      //文本内容
+                      fill: new ol.style.Fill({       //文本填充样式（即文字颜色)
+                        color: '#000'
+                      }),
+                      stroke: new ol.style.Stroke({
+                        color: '#000000',
+                        width: 0
+                      })
+                    })
 
                 });
             },

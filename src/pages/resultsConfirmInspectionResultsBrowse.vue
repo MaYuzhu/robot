@@ -88,7 +88,7 @@
               label="采集信息"
             >
               <template slot-scope="scope">
-                <p style="cursor:pointer;text-decoration:underline;color:blue" @click="openImg(imgUrlBefore+scope.row.cameraPic)">图片信息</p>
+                <p style="cursor:pointer;text-decoration:underline;color:blue" @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic)">图片信息</p>
               </template>
             </el-table-column>
 
@@ -109,8 +109,8 @@
           <ul class="ul_img_wrap">
             <li v-for="(item, index) in imgDataResults" style="width:33.3333%;height:50%;float:left;
                   box-sizing:border-box;border:1px solid #90e8c6">
-              <el-image class="li_img"  v-if="item.cameraPic"
-                   :preview-src-list="srcList" style="width:100%;" :src="imgUrlBefore+item.cameraPic" alt="">
+              <el-image class="li_img"  v-if="item.point"
+                   :preview-src-list="srcList" style="width:100%;" :src="item.cameraPic?imgUrlBefore+item.cameraPic:imgUrlBefore+item.flirPic" alt="">
               </el-image>
               <p v-if="item.point" style="background: #D9ECEA;height: 22px;line-height: 22px">{{item.point.name}}</p>
             </li>
@@ -475,8 +475,10 @@
                       _this.total2 = res.data.total
                       _this.imgDataResults = res.data.items
                       _this.srcList = []
+
                       for(let i=0;i<res.data.items.length;i++){
-                          _this.srcList.push(_this.imgUrlBefore + res.data.items[i].cameraPic)
+                        let url_img = res.data.items[i].cameraPic?res.data.items[i].cameraPic:res.data.items[i].flirPic
+                        _this.srcList.push(_this.imgUrlBefore + url_img)
                       }
 
                   }
@@ -583,11 +585,13 @@
         _this.input_value_wrong = ''
         _this.textarea = ''
         _this.imageArr = []
+        let url_img = row.cameraPic?row.cameraPic:row.flirPic
         _this.imageArr.push({
             title:row.point.name,
-            url:_this.imgUrlBefore + row.cameraPic
+            url:_this.imgUrlBefore + url_img
         })
-        _this.ajax_api('get',url_api + '/point-history/info/'+row.id,
+        //console.log(_this.imageArr)
+        _this.ajax_api('get',url_api + '/point-history/info/' + row.id,
           null,
           true,
           function (res) {
@@ -655,9 +659,13 @@
         _this.textarea=''
         _this.point_info = _this.tableDataResults[_this.rowIndex].point.name
         _this.imageArr = []
+        let url_img = _this.tableDataResults[_this.rowIndex].cameraPic?
+          _this.tableDataResults[_this.rowIndex].cameraPic:_this.tableDataResults[_this.rowIndex].flirPic
         _this.imageArr.push({
             title: _this.tableDataResults[_this.rowIndex].point.name,
-            url: _this.imgUrlBefore +_this.tableDataResults[_this.rowIndex].cameraPic//_this.imgUrlBefore + row.cameraPic
+            url: _this.imgUrlBefore + url_img
+
+          //_this.imgUrlBefore + row.cameraPic
         })
         let id = _this.tableDataResults[_this.rowIndex].id
         _this.checkId = id
@@ -706,9 +714,11 @@
         _this.textarea=''
         _this.point_info = _this.tableDataResults[_this.rowIndex].point.name
         _this.imageArr = []
+        let url_img = _this.tableDataResults[_this.rowIndex].cameraPic?
+          _this.tableDataResults[_this.rowIndex].cameraPic:_this.tableDataResults[_this.rowIndex].flirPic
         _this.imageArr.push({
             title: _this.tableDataResults[_this.rowIndex].point.name,
-            url: _this.imgUrlBefore +_this.tableDataResults[_this.rowIndex].cameraPic//_this.imgUrlBefore + row.cameraPic
+            url: _this.imgUrlBefore + url_img
         })
         let id = _this.tableDataResults[_this.rowIndex].id
         _this.checkId = id

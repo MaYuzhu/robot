@@ -15,7 +15,7 @@
 
           <!--<span style="width: 10px;height:10px;background: red;display: inline-block"></span>-->
           <span :title="node.data.name">
-            <i :class="node.data.children?'el-icon-s-cooperation':'el-icon-s-order'"></i>
+            <i :class="node.data.treeNode?'el-icon-s-cooperation':'el-icon-s-order'"></i>
             <span class="color_alarm" style="width:13px;height:13px;display:inline-block"></span>
             {{ node.data.name }}
           </span>
@@ -62,7 +62,7 @@
            }]*/
         }],
         defaultProps: {
-          children: 'children',
+          children: 'treeNode',
           label: 'label'
         },
         checkedId:[],
