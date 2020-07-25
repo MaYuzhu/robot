@@ -7,7 +7,7 @@
           <XunjianContent :taskInfo="taskInfo"></XunjianContent>
         </div>
         <div class="taskControl_wrap">
-          <taskControl @isVideo="isVideo"></taskControl>
+          <taskControl @isVideo="isVideo" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
         </div>
 
       </div>
@@ -53,6 +53,7 @@
         currentTaskInfoTimeId:null,
         time:3000,
         ros:null,
+        irDataTaskHistoryId:'',
       }
     },
 
@@ -116,7 +117,7 @@
           null,
           true,function (res) {
             if(res.code == 200){
-              //console.log(res)
+              console.log(res)
               _this.taskInfo = {
                 name:res.data.taskName,
                 taskStatus:res.data.taskStatus,
@@ -138,6 +139,7 @@
                   true,function (res) {
                       if(res.code == 200){
                           //console.log(res)
+                          _this.irDataTaskHistoryId = res.data.irDataTaskHistoryId
                           _this.taskInfo = {
                               name:res.data.taskName,
                               taskStatus:res.data.taskStatus,
@@ -211,7 +213,9 @@
               }
           });
           if (-1 == iRet) {
+            setTimeout(function () {
               _this.clickStartRealPlay()
+            },500)
           }
 
 

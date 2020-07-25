@@ -5,7 +5,7 @@
       <div style="width: 60%;float: left">
         <XunjianContent :taskInfo="taskInfo"></XunjianContent>
 
-        <taskControl @isVideo="isVideo" class="task_control_wrap1"></taskControl>
+        <taskControl @isVideo="isVideo" class="task_control_wrap1" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
 
       </div>
       <select style="display: none" id="ip" class="sel" onchange=""></select>
@@ -212,6 +212,7 @@
         ros:null,
         mo_but:0,
         car_direction_mask: true,
+        irDataTaskHistoryId:'',
       }
     },
     methods:{
@@ -286,6 +287,7 @@
                   true,function (res) {
                       if(res.code == 200){
                           //console.log(res)
+                          _this.irDataTaskHistoryId = res.data.irDataTaskHistoryId
                           _this.taskInfo = {
                               name:res.data.taskName,
                               taskStatus:res.data.taskStatus,
@@ -325,7 +327,9 @@
           }
         });
         if (-1 == iRet) {
-          _this.clickStartRealPlay()
+          setTimeout(function () {
+            _this.clickStartRealPlay()
+          },500)
         }
         // 获取通道
         function getChannelInfo() {
@@ -926,6 +930,9 @@
         }
         if(val == 2){
           this.car_direction_mask = false
+        }
+        if(val == 3){
+          this.car_direction_mask = true
         }
       }
 

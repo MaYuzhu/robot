@@ -166,6 +166,7 @@
         ros:null,
       };
     },
+    props: ['irDataTaskHistoryId'],
     mounted(){
     	let _this = this
 
@@ -234,6 +235,7 @@
           title: 'add Layer',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
+            //url: '../../static/geojson/route_yuxian.geojson',
             url: '../../static/geojson/route3.geojson',
             //url: '../../static/geojson/route.geojson',
             format:new ol.format.GeoJSON()
@@ -253,6 +255,7 @@
           title: 'add Layer Point',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
+            //url: '../../static/geojson/stops_yuxian.geojson',
             url: '../../static/geojson/stops3.geojson',
             //url: '../../static/geojson/stops.geojson',
             format:new ol.format.GeoJSON()
@@ -303,8 +306,12 @@
 
                 });
             },
-            visible: true
+            visible: false
         });
+
+        //var m_center = [28, 20]
+        var m_center = [10, 9]
+        m_center = ol.proj.transform(m_center,'EPSG:4326','EPSG:3857');
 
         _this.map = new ol.Map({
           layers: [
@@ -319,8 +326,10 @@
             new ol.interaction.DragRotateAndZoom()
           ]),
           view: new ol.View({
-            center: [0, 0],
-            zoom: 4
+            center: m_center,
+            zoom: 5,
+            rotation: Math.PI/180 * 4.5
+            //rotation: Math.PI/180 * -2.5
           }),
           //controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
           controls: ol.control.defaults().extend([
@@ -530,6 +539,13 @@
           _this.taskServerClear.callService({flag:1},function(result) {
               console.log('任务暂停');
               _this.$message('任务暂停');
+              //发送irDataTaskHistoryId到后台
+              console.log(_this.irDataTaskHistoryId)
+              _this.ajax_api('post',url_api + '/task/gen-path',
+                {irDataTaskHistoryId:_this.irDataTaskHistoryId},
+                true,function (res) {
+                  console.log(res)
+                })
           })
         }else {
           _this.taskStopText = '任务暂停'
@@ -549,6 +565,53 @@
           _this.taskServerClear.callService({flag:2},function(result) {
               console.log('任务继续');
               _this.$message('任务继续');
+              //发id到后台
+              _this.ajax_api('post',url_api + '/task/proceed',
+                {irDataTaskHistoryId:_this.irDataTaskHistoryId,irBaseRobotId:robotIdCurrent},
+                true,function (res) {
+                  console.log(res)
+                  console.log(res.data.path)
+                  //取到计划线路的点
+                  if(!res.data.path){
+                    _this.$message({
+                      message: '未获取到有效路径',
+                    });
+                    return
+                  }
+                  var linePlanObj = JSON.parse(res.data.path)
+                  var lineArr = []
+                  if(lineArr.length>0){
+                    lineArr = []
+                  }
+                  for(var i=0;i<linePlanObj.Tasks.length;i++){
+                    var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
+                    var point = [pointArr[0]*1,pointArr[2]*1]
+                    lineArr.push(point)
+                  }
+                  planLinePointArr = lineArr
+
+                  _this.taskServer = new ROSLIB.Service({
+                    ros : _this.ros,
+                    name : '/tasklist',
+                    serviceType : 'yidamsg/TaskList'
+                  });
+                  _this.taskServerClear = new ROSLIB.Service({
+                    ros : _this.ros,
+                    name : '/taskclear',
+                    serviceType : 'yidamsg/TaskList'
+                  });
+                  _this.taskServerClear.callService({flag:0},function(result) {
+                    console.log('Clear');
+                    var request = new ROSLIB.ServiceRequest({
+                      plan : res.data.path,
+                      //plan : JSON.stringify(aa),
+                    });
+
+                    _this.taskServer.callService(request, function(result) {
+                      console.log(result);
+                    });
+                  });
+                })
           })
         }
 
@@ -727,6 +790,7 @@
       },
       //挂牌
       addPlate(){
+    	  console.log(this.irDataTaskHistoryId)
       	let _this = this
         //如果选点打开先关闭
         if(_this.choosePointText == '停止'){
@@ -1116,7 +1180,7 @@
                   if(vehSource)vehSource.clear();
                   if(passRouteSource)passRouteSource.clear();
                   var iconFeature = new ol.Feature({
-                      geometry: new ol.geom.Point(ol.proj.transform([message.x,message.z], 'EPSG:4326', 'EPSG:3857'), "XY"),
+                      geometry: new ol.geom.Point(ol.proj.transform(projRobotXY(message.x,message.z), 'EPSG:4326', 'EPSG:3857'), "XY"),
                       name: "my Icon",
                   });
                   //console.log(message.anglez*180/Math.PI)
@@ -1134,7 +1198,7 @@
                   )
                   vehSource.addFeature(iconFeature);
 
-                  routeArrPoint.push([message.x,message.z])
+                  routeArrPoint.push(projRobotXY(message.x,message.z))
                   /*routeArr.push(
                       new ol.Feature({
                           geometry:new ol.geom.Point(ol.proj.fromLonLat([message.x,message.y])),

@@ -17,7 +17,7 @@
       <div style="background:lavender;clear: both">
         <XunjianContent :taskInfo="taskInfo"></XunjianContent>
       </div>
-      <taskControl @isVideo="isVideo" class="task_map"></taskControl>
+      <taskControl @isVideo="isVideo" class="task_map" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
     </div>
 <div v-if="false">
   <iframe src="../../static/hkVedio/hkvedio.html" width="500" height="300" frameborder="0"></iframe>
@@ -75,6 +75,7 @@
         currentTaskInfoTimeId:null,
         time:3000,
         ros:null,
+        irDataTaskHistoryId:'',
       }
     },
     mounted() {
@@ -361,7 +362,7 @@
           null,
           true,function (res) {
             if(res.code == 200){
-            	console.log(res)
+            	//console.log(res)
               _this.taskInfo = {
             		name:res.data.taskName,
                 taskStatus:res.data.taskStatus,
@@ -382,6 +383,7 @@
                   true,function (res) {
                       if(res.code == 200){
                           //console.log(res)
+                          _this.irDataTaskHistoryId = res.data.irDataTaskHistoryId
                           _this.taskInfo = {
                               name:res.data.taskName,
                               taskStatus:res.data.taskStatus,

@@ -457,7 +457,7 @@
           },
           true,
           function (res) {
-            console.log(res.data)
+            //console.log(res.data)
             _this.tableDataCycle = res.data.items
 
           })

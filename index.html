@@ -27,14 +27,23 @@
       //D:\360安全浏览器下载\WebComp(www.greenxf.com)\web3.0开发包\demo\codebase  插件
       var url_api = 'http://192.168.1.120:8098/ui'
       var url_img = 'http://192.168.1.120:8090'
+
       //var url_api = 'http://192.168.1.52:8098/ui'
+      //var url_img = 'http://192.168.1.52:8090'
+
       //var url_api = 'http://58.57.83.230:8098/ui'
       //var url_api = 'http://localhost:8098/ui'
+
       var routersArr = []
       var robotIdCurrent = ''
       var planLinePointArr = []
       var robotUrl = 'ws://192.168.1.10:9090'
       var hKUrl = '192.168.1.13'
+
+      var projRobotXY = function (x,y) {
+        var point = 1
+        return [x/point,y/point]
+      }
 
     </script>
     <!--兼容IE9-->

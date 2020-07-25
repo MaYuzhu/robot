@@ -42,8 +42,9 @@
               prop="address" align="center"
               label="采集信息"
               >
-              <template slot-scope="scope">
-                <img :src="scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic" style="width: 50px;height:50px;"
+              <template slot-scope="scope" height="10px">
+                <img :src="scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic"
+                     style="display:block;width:80px;height:32px;margin:0 auto;"
                      @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic)">
               </template>
             </el-table-column>
@@ -371,6 +372,8 @@
       height 100%
     /deep/.el-tabs__content
       height calc(100% - 31px)
+    /deep/.el-table__body td
+      padding 0px
     .box_height
       height 260px
       overflow auto
