@@ -95,50 +95,58 @@
       </el-date-picker>
       <div>
         <ul>
-          <li><img src="../../static/images/query.png" alt=""><span>查询</span></li>
-          <li><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
-          <li><img src="../../static/images/export.png" alt=""><span>导出</span></li>
+          <li @click="queryList()"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
+          <li @click="resetList()"><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
+          <li @click="exportExcel_zanshi()"><img src="../../static/images/export.png" alt=""><span>导出</span></li>
           <li @click="alertBox()"><img src="../../static/images/report.png" alt=""><span>自定义报表</span></li>
         </ul>
       </div>
     </div>
     <div class="content">
       <div class="left">
-        <devTreeNoCheck @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTreeNoCheck>
+        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTree>
       </div>
       <div class="right">
         <p class="title">生成报表</p>
-        <el-table size="mini"
-                  :data="dataTable"
-                  border
+        <el-table size="mini" class="table_box"
+                  :data="tableDataResults"
+                  border id="out-table"
                   style="width: 100%">
           <el-table-column align="center"
-            prop="date"
-            label="序号"
+            prop="date" :index="index"type="index"
+            label="序号" v-if="false"
             width="50">
           </el-table-column>
-          <el-table-column type="selection" align="center"
+          <el-table-column align="center"
+                           prop="point.id"
+                           label="ID"
+          >
+          </el-table-column>
+          <!--<el-table-column type="selection" align="center"
                            prop="address"
                            label=""
           >
-          </el-table-column>
+          </el-table-column>-->
           <el-table-column align="center"
-            prop="address"
+            prop="value" width="120"
             label="识别结果"
           >
+            <template slot-scope="scope">
+              <span>{{scope.row.value}}{{scope.row.point.unit}}</span>
+            </template>
           </el-table-column>
           <el-table-column align="center"
-            prop="address"
+            prop="reconType.name"
             label="识别类型"
           >
           </el-table-column>
           <el-table-column align="center"
-            prop="address"
+            prop="point.deviceName" width="150"
             label="点位名称"
           >
           </el-table-column>
           <el-table-column align="center"
-            prop="address"
+            prop="createTime" width="150"
             label="识别时间"
           >
           </el-table-column>
@@ -181,6 +189,9 @@
             prop="address"
             label="识别状态"
           >
+            <template slot-scope="scope">
+              <p>{{scope.row.reconStatus==0?'正确':'错误'}}</p>
+            </template>
           </el-table-column>
           <el-table-column align="center"
             prop="address"
@@ -203,7 +214,7 @@
           >
           </el-table-column>
           <el-table-column align="center"
-            prop="address"
+                           prop="alarmLevel" :formatter="alarmLevelShow"
             label="告警等级"
           >
           </el-table-column>
@@ -213,9 +224,12 @@
           >
           </el-table-column>
           <el-table-column align="center"
-            prop="address"
+            prop="checkStatus"
             label="是否审核"
           >
+            <template slot-scope="scope">
+              <p>{{scope.row.checkStatus==0?'未审核':'已审核'}}</p>
+            </template>
           </el-table-column>
 
         </el-table>
@@ -224,7 +238,7 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[1, 10, 20, 50]"
+            :page-sizes="[10, 50, 200, 500, 5000, 10000]"
             :page-size="10"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
@@ -287,51 +301,113 @@
   import XunjianTopBox from '../components/xunjianTopBox.vue'
   import myTransfer from '../components/myTransfer.vue'
   import CustomTransfer from '../components/customTransfer.vue'
-  import devTreeNoCheck from '../components/devTreeNoCheck.vue'
+  import devTree from '../components/devTree.vue'
+
+  import FileSaver from "file-saver";
+  import XLSX from "xlsx";
 
   export default {
     data(){
       return{
         title:'生成报表 > 生成报表',
-        dataTable:[],
+        tableDataResults:[], //tableDataResults:[],
         value_start:'',
         value_end:'',
+        ajaxTableData:{page:1, size:10},
         dialogVisible: false,
         chapterNameIdList:[1,2,3],
         chapterNameList:[
         	{
             disabled: false,
             id: 1,
-            templateChapterName: "识别结果1"
+            templateChapterName: "识别结果"
           },
           {
             disabled: false,
             id: 2,
-            templateChapterName: "识别类型2"
+            templateChapterName: "识别类型"
           },
           {
             disabled: false,
             id: 3,
-            templateChapterName: "点位名称3"
+            templateChapterName: "点位名称"
           },
           {
             disabled: false,
             id: 4,
-            templateChapterName: "识别类型4"
+            templateChapterName: "识别时间"
           },{
             disabled: false,
             id: 5,
-            templateChapterName: "识别时间5"
+            templateChapterName: "设备区域"
           },
           {
             disabled: false,
             id: 6,
-            templateChapterName: "设备区域6"
+            templateChapterName: "间隔名称"
           },
           {
             disabled: false,
             id: 7,
-            templateChapterName: "间隔名称7"
+            templateChapterName: "设备名称"
+          },
+          {
+            disabled: false,
+            id: 8,
+            templateChapterName: "设备类型"
+          },
+          {
+            disabled: false,
+            id: 9,
+            templateChapterName: "表计类型"
+          },
+          {
+            disabled: false,
+            id: 10,
+            templateChapterName: "设备外观类型"
+          },
+          {
+            disabled: false,
+            id: 11,
+            templateChapterName: "发热类型"
+          },{
+            disabled: false,
+            id: 12,
+            templateChapterName: "识别状态"
+          },
+          {
+            disabled: false,
+            id: 13,
+            templateChapterName: "审核结果"
+          },
+          {
+            disabled: false,
+            id: 14,
+            templateChapterName: "环境温度"
+          },
+          {
+            disabled: false,
+            id: 15,
+            templateChapterName: "环境湿度"
+          },
+          {
+            disabled: false,
+            id: 16,
+            templateChapterName: "环境风速"
+          },
+          {
+            disabled: false,
+            id: 17,
+            templateChapterName: "告警等级"
+          },
+          {
+            disabled: false,
+            id: 18,
+            templateChapterName: "采集信息"
+          },{
+            disabled: false,
+            id: 19,
+            templateChapterName: "是否审核"
           }
 
 
@@ -380,6 +456,7 @@
           meter:[],
           face:[]
         },
+        tableDataAllExcel:[],
       }
     },
     components: {
@@ -388,12 +465,13 @@
       myTransfer,
       CustomTransfer,
       menuBottom,
-      devTreeNoCheck
+      devTree
     },
     mounted(){
     	this.init()
       this.value_start = this.convertToLateDate()
       this.value_end = this.getDateTime()
+      this.getTableData()
     },
     methods:{
       init(){
@@ -524,9 +602,6 @@
           $('.all_content_face_type').height('20px')
         }
       },
-      treeCheck(data){
-        //console.log(data)
-      },
 
       alertBox(){
         this.dialogVisible = true
@@ -638,9 +713,123 @@
       },
       handleSizeChange(val) {
         //console.log(`每页 ${val} 条`);
+        this.ajaxTableData.size = val
+        this.getTableData()
       },
       handleCurrentChange(val) {
         //console.log(`当前页: ${val}`);
+        this.ajaxTableData.page = val
+        this.getTableData()
+      },
+      index(val){
+        return (this.ajaxTableData.page - 1)*this.ajaxTableData.size + val + 1
+      },
+
+      getTableData(){
+        let _this = this
+        _this.ajaxTableData.startTime = _this.value_start+' 00:00:00'
+        _this.ajaxTableData.endTime = _this.value_end+' 23:59:59'
+        //_this.ajaxTableData.pointIds = ''
+        //console.log(_this.ajaxTableData)
+        _this.ajax_api('post',url_api + '/point-history',
+          _this.ajaxTableData,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data.items)
+              _this.tableDataResults = res.data.items
+              _this.total = res.data.total
+              //自己得到表格显示的内容
+              _this.tableDataAllExcel = []
+              for(let i=0;i<res.data.items.length;i++){
+
+              }
+            }
+          })
+
+      },
+
+      treeCheck(data){
+        //console.log(data)
+        this.ajaxTableData.pointIds = data.toString()
+      },
+      //查询
+      queryList(){
+        let _this = this
+        _this.getTableData()
+      },
+      resetList(){
+        this.checkAllQuyu = false
+        this.checkedQuyu = []
+        this.isIndeterminateQuyu = false
+        this.moreQuyu = false
+
+        this.checkAllDevType = false
+        this.checkedDevType = []
+        this.isIndeterminateDevType = false
+        this.moreDevType = false
+
+        this.checkAllReconType = false
+        this.checkedReconType = []
+        this.isIndeterminateReconType = false
+        this.moreReconType = false
+
+        this.checkAllAlarm = false
+        this.checkedAlarm = []
+        this.isIndeterminateAlarm = false
+        this.moreAlarm = false
+
+        this.value_end = this.getDateTime()
+        this.value_start = this.convertToLateDate()
+        this.ajaxTableData.pointIds = ''
+        this.getTableData()
+      },
+
+      exportExcelRes(){
+        let _this = this
+        if(_this.checkedNameList.length<1){
+          _this.$message({
+              type: 'success',
+              message: '请选择自定义报表',
+            });
+          return
+        }
+        console.log(_this.checkedNameList)
+
+        var url = url_api + '/file/download';
+        var xhr = new XMLHttpRequest();
+        var data = {
+          dataSet: [
+            { taskName:"12", deviceRegion:"13"},
+            { taskName:"12", deviceRegion:"13"}
+          ],
+          heads: {taskName:"任务名称", deviceRegion:"设备区域", },
+          sheetName: "test"
+        };
+        xhr.open('post', url, true);    // 也可以使用POST方式，根据接口
+        xhr.setRequestHeader("Content-type", "application/json;charset=utf-8");
+        xhr.setRequestHeader("token",localStorage.getItem('token'));
+        xhr.send(JSON.stringify(data))
+        xhr.responseType = "blob";  // 返回类型blob
+        // 定义请求完成的处理函数，请求前也可以增加加载框/禁用下载按钮逻辑
+        xhr.onload = function () {
+          // 请求完成
+          if (this.status === 200) {
+            // 返回200
+            var blob = this.response;
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
+            reader.onload = function (e) {
+              // 转换完成，创建一个a标签用于下载
+              var a = document.createElement('a');
+              a.download = 'data.xlsx';
+              a.href = e.target.result;
+              $("body").append(a);  // 修复firefox中无法触发click
+              a.click();
+              $(a).remove();
+            }
+          }
+        };
       },
 
       convertToLateDate(){
@@ -682,6 +871,73 @@
         //return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
         return y + "-" + m + "-" + d
       },
+      getDateTimeHhMmSs(){ //默认显示今天
+        var Da = new Date();
+        //var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var ss = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
+        return y + "-" + m + "-" + d + "-" + H + "-" + mm + "-" + ss;
+      },
+
+      alarmLevelShow(row){
+        let alarmLevelName = ''
+        switch (row.alarmLevel){
+          case 0:
+            alarmLevelName = '正常'
+            break
+          case 1:
+            alarmLevelName = '预警'
+            break
+          case 2:
+            alarmLevelName = '一般缺陷'
+            break
+          case 3:
+            alarmLevelName = '严重缺陷'
+            break
+          case 4:
+            alarmLevelName = '危险缺陷'
+            break
+        }
+        return alarmLevelName
+      },
+
+      //暂时导出结果
+      exportExcel_zanshi() {
+        var _this = this
+        /* 从表生成工作簿对象 */
+        var wb = XLSX.utils.table_to_book(document.querySelector("#out-table"));
+        /* 获取二进制字符串作为输出 */
+        var wbout = XLSX.write(wb, {
+          bookType: "xlsx",
+          bookSST: true,
+          type: "array"
+        });
+        try {
+          FileSaver.saveAs(
+            //Blob 对象表示一个不可变、原始数据的类文件对象。
+            //Blob 表示的不一定是JavaScript原生格式的数据。
+            //File 接口基于Blob，继承了 blob 的功能并将其扩展使其支持用户系统上的文件。
+            //返回一个新创建的 Blob 对象，其内容由参数中给定的数组串联组成。
+            new Blob([wbout], { type: "application/octet-stream" }),
+            //设置导出文件名称 name生成报表
+            "生成报表" + _this.getDateTimeHhMmSs() + ".xlsx"
+            //"sheetjs.xlsx"
+          );
+        } catch (e) {
+          if (typeof console !== "undefined") console.log(e, wbout);
+        }
+        return wbout;
+      }
 
     },
     watch:{
@@ -819,7 +1075,11 @@
         .page
           position absolute
           bottom 0
-    div>>>
+        .table_box
+          max-height calc(100% - 64px)
+          overflow-y auto
+
+  div>>>
       .el-dialog
         background #d7efec
         width: 48%;
@@ -915,4 +1175,10 @@
         font-size 14px
         top 4px
         left 10px
+  div>>>
+    .el-table::before
+      left: 0;
+      bottom: 0;
+      width: 100%;
+      height: 0px;
 </style>

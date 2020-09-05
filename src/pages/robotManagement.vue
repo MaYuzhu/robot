@@ -174,7 +174,7 @@
         var listener = new ROSLIB.Topic({
           ros : ros,
           name : '/detect_result',
-          messageType : 'yidamsg/InspectedResult'
+          messageType : 'robotmsg/InspectedResult'
         });
 
         listener.subscribe(function(message) {

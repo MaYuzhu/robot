@@ -808,14 +808,20 @@
                 console.log(resData)
                 _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
                     {},true,function (res) {
-                        console.log(res)
-                        console.log(res.data.path)
+                        //console.log(res)
+                        //console.log(res.data.path)
                         //取到计划线路的点
                         if(!res.data.path){
                           _this.$message({
                             message: '未获取到有效路径',
                           });
                           return
+                        }else {
+                          _this.$message({
+                            type: 'success',
+                            message: '任务发送成功',
+                          });
+                          _this.$root.eventHub.$emit('taskSuccess', '1111');
                         }
                         var linePlanObj = JSON.parse(res.data.path)
                         var lineArr = []
@@ -832,12 +838,12 @@
                         _this.taskServer = new ROSLIB.Service({
                             ros : _this.ros,
                             name : '/tasklist',
-                            serviceType : 'yidamsg/TaskList'
+                            serviceType : 'robotmsg/TaskList'
                         });
                         _this.taskServerClear = new ROSLIB.Service({
                             ros : _this.ros,
                             name : '/taskclear',
-                            serviceType : 'yidamsg/TaskList'
+                            serviceType : 'robotmsg/TaskList'
                         });
                         _this.taskServerClear.callService({flag:0},function(result) {
                             console.log('Clear');
@@ -850,7 +856,6 @@
                                 console.log(result);
                             });
                         });
-
                     })
             })
 
@@ -877,12 +882,12 @@
                   _this.taskServer = new ROSLIB.Service({
                       ros : _this.ros,
                       name : '/tasklist',
-                      serviceType : 'yidamsg/TaskList'
+                      serviceType : 'robotmsg/TaskList'
                   });
                   _this.taskServerClear = new ROSLIB.Service({
                       ros : _this.ros,
                       name : '/taskclear',
-                      serviceType : 'yidamsg/TaskList'
+                      serviceType : 'robotmsg/TaskList'
                   });
                   _this.taskServerClear.callService({flag:0},function(result) {
                       console.log('new plan before Clear');

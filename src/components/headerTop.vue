@@ -119,9 +119,25 @@
                       <router-link to="/tasks/defect-tracking">缺陷跟踪</router-link>
                       <span>|</span>
                     </div>
+                    <div>
+                      <router-link to="/tasks/defect-tracking">远方状态确认</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/tasks/defect-tracking">远方异常告警确认</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/tasks/defect-tracking">安防联动</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/tasks/defect-tracking">协助应急事故处理</router-link>
+                      <span>|</span>
+                    </div>
                   </dd>
                 </dl>
-                <dl>
+                <!--<dl>
                   <dt>多光谱巡检</dt>
                   <span>|</span>
                   <dd>
@@ -130,13 +146,23 @@
                       <span>|</span>
                     </div>
                   </dd>
-                </dl>
+                </dl>-->
                 <dl>
                   <dt>自定义任务</dt>
                   <span>|</span>
                   <dd>
                     <div>
                       <router-link to="/tasks/custom-task">自定义任务</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
+                <dl>
+                  <dt>地图选点</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/robots/robot-management">地图选点</router-link>
                       <span>|</span>
                     </div>
                   </dd>
@@ -197,6 +223,10 @@
                   <dd>
                     <div>
                       <router-link to="/resultsConfirm/alarm-query">设备告警信息确认</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/resultsConfirm/interval-show">主接线展示</router-link>
                       <span>|</span>
                     </div>
                     <div>
@@ -277,6 +307,10 @@
                       <router-link to="/users/threshold-setting">告警阈值设置</router-link>
                       <span>|</span>
                     </div>
+                    <div>
+                      <router-link to="/users/threshold-setting">告警消息订阅设置</router-link>
+                      <span>|</span>
+                    </div>
                   </dd>
                 </dl>
                 <dl>
@@ -289,7 +323,7 @@
                     </div>
                   </dd>
                 </dl>
-                <!--<dl>
+                <dl>
                   <dt>点位设置</dt>
                   <span>|</span>
                   <dd>
@@ -297,8 +331,22 @@
                       <router-link to="/users/inspection-points-setting">巡检点位设置</router-link>
                       <span>|</span>
                     </div>
+                    <div>
+                      <router-link to="/users/inspection-points-setting">典型巡检点位库维护</router-link>
+                      <span>|</span>
+                    </div>
                   </dd>
-                </dl>-->
+                </dl>
+                <dl>
+                  <dt>检修区域设置</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/robots/robot-management">检修区域设置</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
                 <dl>
                   <dt>系统设置</dt>
                   <span>|</span>
@@ -328,6 +376,16 @@
                 <span>&gt;</span>
               </div>
               <div class="pop_up">
+                <dl>
+                  <dt>巡检地图设置</dt>
+                  <span>|</span>
+                  <dd>
+                    <div>
+                      <router-link to="/systems/software-settings">巡检地图维护</router-link>
+                      <span>|</span>
+                    </div>
+                  </dd>
+                </dl>
                 <dl>
                   <dt>软件设置</dt>
                   <span>|</span>
@@ -383,6 +441,8 @@
         <span>{{companyArea}}</span>
       </div>
     </div>
+    <div class="baojing"><audio id="audio" controls="controls" loop="loop"
+                                src="../../static/img/baojing.mp3"></audio></div>
   </div>
 </template>
 
@@ -400,12 +460,25 @@
         countAlarm:0,
         //../../static/images/logo.jpg
         logoUrl:'../../static/images/logo.jpg',
+        url:robotUrl,
+        ros:null,
+        listener:null,
+        listenerController:null,
+        timesListenerController:null,
       }
 
     },
     mounted(){
+      let _this = this
     	this.getCompanyName()
       this.countAlarmShow()
+      _this.ros = new ROSLIB.Ros({
+        url : _this.url
+      });
+      _this.ros.on('connection', function() {
+        console.log('all_alarm');
+      });
+      //this.allAlarm()
     },
     props:['title'],
     methods: {
@@ -489,6 +562,95 @@
       wordDetail(){
 
       },
+      //报警
+      allAlarm(){
+        let _this = this
+        //接收任务是否完成-消息
+        _this.listener = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/self_check',
+          messageType : 'robotmsg/connection_status'
+        });
+        _this.listener.subscribe(function(message) {
+          //console.log(message)
+          if(!message.joy){
+            _this.open('遥控信号')
+            _this.playOrPaused()
+          }else if(!message.ipc){
+            _this.open('工控机信号')
+            _this.playOrPaused()
+          }else if(!message.xavier){
+            _this.open('计算单元信号')
+            _this.playOrPaused()
+          }else if(!message.infrared_camera){
+            _this.open('红外信号')
+            _this.playOrPaused()
+          }
+
+        });
+
+        _this.listenerController = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/controller_status',
+          messageType : 'std_msgs/Bool'
+        });
+
+        /*_this.listenerController.subscribe(function(message) {
+          console.log(message)
+          if(message) {
+            _this.open('驱动系统')
+            _this.playOrPaused()
+            _this.listenerController.unsubscribe();
+          }
+        });*/
+        var bool_controller = true
+        _this.listenerController.subscribe(function(message) {
+          //console.log(message.data)
+          bool_controller = message.data
+        })
+
+        listenerControllerTimeout()
+        function listenerControllerTimeout(){
+          _this.timesListenerController = setTimeout(function () {
+            if(!bool_controller) {
+              _this.open('驱动系统')
+              _this.playOrPaused()
+              _this.listenerController.unsubscribe();
+            }
+          },2000)
+        }
+
+
+      },
+      open(message) {
+        let _this = this
+        this.$alert(`${message}故障`, '系统警报', {
+          confirmButtonText: '确定',
+          callback: action => {
+            _this.playClose()
+            clearTimeout(_this.timesListenerController)
+            /*this.$message({
+              type: 'info',
+              message: `action: ${ action }`
+            });*/
+          }
+        })
+      },
+      playOrPaused(id,obj){
+        var audio = document.getElementById('audio');
+        if(audio.paused){
+          audio.play();
+          //obj.innerHTML='暂停';
+          return;
+        }
+        audio.pause();
+        //obj.innerHTML='播放';
+      },
+      playClose(id,obj){
+        var audio = document.getElementById('audio');
+        audio.pause();
+      },
+
     }
   }
 </script>
@@ -727,5 +889,11 @@
 
 
 
+    .baojing
+      position absolute
+      z-index 20000
+      background #3d8fff
+      left -3000px
+      margin-left -1000px
 
 </style>

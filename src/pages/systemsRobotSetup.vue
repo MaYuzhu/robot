@@ -71,10 +71,14 @@
               <div>
                 <p>云台水平偏移量: </p>
                 <el-input v-model="yun_x" size="mini"></el-input>
+                <p>轮子直径: </p>
+                <el-input v-model="zhijing" size="mini" style="width:50px"></el-input>
               </div>
               <div>
                 <p>云台垂直偏移量: </p>
                 <el-input v-model="yun_y" size="mini"></el-input>
+                <p>轮子距中心距离: </p>
+                <el-input v-model="zhongxin" size="mini" style="width:50px"></el-input>
               </div>
             </div>
             <div style="display: flex;justify-content: space-around;padding: 16px 10px;">
@@ -262,7 +266,8 @@
         y_y:'',
         yun_x:'',
         yun_y:'',
-
+        zhijing:'',
+        zhongxin:'',
       }
     },
     mounted(){
@@ -275,7 +280,7 @@
         _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
           {irBaseRobotId:1,size:100,page:1,},
           true, function (res) {
-            //console.log(res.data)
+            console.log(res.data)
             let alarm_after = res.data.items.filter(item => {
               return item.name == 'alarm-after-execute'
             })
@@ -304,7 +309,7 @@
         _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
           {irBaseRobotId:1,size:100,page:1,},
           true, function (res) {
-            //console.log(res.data)
+            console.log(res.data)
             let x_x = res.data.items.filter(item => {
               return item.name == 'x-value'
             })

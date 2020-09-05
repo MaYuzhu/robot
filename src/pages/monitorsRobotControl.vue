@@ -35,7 +35,9 @@
             <p @click="clickCapturePic" title="抓图" class="button_control_header"><img src="../../static/images/pictures.png" alt=""></p>
             <p @click="clickVoice" :title="voice_title" class="button_control_header"><img :src='voice_img' alt=""></p>
             <p @click="clickVideo" :title="video_title" class="button_control_header"><img :src="video_img" alt=""></p>
-            <p class="button_control_header"><img src="../../static/images/voice.png" alt=""></p>
+            <p @click="clickDuijiang" :title="duijiang_title" class="button_control_header duijiang">
+              <img :src="duijiang_img" alt="">
+            </p>
             <p class="button_control_header"><img src="../../static/images/lookpicture.png" alt=""></p>
             <p class="button_control_header"><img src="../../static/images/audio.png" alt=""></p>
             <p @click="clickPlayback" :title="playback_title" class="button_control_header"><img :src="playback_img" alt=""></p>
@@ -200,6 +202,8 @@
         video_img:"../../static/images/recordingvideo.png",
         playback_title:'视频回放',
         playback_img:'../../static/images/playback.png',
+        duijiang_title: '开启语音',
+        duijiang_img:'../../static/images/voice_close.png',
         g_bPTZAuto : false,
         taskInfo:{},
         robotId:'',
@@ -213,6 +217,7 @@
         mo_but:0,
         car_direction_mask: true,
         irDataTaskHistoryId:'',
+        taskServer:null,
       }
     },
     methods:{
@@ -519,6 +524,20 @@
         }
       },
 
+      //语音对讲
+      clickDuijiang(){
+        let _this = this
+        if(_this.duijiang_title == '关闭语音'){
+          _this.duijiang_title = '开启语音'
+          _this.duijiang_img = "../../static/images/voice_close.png"
+
+        }else {
+          _this.duijiang_title = '关闭语音'
+          _this.duijiang_img = "../../static/images/voice.png"
+
+        }
+      },
+
       PTZZoomIn() {
         var _this = this
         var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex);
@@ -616,6 +635,36 @@
         }
       },
 
+      //打开对讲
+      openDuijiang(){
+        let _this = this
+        _this.taskServer = new ROSLIB.Service({
+          ros : _this.ros,
+          name : '/chat_call',
+          serviceType : 'robotmsg/Control'
+        });
+        var request = new ROSLIB.ServiceRequest({
+          control : true,
+        });
+        _this.taskServer.callService(request, function(result) {
+          console.log(result);
+        });
+      },
+      //关闭对讲
+      closeDuijiang(){
+        let _this = this
+        _this.taskServer = new ROSLIB.Service({
+          ros : _this.ros,
+          name : '/chat_call',
+          serviceType : 'robotmsg/Control'
+        });
+        var request = new ROSLIB.ServiceRequest({
+          control : false,
+        });
+        _this.taskServer.callService(request, function(result) {
+          console.log(result);
+        });
+      },
       // 打开声音
       clickOpenSound() {
         var _this = this
@@ -1160,7 +1209,7 @@
                 width 36%
                 display inline-block
                 line-height 26px
-                //margin 0 auto
+
           >.control_header_right
             float left
             display flex

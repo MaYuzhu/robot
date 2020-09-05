@@ -115,12 +115,12 @@
           true,
           function (res) {
             if(res.code == 200){
-              console.log(res.data)
+              //console.log(res.data)
               _this.dataTree = res.data
               _this.dataTree.forEach(m=>{
                 _this.idArr.push(m.id) //默认展开
               })
-              console.log(_this.idArr)
+              //console.log(_this.idArr)
               if(_this.toTreeData.quyu.length>0){
                 let newDataQuyu = []
                 for(let i=0;i<_this.toTreeData.quyu.length;i++){

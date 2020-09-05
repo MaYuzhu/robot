@@ -248,8 +248,8 @@
 
         _this.listener = new ROSLIB.Topic({
           ros : _this.ros,
-          name : '/car_status_now',
-          messageType : 'yidamsg/weather'
+          name : '/weather_info',
+          messageType : 'robotmsg/weather'
         });
 
         _this.listener.subscribe(function(message) {
@@ -273,7 +273,7 @@
         _this.listener = new ROSLIB.Topic({
             ros : _this.ros,
             name : '/car_status_now',
-            messageType : 'yidamsg/nrcar_status'
+            messageType : 'robotmsg/nrcar_status'
         });
 
         _this.listener.subscribe(function(message) {
@@ -352,7 +352,7 @@
         _this.listener = new ROSLIB.Topic({
           ros : _this.ros,
           name : '/self_check',
-          messageType : 'yidamsg/connection_status'
+          messageType : 'robotmsg/connection_status'
         });
 
         _this.listener.subscribe(function(message) {

@@ -147,7 +147,7 @@
     methods: {
       handleAvatarSuccess(res, file) {
         this.imageUrl = URL.createObjectURL(file.raw);
-        console.log(res)
+        console.log(file.response)
         //action="https://jsonplaceholder.typicode.com/posts/" 37位//8b79b27e7d14cb6569400958ee474c56.jpg
         //console.log(file.response.data.localUrl)
         //console.log(file.response.data.localUrl.slice(-37))

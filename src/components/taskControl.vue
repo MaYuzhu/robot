@@ -8,6 +8,7 @@
       <option value="pointmove">鼠标经过</option>
     </select>
     <div id="map" ref="rootmap">
+      <div title="复位" class="map_fuwei" @click="resetView()"><img src="../../static/img/weizhi.png" alt=""></div>
       <ul>
         <li @click="taskStop">
           <el-button type="text" size="mini">{{taskStopText}}</el-button>
@@ -164,6 +165,10 @@
         taskServerClear:null,
 
         ros:null,
+
+        mapCenter:null,
+        mapZoom:null,
+        mapRotate:null,
       };
     },
     props: ['irDataTaskHistoryId'],
@@ -181,6 +186,7 @@
       _this.init()
       _this.plateShow()
       _this.point_now()
+      _this.taskExecuteStatus()
       //_this.planLineShow()
       _this.planLinePoint = planLinePointArr
 
@@ -189,6 +195,15 @@
     methods:{
     	init(){
     		let _this = this
+        //请求shp文件
+        /*_this.ajax_api('post',url_api + '/shpfile/shpToGeoJson',
+          {
+            localUrl: 'D:\\abc\\route.geojson',
+            shpUrl: url_img+'/shp/route.shp'
+          },
+          true,function (res) {
+            console.log(res)
+        })*/
         _this.geoJsonLayerRoute = new ol.layer.Vector({
           title: 'add Layer',
           source: new ol.source.Vector({
@@ -235,8 +250,8 @@
           title: 'add Layer',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
-            //url: '../../static/geojson/route_yuxian.geojson',
-            url: '../../static/geojson/route3.geojson',
+            url: '../../static/geojson/route_yu_new.geojson',
+            //url: '../../static/geojson/route3.geojson',
             //url: '../../static/geojson/route.geojson',
             format:new ol.format.GeoJSON()
           }),
@@ -255,8 +270,8 @@
           title: 'add Layer Point',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
-            //url: '../../static/geojson/stops_yuxian.geojson',
-            url: '../../static/geojson/stops3.geojson',
+            url: '../../static/geojson/stops_yu_new.geojson',
+            //url: '../../static/geojson/stops3.geojson',
             //url: '../../static/geojson/stops.geojson',
             format:new ol.format.GeoJSON()
           }),
@@ -285,7 +300,7 @@
                 //console.log(feature)
                 return new ol.style.Style({
                     image: new ol.style.Circle({
-                        radius: 3,
+                        radius: 4,
                         fill: new ol.style.Fill({
                             color: '#ff5524'
                         })
@@ -293,6 +308,7 @@
                     text: new ol.style.Text({
                       textAlign: 'center',            //位置
                       textBaseline: 'middle',         //基准线
+                      offsetY: -8,
                       font: 'normal 14px 微软雅黑',    //文字样式
                       text: feature.getId().substring(8),      //文本内容
                       fill: new ol.style.Fill({       //文本填充样式（即文字颜色)
@@ -309,8 +325,8 @@
             visible: false
         });
 
-        //var m_center = [28, 20]
-        var m_center = [10, 9]
+        var m_center = [28, 20]
+        //var m_center = [10, 9]
         m_center = ol.proj.transform(m_center,'EPSG:4326','EPSG:3857');
 
         _this.map = new ol.Map({
@@ -328,8 +344,8 @@
           view: new ol.View({
             center: m_center,
             zoom: 5,
-            rotation: Math.PI/180 * 4.5
-            //rotation: Math.PI/180 * -2.5
+            //rotation: Math.PI/180 * 4.5
+            rotation: Math.PI/180 * -2.4
           }),
           //controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
           controls: ol.control.defaults().extend([
@@ -352,6 +368,12 @@
         })
         _this.map.addLayer(_this.planLinePointVector);
         $('.ol-full-screen button').text('全屏')
+
+        var view = _this.map.getView();
+        _this.mapZoom = view.getZoom();
+        _this.mapCenter = view.getCenter();
+        _this.mapRotation = view.getRotation();
+
       },
       //地图选点
       choosePoint(){
@@ -534,7 +556,7 @@
           _this.taskServerClear = new ROSLIB.Service({
               ros : _this.ros,
               name : '/taskclear',
-              serviceType : 'yidamsg/TaskControl'
+              serviceType : 'robotmsg/TaskControl'
           });
           _this.taskServerClear.callService({flag:1},function(result) {
               console.log('任务暂停');
@@ -560,7 +582,7 @@
           _this.taskServerClear = new ROSLIB.Service({
               ros : _this.ros,
               name : '/taskclear',
-              serviceType : 'yidamsg/TaskControl'
+              serviceType : 'robotmsg/TaskControl'
           });
           _this.taskServerClear.callService({flag:2},function(result) {
               console.log('任务继续');
@@ -593,12 +615,12 @@
                   _this.taskServer = new ROSLIB.Service({
                     ros : _this.ros,
                     name : '/tasklist',
-                    serviceType : 'yidamsg/TaskList'
+                    serviceType : 'robotmsg/TaskList'
                   });
                   _this.taskServerClear = new ROSLIB.Service({
                     ros : _this.ros,
                     name : '/taskclear',
-                    serviceType : 'yidamsg/TaskList'
+                    serviceType : 'robotmsg/TaskList'
                   });
                   _this.taskServerClear.callService({flag:0},function(result) {
                     console.log('Clear');
@@ -662,12 +684,12 @@
                     _this.taskServer = new ROSLIB.Service({
                         ros : _this.ros,
                         name : '/tasklist',
-                        serviceType : 'yidamsg/TaskList'
+                        serviceType : 'robotmsg/TaskList'
                     });
                     _this.taskServerClear = new ROSLIB.Service({
                         ros : _this.ros,
                         name : '/taskclear',
-                        serviceType : 'yidamsg/TaskList'
+                        serviceType : 'robotmsg/TaskList'
                     });
                     _this.taskServerClear.callService({flag:0},function(result) {
                         console.log('Clear');
@@ -1169,7 +1191,7 @@
           _this.listener = new ROSLIB.Topic({
               ros : _this.ros,
               name : '/robot_pose',
-              messageType : 'yidamsg/Yida_pose'
+              messageType : 'robotmsg/robot_pose'
           });
           var routeArr = [],
               routeArrPoint = []
@@ -1229,6 +1251,31 @@
               //_this.listener.unsubscribe();
           });
       },
+      taskExecuteStatus(){
+    	  let _this = this
+        //接收任务是否完成-消息
+        _this.listener = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/task_execute_status',
+          messageType : 'robotmsg/TaskExecuteStatus'
+        });
+        _this.listener.subscribe(function(message) {
+          //console.log(message.task_status)
+          if(message.task_status==0){
+            /*_this.$message({
+              type: 'success',
+              message: '任务完成',
+            });*/
+            _this.$alert('任务完成', '提示', {
+              confirmButtonText: '确定',
+              callback: action => {
+
+              }
+            })
+          }
+        });
+      },
+
 
       planLineShow(val){
         let _this = this
@@ -1259,12 +1306,21 @@
           _this.taskServerClear = new ROSLIB.Service({
               ros : _this.ros,
               name : '/taskclear',
-              serviceType : 'yidamsg/TaskList'
+              serviceType : 'robotmsg/TaskList'
           });
           _this.taskServerClear.callService({flag:0},function(result) {
               console.log('任务终止');
               _this.$message('任务终止');
           })
+      },
+
+      //地图复位
+      resetView(){
+    	  var _this = this
+        var view = _this.map.getView();
+        view.setCenter(_this.mapCenter); //初始中心点
+        view.setRotation(_this.mapRotation); //初始旋转角度
+        view.setZoom(_this.mapZoom); //平移地图
       }
     },
     computed:{
@@ -1301,6 +1357,19 @@
       /*border 1px solid deeppink*/
       background white
       position relative
+      .map_fuwei
+        width 21px
+        height 21px
+        position absolute
+        top 86px
+        left 10px
+        z-index 99
+        background rgba(0,60,136,.5)
+        :hover
+          background rgba(10,60,136,.5)
+        img
+          width 100%
+          height 100%
       >ul
         background-color: #109cb4;
         border: 1px solid #c6cdd3;

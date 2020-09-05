@@ -39,6 +39,8 @@
   import XunjianContent from '../components/xunjianContent.vue'
   import taskControl from '../components/taskControl.vue'
 
+  import testTree from '../components/test.vue'
+
   export default {
     data(){
       return{
@@ -341,7 +343,8 @@
       TabsBottom,
       XunjianContent,
       taskControl,
-      menuBottom
+      menuBottom,
+      testTree
     },
   }
 </script>

@@ -89,8 +89,8 @@
           })
       },
       checkedNode(data,isCheck){
-        this.checkedId = []
-        this.checkedId.push(isCheck.checkedKeys)
+        this.checkedId = this.$refs.tree.getCheckedKeys(true)
+        //console.log(this.$refs.tree.getCheckedKeys(true));
         //console.log(data,isCheck)
         this.checkedId = distinct(this.checkedId)
         this.$emit('devTreeKey', this.checkedId)

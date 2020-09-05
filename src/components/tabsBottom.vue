@@ -1,9 +1,10 @@
 <template>
 	<div id="tabs">
+    <div class="linshi" @click="exportExcel">临时导出</div>
     <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
       <el-tab-pane label="实时信息" name="first">
         <div style="padding:0 0px;" class="box_height"><!--height:144px;overflow: auto-->
-          <el-table size="mini"
+          <el-table size="mini" id="rebateSetTable"
             :data="tableDataPointNow"
             border
             style="width: 100%">
@@ -23,6 +24,11 @@
             >
             </el-table-column>
             <el-table-column
+              prop="point.id" align="center"
+              label="点位ID" width="60"
+            >
+            </el-table-column>
+            <el-table-column
               prop="createTime" align="center"
               label="识别时间"  width="330"
             >
@@ -31,6 +37,9 @@
               prop="value" align="center"
               label="识别结果"
             >
+              <template slot-scope="scope">
+                <span>{{scope.row.value}}{{scope.row.point.unit}}</span>
+              </template>
             </el-table-column>
             <el-table-column
               prop="reconType.name" align="center"
@@ -154,11 +163,14 @@
 </template>
 
 <script>
+  import FileSaver from 'file-saver'
+  import XLSX from 'xlsx'
+
   export default {
     data() {
       return {
         activeName: 'first',
-          ajaxTablePointNowData:{page:1, size:40},
+          ajaxTablePointNowData:{page:1, size:1},
           tableDataPointNow:[],
           pointNowTimeId:null,
           tableDataPointAlarmNow:[],
@@ -173,6 +185,12 @@
           dialogImgUrl:'',
           imgUrlBefore: url_img + '/smcsp/'
       };
+    },
+    created(){
+      this.$root.eventHub.$on('taskSuccess',(target) => {
+        console.log(target)
+        this.tableDataPointNow = []
+      });
     },
     mounted(){
         this.pointNow()
@@ -333,6 +351,22 @@
           let _this = this
           _this.$emit('isVideo', true)
       },
+
+      //导出表格
+      exportExcel () {
+        /* generate workbook object from table */
+        let wb = XLSX.utils.table_to_book(document.querySelector('#rebateSetTable'));
+        /* get binary string as output */
+        let wbout = XLSX.write(wb, { bookType: 'xlsx', bookSST: true, type: 'array' });
+        try {
+          FileSaver.saveAs(new Blob([wbout], { type: 'application/octet-stream' }), '结果数据.xlsx');
+        } catch (e)
+        {
+          if (typeof console !== 'undefined')
+            console.log(e, wbout)
+        }
+        return wbout
+      },
     },
     destroyed(){
         let _this = this
@@ -349,6 +383,7 @@
 
   #tabs
     /*background transparent*/
+    position relative
     height 100%
     .el-tabs--card
       .el-tabs__header
@@ -384,4 +419,13 @@
           right 10px
           top 10px
 
+    .linshi
+      position absolute
+      padding 5px 8px
+      border-radius 3px
+      top 5px
+      right 20px
+      background #146363
+      color white
+      z-index 999
 </style>

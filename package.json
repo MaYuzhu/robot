@@ -17,6 +17,7 @@
     "commander": "^5.0.0",
     "compressible": "^2.0.18",
     "echarts": "^4.7.0",
+    "el-tree-transfer": "^2.3.0",
     "element-ui": "^2.13.0",
     "es6-promise": "^4.2.8",
     "file-saver": "^2.0.2",

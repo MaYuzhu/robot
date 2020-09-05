@@ -373,7 +373,7 @@
       },
       drawLine(dateX,dataY){
         let _this = this
-        //console.log(dataY)
+        //console.log(dateX,dataY)
         let legend = []
         for(let i=0;i<dataY.length;i++){
           legend.push(dataY[i].name)
@@ -382,6 +382,7 @@
         //console.log(legend)
         // 基于准备好的dom，初始化echarts实例
         _this.myChart = this.$echarts.init(document.getElementById('center_chart'))
+        _this.myChart.clear()
         // 绘制图表
         _this.myChart.setOption({
           title: { text: '' },
@@ -472,7 +473,9 @@
       },
       devTreeKey(val){
         let _this = this
-        let testPoint = [2,4,7,37,36,28,26,19]
+        //let testPoint = [2,4,7,37,36,28,26,19]
+        let testPoint = val
+        //console.log(val)
         //console.log(val.toString())
         _this.pointIds = testPoint.toString()
         _this.ajaxTableData.pointIds = _this.pointIds
@@ -494,6 +497,10 @@
             true,
             function (res) {
               if(res.code == 200){
+                if(res.data.items.length<1){
+                  //console.log(res.data.items)
+                  return
+                }
                 //console.log(res.data.items)
                 dateX = []
                 dataY = {}
@@ -522,6 +529,10 @@
     watch:{
       screenWidth(val){
         let _this = this
+        if(!_this.myChart){
+          return
+        }
+        console.log(_this.myChart)
         _this.myChart.resize()
       }
     }
