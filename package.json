@@ -21,7 +21,7 @@
     "element-ui": "^2.13.0",
     "es6-promise": "^4.2.8",
     "file-saver": "^2.0.2",
-    "jquery": "^1.5.1",
+    "jquery": "^3.5.0",
     "js-table2excel": "^1.0.3",
     "vue": "^2.5.2",
     "vue-router": "^3.0.1",
