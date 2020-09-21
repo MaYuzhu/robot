@@ -19,7 +19,7 @@
           <div id="divPlugin" style="width: 100%;height: 100%;background:#343434"></div>
         </div>
         <div class="right_bottom" style="border:1px solid;height: 50%">
-          <Button class="red_pic_but" @click="red_pic">红外</Button>
+          <!--<Button class="red_pic_but" @click="red_pic">红外</Button>-->
           <img id="chatterMessage" :src="src" style="width: 100%;height: 100%" alt="">
         </div>
       </div>
@@ -163,6 +163,11 @@
         </div>
       </div>
     </div>
+    <div class="playbackdiv" v-show="playbackShow"><!--192.168.1.13_null_1600583539105-->
+      <video src="http://localhost:8080/video_a/2020-09-20/aaa.mp4" controls="controls" style="width: 100%;height: 100%">
+        您的浏览器不支持 video 标签。
+      </video>
+    </div>
     <menuBottom></menuBottom>
   </div>
 </template>
@@ -218,6 +223,7 @@
         car_direction_mask: true,
         irDataTaskHistoryId:'',
         taskServer:null,
+        playbackShow:false,
       }
     },
     methods:{
@@ -260,7 +266,7 @@
               _this.options = res.data.items
               _this.robotId = _this.options[0].id
               robotIdCurrent = _this.robotId
-              _this.getTaskInfo()
+              //_this.getTaskInfo()
             }
           })
       },
@@ -440,7 +446,7 @@
           bZeroChannel: bZeroChannel
         });
 
-        console.log(iRet)
+        //console.log(iRet)
         if (0 == iRet) {
           szInfo = "开始预览成功！";
         } else {
@@ -514,12 +520,12 @@
       clickPlayback(){
         let _this = this
         if(_this.playback_title == '停止回放'){
-          _this.playback_title = '视频回放'
-          _this.playback_img = "../../static/images/playback.png"
-          _this.clickStopPlayback()
+          //_this.playback_title = '视频回放'
+          //_this.playback_img = "../../static/images/playback.png"
+          //_this.clickStopPlayback()
         }else {
-          _this.playback_title = '停止回放'
-          _this.playback_img = "../../static/images/recordStop.png"
+          //_this.playback_title = '停止回放'
+          //_this.playback_img = "../../static/images/recordStop.png"
           _this.clickStartPlayback()
         }
       },
@@ -530,11 +536,11 @@
         if(_this.duijiang_title == '关闭语音'){
           _this.duijiang_title = '开启语音'
           _this.duijiang_img = "../../static/images/voice_close.png"
-
+          _this.closeDuijiang()
         }else {
           _this.duijiang_title = '关闭语音'
           _this.duijiang_img = "../../static/images/voice.png"
-
+          _this.openDuijiang()
         }
       },
 
@@ -638,6 +644,7 @@
       //打开对讲
       openDuijiang(){
         let _this = this
+        console.log('语音打开')
         _this.taskServer = new ROSLIB.Service({
           ros : _this.ros,
           name : '/chat_call',
@@ -743,7 +750,7 @@
         }
       },
       // 开始回放
-      clickStartPlayback() {
+      clickStartPlayback_xxx() {
         var _this = this
         var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
         szIP = $("#ip").val(),
@@ -798,7 +805,7 @@
         console.log(szIP + " " + szInfo);
       },
       // 停止回放
-      clickStopPlayback() {
+      clickStopPlayback_xxx() {
         var _this = this
         var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
           szInfo = "";
@@ -812,6 +819,13 @@
           }
           console.log(oWndInfo.szIP + " " + szInfo);
         }
+      },
+
+      //回放按钮
+      clickStartPlayback(){
+        let _this = this
+        _this.playbackShow = true
+        _this.isVideo(false)
       },
       // 格式化时间
       dateFormat(oDate, fmt) {
@@ -958,6 +972,7 @@
           //console.log(margin)
           $('.play_video').css({'margin':margin})
       },
+
       //视频窗口隐藏
       isVideo(val){
           //console.log(val)
@@ -983,7 +998,37 @@
         if(val == 3){
           this.car_direction_mask = true
         }
-      }
+      },
+
+      //设置录像等保存路径
+      // 设置本地参数
+      clickSetLocalCfg() {
+        var arrXml = [],
+        szInfo = "";
+
+        arrXml.push("<LocalConfigInfo>");
+        //arrXml.push("<PackgeSize>" + $("#packSize").val() + "</PackgeSize>");
+        //arrXml.push("<PlayWndType>" + $("#wndSize").val() + "</PlayWndType>");
+        //arrXml.push("<BuffNumberType>" + $("#netsPreach").val() + "</BuffNumberType>");
+        arrXml.push("<RecordPath>" + 'C:\\tomcat\\apache-tomcat-8.5.57\\webapps\\video_a' + "</RecordPath>");
+        arrXml.push("<CapturePath>" + 'C:\\tomcat\\apache-tomcat-8.5.57\\webapps\\pic_a' + "</CapturePath>");
+        //arrXml.push("<PlaybackFilePath>" + $("#playbackFilePath").val() + "</PlaybackFilePath>");
+        //arrXml.push("<PlaybackPicPath>" + $("#playbackPicPath").val() + "</PlaybackPicPath>");
+        //arrXml.push("<DownloadPath>" + $("#downloadPath").val() + "</DownloadPath>");
+        //arrXml.push("<IVSMode>" + $("#rulesInfo").val() + "</IVSMode>");
+        //arrXml.push("<CaptureFileFormat>" + $("#captureFileFormat").val() + "</CaptureFileFormat>");
+        //arrXml.push("<ProtocolType>" + $("#protocolType").val() + "</ProtocolType>");
+        arrXml.push("</LocalConfigInfo>");
+
+        var iRet = WebVideoCtrl.I_SetLocalCfg(arrXml.join(""));
+
+        if (0 == iRet) {
+          szInfo = "本地配置设置成功！";
+        } else {
+          szInfo = "本地配置设置失败！";
+        }
+        console.log(szInfo);
+  }
 
     },
     mounted() {
@@ -1142,12 +1187,40 @@
               window.clearInterval(_this.time_id_key)
           }
       });
+      //监听任务是否正在执行
+      _this.listener_task = new ROSLIB.Topic({
+        ros : _this.ros,
+        name : '/task_execute_status',
+        messageType : 'robotmsg/TaskExecuteStatus'
+      });
+      _this.listener_task.subscribe(function(message) {
+        console.log(message.task_status)
+        if(message.task_status==0){
+          clearTimeout(_this.currentTaskInfoTimeId)
+        }else if(message.task_status==1){
+          _this.getTaskInfo()
+        }
+      });
+
+      //可见光，红外自动接收
+      _this.test_login()
+      _this.red_pic()
+
+      //设置视频文件保存路径
+      _this.clickSetLocalCfg()
 
     },
     destroyed(){
         let _this = this
         clearTimeout(_this.currentTaskInfoTimeId)
         _this.ros.close()
+    },
+    created() {
+      let _this = this
+      _this.$root.eventHub.$on('taskEnd',(target) => {
+        console.log(target)
+        clearTimeout(_this.currentTaskInfoTimeId)
+      });
     },
     beforeRouteLeave(to, form, next) {
       next()
@@ -1553,4 +1626,15 @@
       .tabs_wrap
         height calc(100% - 87px)
 
+
+    .playbackdiv
+      width 700px
+      height 500px
+      border 1px solid #00ffff
+      background #3d8fff
+      position absolute
+      z-index: 99999;
+      top 50%
+      left 50%
+      transform translate(-50%,-50%)
 </style>

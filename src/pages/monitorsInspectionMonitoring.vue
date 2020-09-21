@@ -60,16 +60,16 @@
     },
 
     mounted(){
-    	let _this = this
-      _this.ros = new ROSLIB.Ros({
-          url : _this.url
-      });
-    	if(robotIdCurrent){
-    		_this.robotId = robotIdCurrent
-        _this.getTaskInfo()
-      }else {
-        _this.getRobotList()
-      }
+        let _this = this
+        _this.ros = new ROSLIB.Ros({
+            url : _this.url
+        });
+        if(robotIdCurrent){
+          _this.robotId = robotIdCurrent
+          _this.getTaskInfo()
+        }else {
+          _this.getRobotList()
+        }
         _this.play_but()
         WebVideoCtrl.I_InitPlugin('100%', '100%', {
             iWndowType: 1,
@@ -98,6 +98,24 @@
             _this.play_but()
         })
 
+        //监听任务是否正在执行
+        _this.listener_task = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/task_execute_status',
+          messageType : 'robotmsg/TaskExecuteStatus'
+        });
+        _this.listener_task.subscribe(function(message) {
+          console.log(message.task_status)
+          if(message.task_status==0){
+            clearTimeout(_this.currentTaskInfoTimeId)
+          }else if(message.task_status==1){
+            _this.getTaskInfo()
+          }
+        });
+        //可见光，红外自动接收
+        _this.test_login()
+        _this.red_pic()
+
     },
     methods:{
       getRobotList(){
@@ -119,7 +137,7 @@
           null,
           true,function (res) {
             if(res.code == 200){
-              console.log(res)
+              //console.log(res)
               _this.taskInfo = {
                 name:res.data.taskName,
                 taskStatus:res.data.taskStatus,
@@ -140,7 +158,7 @@
                   null,
                   true,function (res) {
                       if(res.code == 200){
-                          //console.log(res)
+                          console.log(res)
                           _this.irDataTaskHistoryId = res.data.irDataTaskHistoryId
                           _this.taskInfo = {
                               name:res.data.taskName,
@@ -329,6 +347,13 @@
         let _this = this
         clearTimeout(_this.currentTaskInfoTimeId)
         _this.ros.close()
+    },
+    created() {
+      let _this = this
+      _this.$root.eventHub.$on('taskEnd',(target) => {
+        console.log(target)
+        clearTimeout(_this.currentTaskInfoTimeId)
+      });
     },
     beforeRouteLeave(to, form, next) {
         next()

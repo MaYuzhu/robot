@@ -38,7 +38,7 @@
               label="识别结果"
             >
               <template slot-scope="scope">
-                <span>{{scope.row.value}}{{scope.row.point.unit}}</span>
+                <span v-if="scope.row">{{scope.row.valueDesc}}{{scope.row.point.unit}}</span>
               </template>
             </el-table-column>
             <el-table-column
@@ -51,7 +51,7 @@
               prop="address" align="center"
               label="采集信息"
               >
-              <template slot-scope="scope" height="10px">
+              <template slot-scope="scope" height="10px" v-if="scope.row">
                 <img :src="scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic"
                      style="display:block;width:80px;height:32px;margin:0 auto;"
                      @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic)">
@@ -183,16 +183,54 @@
           tableData: [],
           imgVisible: false,
           dialogImgUrl:'',
-          imgUrlBefore: url_img + '/smcsp/'
+          imgUrlBefore: url_img + '/smcsp/',
+          ros:null,
+          url:robotUrl,
       };
     },
+    props: ['irDataTaskHistoryId'],
     created(){
-      this.$root.eventHub.$on('taskSuccess',(target) => {
+      let _this = this
+      _this.$root.eventHub.$on('taskSuccess',(target) => {
+        //console.log(target)
+        _this.tableDataPointNow = []
+      });
+
+      _this.$root.eventHub.$on('taskEnd',(target) => {
         console.log(target)
-        this.tableDataPointNow = []
+        clearTimeout(_this.pointNowTimeId)
+        clearTimeout(_this.pointAlarmNowTimeId)
+        clearTimeout(_this.SysAlarmNowTimeId)
+        if(target){
+          _this.tableDataPointNow = []
+        }
       });
     },
     mounted(){
+        let _this = this
+        _this.ros = new ROSLIB.Ros({
+          url : _this.url
+        });
+        _this.ros.on('connection', function() {
+
+        });
+        _this.listener = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/task_execute_status',
+          messageType : 'robotmsg/TaskExecuteStatus'
+        });
+        _this.listener.subscribe(function(message) {
+          console.log(message.task_status)
+          if(message.task_status==0){
+            clearTimeout(_this.pointNowTimeId)
+            clearTimeout(_this.pointAlarmNowTimeId)
+            clearTimeout(_this.SysAlarmNowTimeId)
+          }else if(message.task_status==1){
+            _this.pointNow()
+            _this.pointAlarmNow()
+            _this.pointSysAlarmNow()
+          }
+        });
         this.pointNow()
         this.pointAlarmNow()
         this.pointSysAlarmNow()
@@ -205,25 +243,41 @@
       },
       pointNow(){
           let _this = this
+          //console.log(_this.irDataTaskHistoryId)
+          _this.ajaxTablePointNowData.irDataTaskHistoryId = _this.irDataTaskHistoryId
           _this.ajax_api('post',url_api + '/point-history',
               _this.ajaxTablePointNowData,
               true,
               function (res) {
+                //console.log(res)
                   if(res.code == 200){
                       //console.log(res.data.items)
-                      _this.tableDataPointNow = res.data.items
+                      if(_this.irDataTaskHistoryId){
+                        _this.tableDataPointNow = res.data.items
+                      }
                       pointNowTime()
                   }
               })
 
           function pointNowTime(){
+              //console.log(_this.irDataTaskHistoryId)
               _this.ajax_api('post',url_api + '/point-history',
-                  {page:1, size:1},
+                  {page:1, size:1,
+                    irDataTaskHistoryId:_this.irDataTaskHistoryId
+                  },
                   true,
                   function (res) {
-                      //console.log(res.data.items)
+                      //console.log(res.data.items.length)
+                      if(_this.irDataTaskHistoryId == ''){
+                        //console.log('id为空')
+                        return
+                      }
+                      if(_this.tableDataPointNow.length==0 && res.data.items.length>0){
+                        console.log('+1')
+                        _this.tableDataPointNow.unshift(res.data.items[0])
+                      }
                       if(res.code == 200 && res.data.items.length>0){
-                          //console.log(res.data.items)
+                          //console.log(_this.tableDataPointNow[0].createTime)
                           if(_this.tableDataPointNow[0].createTime!=res.data.items[0].createTime){
                               _this.tableDataPointNow.unshift(res.data.items[0])
                           }
@@ -242,6 +296,7 @@
                 {page:1, size:3},
                 true,
                 function (res) {
+                  //console.log(res)
                     if(res.code == 200){
                         //console.log(res.data.items)
                         _this.tableDataPointAlarmNow = res.data.items
@@ -375,6 +430,7 @@
         clearTimeout(_this.pointAlarmNowTimeId)
         clearTimeout(_this.SysAlarmNowTimeId)
     },
+
 
   };
 </script>

@@ -114,7 +114,7 @@
                   style="width: 100%">
           <el-table-column align="center"
             prop="date" :index="index"type="index"
-            label="序号" v-if="false"
+            label="序号"
             width="50">
           </el-table-column>
           <el-table-column align="center"
@@ -129,7 +129,7 @@
           </el-table-column>-->
           <el-table-column align="center"
             prop="value" width="120"
-            label="识别结果"
+            label="识别结果" v-if="tableVisibleObj['1']"
           >
             <template slot-scope="scope">
               <span>{{scope.row.value}}{{scope.row.point.unit}}</span>
@@ -137,95 +137,104 @@
           </el-table-column>
           <el-table-column align="center"
             prop="reconType.name"
-            label="识别类型"
+            label="识别类型" v-if="tableVisibleObj['2']"
           >
           </el-table-column>
           <el-table-column align="center"
             prop="point.deviceName" width="150"
-            label="点位名称"
+            label="点位名称" v-if="tableVisibleObj['3']"
           >
           </el-table-column>
           <el-table-column align="center"
             prop="createTime" width="150"
-            label="识别时间"
+            label="识别时间" v-if="tableVisibleObj['4']"
+          >
+          </el-table-column>
+          <el-table-column align="center"
+            prop="deviceRegion"
+            label="设备区域" v-if="tableVisibleObj['5']"
+          >
+          </el-table-column>
+          <el-table-column align="center"
+            prop="deviceInterval"
+            label="间隔名称" v-if="tableVisibleObj['6']"
+          >
+          </el-table-column>
+          <el-table-column align="center"
+            prop="deviceName"
+            label="设备名称" v-if="tableVisibleObj['7']"
+          >
+          </el-table-column>
+          <el-table-column align="center"
+            prop="deviceType"
+            label="设备类型" v-if="tableVisibleObj['8']"
           >
           </el-table-column>
           <el-table-column align="center"
             prop="address"
-            label="设备区域"
+            label="表计类型" v-if="tableVisibleObj['9']"
           >
           </el-table-column>
           <el-table-column align="center"
             prop="address"
-            label="间隔名称"
+            label="设备外观类型" v-if="tableVisibleObj['10']"
           >
           </el-table-column>
           <el-table-column align="center"
             prop="address"
-            label="设备名称"
+            label="发热类型" v-if="tableVisibleObj['11']"
           >
           </el-table-column>
           <el-table-column align="center"
             prop="address"
-            label="设备类型"
-          >
-          </el-table-column>
-          <el-table-column align="center"
-            prop="address"
-            label="表计类型"
-          >
-          </el-table-column>
-          <el-table-column align="center"
-            prop="address"
-            label="设备外观类型"
-          >
-          </el-table-column>
-          <el-table-column align="center"
-            prop="address"
-            label="发热类型"
-          >
-          </el-table-column>
-          <el-table-column align="center"
-            prop="address"
-            label="识别状态"
+            label="识别状态" v-if="tableVisibleObj['12']"
           >
             <template slot-scope="scope">
               <p>{{scope.row.reconStatus==0?'正确':'错误'}}</p>
             </template>
           </el-table-column>
+          <!--<el-table-column align="center"
+            prop="address"
+            label="审核结果" v-if="tableVisibleObj['13']"
+          >
+          </el-table-column>-->
           <el-table-column align="center"
             prop="address"
-            label="审核结果"
+            label="环境温度" v-if="tableVisibleObj['14']"
           >
           </el-table-column>
           <el-table-column align="center"
             prop="address"
-            label="环境温度"
+            label="环境湿度" v-if="tableVisibleObj['15']"
           >
           </el-table-column>
           <el-table-column align="center"
             prop="address"
-            label="环境湿度"
-          >
-          </el-table-column>
-          <el-table-column align="center"
-            prop="address"
-            label="环境风速"
+            label="环境风速" v-if="tableVisibleObj['16']"
           >
           </el-table-column>
           <el-table-column align="center"
                            prop="alarmLevel" :formatter="alarmLevelShow"
-            label="告警等级"
+            label="告警等级" v-if="tableVisibleObj['17']"
           >
           </el-table-column>
           <el-table-column align="center"
-            prop="address"
-            label="采集信息"
+            prop="irProjSaveTypeId" width="90"
+            label="采集信息" v-if="tableVisibleObj['18']"
           >
+            <!--<template slot-scope="scope">
+              <p>{{scope.row.irProjSaveTypeId==1?'红外图片':'可见光图片'}}</p>
+            </template>-->
+            <template slot-scope="scope">
+              <p style="cursor:pointer;text-decoration:underline;color:blue"
+                 @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic)">
+                {{scope.row.irProjSaveTypeId==1?'红外图片':'可见光图片'}}
+              </p>
+            </template>
           </el-table-column>
           <el-table-column align="center"
             prop="checkStatus"
-            label="是否审核"
+            label="是否审核" v-if="tableVisibleObj['19']"
           >
             <template slot-scope="scope">
               <p>{{scope.row.checkStatus==0?'未审核':'已审核'}}</p>
@@ -288,8 +297,13 @@
       </div>
       <span slot="footer" class="dialog-footer">
         <el-button @click="dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="jumpPage('merge','','')">确 定</el-button>
+        <el-button type="primary" @click="jumpPage()">确 定</el-button>
       </span>
+    </el-dialog>
+    <el-dialog width="500px" :visible.sync="imgVisible" class="img-dialog">
+      <el-card :body-style="{ padding: '0px' }">
+        <img :src="dialogImgUrl" width="100%" height="100%">
+      </el-card>
     </el-dialog>
     <menuBottom></menuBottom>
   </div>
@@ -375,11 +389,11 @@
             id: 12,
             templateChapterName: "识别状态"
           },
-          {
+          /*{
             disabled: false,
             id: 13,
             templateChapterName: "审核结果"
-          },
+          },*/
           {
             disabled: false,
             id: 14,
@@ -403,7 +417,7 @@
           {
             disabled: false,
             id: 18,
-            templateChapterName: "采集信息"
+            templateChapterName: "采集信息"  //irProjSaveTypeId  1,红外，2，可见光
           },{
             disabled: false,
             id: 19,
@@ -457,6 +471,13 @@
           face:[]
         },
         tableDataAllExcel:[],
+        tableVisibleObj:{
+          1:true,2:true,3:true,4:true,5:true,6:true,7:true,8:true,9:true,10:true,
+          11:true,12:true,13:true,14:true,15:true,16:true,17:true,18:true,19:true,
+        },
+        imgVisible: false,
+        dialogImgUrl: '',
+        imgUrlBefore: url_img + '/smcsp/',
       }
     },
     components: {
@@ -616,6 +637,16 @@
       jumpPage(){
       	let _this = this
         _this.dialogVisible = false
+        //console.log(_this.checkedNameList)  //tableVisibleObj
+        if(_this.checkedNameList.length>1){
+          for(let key in _this.tableVisibleObj){
+            _this.tableVisibleObj[key] = false
+          }
+        }
+        for(let i=0;i<_this.checkedNameList.length;i++){
+          _this.tableVisibleObj[_this.checkedNameList[i].id] = true
+        }
+        //console.log(_this.tableVisibleObj)
       },
       //穿梭框
       checkLeft(value){
@@ -783,6 +814,9 @@
         this.value_start = this.convertToLateDate()
         this.ajaxTableData.pointIds = ''
         this.getTableData()
+        for(let key in this.tableVisibleObj){
+          this.tableVisibleObj[key] = true
+        }
       },
 
       exportExcelRes(){
@@ -794,7 +828,7 @@
             });
           return
         }
-        console.log(_this.checkedNameList)
+        //console.log(_this.checkedNameList)
 
         var url = url_api + '/file/download';
         var xhr = new XMLHttpRequest();
@@ -909,6 +943,16 @@
             break
         }
         return alarmLevelName
+      },
+
+      //irProjSaveTypeId  1,红外，2，可见光
+      openImg(url) {
+        let _this = this
+        if (url) {
+          _this.imgVisible = true
+          _this.dialogImgUrl = url
+          //_this.$emit('isVideo', false)
+        }
       },
 
       //暂时导出结果
@@ -1080,11 +1124,11 @@
           overflow-y auto
 
   div>>>
-      .el-dialog
-        background #d7efec
-        width: 48%;
-        min-width: 800px;
-        padding-bottom: 6px;
+    .el-dialog
+      background #d7efec
+      width: 48%;
+      min-width: 800px;
+      padding-bottom: 6px;
     .dialog_content
       background white
       border 1px solid #90e8c6
@@ -1181,4 +1225,5 @@
       bottom: 0;
       width: 100%;
       height: 0px;
+
 </style>

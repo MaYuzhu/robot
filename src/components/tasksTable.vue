@@ -740,6 +740,8 @@
       atOnce(){
       	let _this = this
         _this.dialogVisible = false
+        _this.$root.eventHub.$emit('taskSuccess', '1111');
+        _this.$router.push({path:'/robots/robot-management'})
         /*var linePlan = {
             "InspectId":"1",
             "Tasks":[
@@ -802,10 +804,10 @@
                 "irProjTaskId": _this.irProjTaskId,
                 "taskEndTime": _this.getdatatime10(),
                 "taskStartTime": _this.getdatatime(),
-                "taskStatus": "3",
+                "taskStatus": "1",
                 "wind": 0
             },true,function (resData) {
-                console.log(resData)
+                //console.log(resData)
                 _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
                     {},true,function (res) {
                         //console.log(res)
@@ -817,11 +819,11 @@
                           });
                           return
                         }else {
-                          _this.$message({
+                          /*_this.$message({
                             type: 'success',
                             message: '任务发送成功',
                           });
-                          _this.$root.eventHub.$emit('taskSuccess', '1111');
+                          _this.$root.eventHub.$emit('taskSuccess', '1111');*/
                         }
                         var linePlanObj = JSON.parse(res.data.path)
                         var lineArr = []
@@ -830,10 +832,12 @@
                         }
                         for(var i=0;i<linePlanObj.Tasks.length;i++){
                             var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
-                            var point = [pointArr[0]*1,pointArr[2]*1]
+                            var point = projRobotXY(pointArr[0]*1,pointArr[2]*1)
                             lineArr.push(point)
                         }
                         planLinePointArr = lineArr
+                        console.log(planLinePointArr)
+                        localStorage.setItem("planLine",lineArr);
 
                         _this.taskServer = new ROSLIB.Service({
                             ros : _this.ros,
@@ -847,14 +851,46 @@
                         });
                         _this.taskServerClear.callService({flag:0},function(result) {
                             console.log('Clear');
-                            var request = new ROSLIB.ServiceRequest({
+                            if(result){
+                              var request = new ROSLIB.ServiceRequest({
                                 plan : res.data.path,
                                 //plan : JSON.stringify(aa),
-                            });
-
-                            _this.taskServer.callService(request, function(result) {
-                                console.log(result);
-                            });
+                              });
+                              console.log(res.data.path);
+                              _this.taskServer.callService(request, function(result) {
+                                //console.log('返回'+result);
+                                if(result){
+                                  _this.$message({
+                                    type: 'success',
+                                    message: '任务发送成功',
+                                  });
+                                  _this.$root.eventHub.$emit('taskSuccess', '1111');
+                                  _this.$router.push({path:'/'})
+                                }
+                              });
+                            }else {
+                              _this.taskServerClear.callService({flag:0},function(result) {
+                                if(result){
+                                  var request = new ROSLIB.ServiceRequest({
+                                    plan : res.data.path,
+                                    //plan : JSON.stringify(aa),
+                                  });
+                                  _this.taskServer.callService(request, function(result) {
+                                    console.log(result);
+                                    _this.$message({
+                                      type: 'success',
+                                      message: '任务发送成功',
+                                    });
+                                    _this.$root.eventHub.$emit('taskSuccess', '1111');
+                                  });
+                                }else{
+                                  _this.$message({
+                                    type: 'success',
+                                    message: '任务发送失败',
+                                  });
+                                }
+                              })
+                            }
                         });
                     })
             })

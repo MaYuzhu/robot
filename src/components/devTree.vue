@@ -20,7 +20,7 @@
             <span style="width: 13px;height:13px;background:#329632;display: inline-block"></span>
             {{ node.data.name }}
           </span>
-          <span>{{node.data.id}}</span>
+          <!--<span>{{node.data.id}}</span>-->
         </span>
 
       </el-tree>
@@ -102,6 +102,7 @@
         function (res) {
           if(res.code == 200){
             _this.dataTreeAll = res.data
+            //console.log(res.data)
           }
         })
 

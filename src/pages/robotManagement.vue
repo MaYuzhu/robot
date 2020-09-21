@@ -38,7 +38,7 @@
     </div>
 
     <div class="tabs_bottom">
-      <TabsBottom @isVideo="isVideo"></TabsBottom>
+      <TabsBottom @isVideo="isVideo" :irDataTaskHistoryId="irDataTaskHistoryId"></TabsBottom>
     </div>
 
     <menuBottom></menuBottom>
@@ -91,7 +91,7 @@
         cbSelWnd: function (xmlDoc) {
           _this.g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
           var szInfo = "当前选择的窗口编号：" + _this.g_iWndIndex;
-          console.log(11111111111);
+          console.log();
         }
       });*/
       //WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
@@ -115,6 +115,29 @@
 
       //this.createWebSocket();
       //_this.test_login()
+      //监听任务是否正在执行
+      _this.listener_task = new ROSLIB.Topic({
+        ros : _this.ros,
+        name : '/task_execute_status',
+        messageType : 'robotmsg/TaskExecuteStatus'
+      });
+      _this.listener_task.subscribe(function(message) {
+        console.log(message.task_status)
+        if(message.task_status==0){
+
+          clearTimeout(_this.currentTaskInfoTimeId)
+        }else if(message.task_status==1){
+          _this.getTaskInfo()
+        }
+      });
+      //可见光，红外自动接收
+      _this.test_login()
+      _this.red_pic()
+      _this.$root.eventHub.$on('taskSuccess',(target) => {
+        console.log(target+'222222')
+        _this.tableDataPointNow = []
+        _this.getTaskInfo()
+      });
     },
     methods: {
     	red_pic(){
@@ -264,7 +287,7 @@
           cbSelWnd: function (xmlDoc) {
             _this.g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
             var szInfo = "当前选择的窗口编号：" + _this.g_iWndIndex;
-            //console.log(11111111111);
+            //console.log();
           }
         });
         WebVideoCtrl.I_InsertOBJECTPlugin("divPlugin");
@@ -352,17 +375,19 @@
                 _this.robotId = _this.options[0].id
                 robotIdCurrent = _this.robotId
               }
+              //setTimeout(()=>{_this.getTaskInfo()},5000)
               _this.getTaskInfo()
             }
           })
       },
       getTaskInfo(){
-        let _this = this//GET /ui/robot/{id}/current-task
+        console.log('getTaskInfo-----')
+        let _this = this  //GET /ui/robot/{id}/current-task
         _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
           null,
           true,function (res) {
             if(res.code == 200){
-            	//console.log(res)
+            	//console.log(res.data)
               _this.taskInfo = {
             		name:res.data.taskName,
                 taskStatus:res.data.taskStatus,
@@ -405,7 +430,7 @@
       	let _this = this
       	//console.log(val)
         robotIdCurrent = _this.robotId
-        _this.getTaskInfo()
+        //_this.getTaskInfo()
 
         _this.ajax_api('get',url_api + '/robot-param',
           {irBaseRobotId:robotIdCurrent,page:1,size:1000},
@@ -495,6 +520,18 @@
         let _this = this
         clearTimeout(_this.currentTaskInfoTimeId)
         _this.ros.close()
+    },
+    created() {
+      let _this = this
+      _this.$root.eventHub.$on('taskEnd',(target) => {
+        console.log(target)
+        clearTimeout(_this.currentTaskInfoTimeId)
+      });
+      /*_this.$root.eventHub.$on('taskSuccess',(target) => {
+        console.log(target)
+        _this.tableDataPointNow = []
+        _this.getRobotList()
+      });*/
     },
 
     beforeRouteLeave(to, form, next) {

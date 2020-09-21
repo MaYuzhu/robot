@@ -37,7 +37,7 @@
             <el-dropdown-menu slot="dropdown">
 
               <el-dropdown-item>
-                <el-checkbox v-model="checked1" @change="change11('geoJsonLayerPoint3',checked1)">停靠点</el-checkbox>
+                <el-checkbox v-model="checked1" @change="change11('geoJsonLayerPoint',checked1)">停靠点</el-checkbox>
               </el-dropdown-item>
               <el-dropdown-item>
                 <el-checkbox v-model="checked2" @change="change11('geoJsonLayerPointTargets3',checked2)">检测点</el-checkbox>
@@ -169,6 +169,7 @@
         mapCenter:null,
         mapZoom:null,
         mapRotate:null,
+        aa:{"InspectId":"1","Tasks":[{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"355.04953;231.2143;86.165596","TLocType":"start","TLocWidth":5},{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"355.04953;231.2143;86.165596","TLocType":"turn","TLocWidth":5,"TurnAngle":"-178"},{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"355.062;230.642;86.714","TLocType":"turn","TLocWidth":5,"TurnAngle":"1"},{"Align":"middle","Id":"1","IsAnterograde":false,"Status":"0","TLoc":"356.451;230.577;121.917","TLocType":"turn","TLocWidth":5,"TurnAngle":"89"},{"Align":"middle","Id":"13","IsAnterograde":false,"Status":"0","TLoc":"370.268;230.618;121.624","TLocType":"turn","TLocWidth":5,"TurnAngle":"-85"},{"Align":"middle","CameraPose":"1:1/382.907,129.578,238.054,400.0,400.0,1,14,down,0.0,0.0,0.0,100.0,0,53.0/1/62","Id":"1001","IsAnterograde":false,"Status":"0","TLoc":"371.315;231.248;130.759","TLocType":"transfer","TLocWidth":5},{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"371.315;231.248;130.759","TLocType":"turn","TLocWidth":5,"TurnAngle":"180"},{"Align":"middle","Id":"13","IsAnterograde":false,"Status":"0","TLoc":"370.268;230.618;121.624","TLocType":"turn","TLocWidth":5,"TurnAngle":"85"},{"Align":"middle","Id":"21","IsAnterograde":false,"Status":"0","TLoc":"332.62;230.635;123.015","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","CameraPose":"13:1/336.946,148.144,234.817,50.0,50.0,1,7,down,0.0,0.0,0.0,60.0,0,35.0/1/62","Id":"1013","IsAnterograde":false,"Status":"0","TLoc":"332.987;231.418;132.665","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"41:1/329.457,138.994,240.221,800.0,800.0,2,1,down,0.0,0.0,0.0,0.0,0,0.0/1/62;42:1/336.027,138.837,240.262,800.0,800.0,2,1,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1036","IsAnterograde":false,"Status":"0","TLoc":"333.204;231.408;138.685","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"38:1/328.757,140.626,235.414,800.0,1000.0,2,2,down,0.0,0.0,0.0,0.0,0,0.0/1/62;39:1/336.188,140.728,235.374,800.0,1000.0,2,2,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1035","IsAnterograde":false,"Status":"0","TLoc":"333.276;231.405;140.692","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"9:1/329.831,148.763,235.049,100.0,100.0,1,3,down,-0.1,0.0,-0.1,0.9,0,0.6/1/62","Id":"1009","IsAnterograde":false,"Status":"0","TLoc":"333.566;231.392;148.718","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"8:1/322.35,148.985,235.029,100.0,100.0,1,3,down,-0.1,0.0,-0.1,0.9,0,0.6/1/62","Id":"1008","IsAnterograde":false,"Status":"0","TLoc":"333.675;231.387;151.728","TLocType":"transfer","TLocWidth":5},{"Align":"middle","Id":"70","IsAnterograde":false,"Status":"0","TLoc":"333.805;230.731;155.335","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","CameraPose":"80:1/346.053,152.646,235.232,800.0,1000.0,2,2,down,0.0,0.0,0.0,0.0,0,0.0/1/62;81:1/346.171,159.992,235.322,800.0,1000.0,2,2,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1067","IsAnterograde":false,"Status":"0","TLoc":"346.224;231.513;154.878","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"84:1/347.69,160.249,239.99,800.0,800.0,2,1,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1070","IsAnterograde":false,"Status":"0","TLoc":"347.235;231.509;154.841","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"86:1/349.38,153.213,235.346,800.0,1000.0,2,2,down,0.0,0.0,0.0,0.0,0,0.0/1/62;87:1/349.405,160.605,235.323,800.0,1000.0,2,2,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1072","IsAnterograde":false,"Status":"0","TLoc":"349.255;231.501;154.766","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"19:1/355.195,145.447,234.209,100.0,100.0,1,15,down,0.0,0.0,0.0,1.0,0,10002.0/1/62","Id":"1019","IsAnterograde":false,"Status":"0","TLoc":"354.811;231.478;154.56","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"10:1/337.348,148.475,235.021,100.0,100.0,1,3,down,-0.1,0.0,-0.1,0.9,0,0.6/1/62","Id":"1010","IsAnterograde":false,"Status":"0","TLoc":"357.842;231.466;154.448","TLocType":"transfer","TLocWidth":5},{"Align":"middle","Id":"69","IsAnterograde":false,"Status":"0","TLoc":"362.779;230.796;154.267","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","CameraPose":"15:1/360.468,152.405,232.845,100.0,100.0,1,5,down,0.0,0.0,0.0,6.0,0,1.4/1/62;89:1/360.442,152.399,232.9,100.0,100.0,1,8,down,0.0,0.0,0.0,3.0,0,0.0/1/62","Id":"1015","IsAnterograde":false,"Status":"0","TLoc":"362.71;231.441;152.268","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"16:1/360.198,144.918,232.865,100.0,100.0,1,5,down,0.0,0.0,0.0,6.0,0,1.5/1/62;88:1/360.176,144.916,232.94,100.0,100.0,1,8,down,0.0,0.0,0.0,3.0,0,0.0/1/62","Id":"1016","IsAnterograde":false,"Status":"0","TLoc":"362.453;231.42;144.702","TLocType":"transfer","TLocWidth":5},{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"362.453;231.42;144.702","TLocType":"turn","TLocWidth":5,"TurnAngle":"180"},{"Align":"middle","CameraPose":"14:1/360.608,159.903,232.859,100.0,100.0,1,5,down,0.0,0.0,0.0,6.0,0,10002.0/1/62;90:1/360.703,159.903,232.835,100.0,100.0,1,8,down,0.0,0.0,0.0,3.0,0,0.0/1/62","Id":"1014","IsAnterograde":false,"Status":"0","TLoc":"362.968;231.462;159.833","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"18:1/355.496,152.92,234.226,100.0,100.0,1,14,down,0.0,0.0,0.0,1.0,0,10002.0/1/62","Id":"1018","IsAnterograde":false,"Status":"0","TLoc":"363.237;231.463;167.79","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"22:1/338.507,180.444,235.101,100.0,100.0,1,3,down,-0.1,0.0,-0.1,0.9,0,0.61/1/62","Id":"1022","IsAnterograde":false,"Status":"0","TLoc":"363.62;231.515;178.999","TLocType":"transfer","TLocWidth":5},{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"363.62;231.515;178.999","TLocType":"turn","TLocWidth":5,"TurnAngle":"180"},{"Align":"middle","Id":"69","IsAnterograde":false,"Status":"0","TLoc":"362.779;230.796;154.267","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","Id":"70","IsAnterograde":false,"Status":"0","TLoc":"333.805;230.731;155.335","TLocType":"turn","TLocWidth":5,"TurnAngle":"-90"},{"Align":"middle","Id":"21","IsAnterograde":false,"Status":"0","TLoc":"332.62;230.635;123.015","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","Id":"31","IsAnterograde":false,"Status":"0","TLoc":"304.833;230.657;124.11","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","CameraPose":"103:1/308.932,149.435,234.824,50.0,50.0,1,7,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1084","IsAnterograde":false,"Status":"0","TLoc":"305.471;231.399;141.936","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"113:1/301.848,149.986,235.066,100.0,100.0,1,3,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1094","IsAnterograde":false,"Status":"0","TLoc":"305.743;231.371;149.953","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"106:1/310.069,181.424,234.832,50.0,50.0,1,7,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1087","IsAnterograde":false,"Status":"0","TLoc":"306.61;231.344;175.478","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"116:1/302.986,182.053,235.011,100.0,100.0,1,3,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1097","IsAnterograde":false,"Status":"0","TLoc":"306.831;231.337;181.984","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"25:1/323.792,217.987,235.084,100.0,100.0,1,3,down,-0.1,0.0,-0.1,0.9,0,10002.0/1/62","Id":"1025","IsAnterograde":false,"Status":"0","TLoc":"308.038;231.3;217.518","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"120:1/310.762,218.759,235.056,100.0,100.0,1,3,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1101","IsAnterograde":false,"Status":"0","TLoc":"308.106;231.298;219.52","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"26:1/331.29,217.744,235.081,100.0,100.0,1,3,down,-0.1,0.0,-0.1,0.9,0,10002.0/1/62","Id":"1026","IsAnterograde":false,"Status":"0","TLoc":"308.259;231.293;224.024","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"110:1/303.644,219.331,234.868,50.0,50.0,1,7,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1091","IsAnterograde":false,"Status":"0","TLoc":"308.293;231.292;225.025","TLocType":"transfer","TLocWidth":5},{"Align":"middle","Id":"29","IsAnterograde":false,"Status":"0","TLoc":"308.973;230.621;245.044","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","CameraPose":"30:1/339.163,217.802,234.595,50.0,50.0,1,7,down,0.0,0.0,0.0,60.0,0,10002.0/1/62","Id":"1030","IsAnterograde":false,"Status":"0","TLoc":"343.662;231.23;243.791","TLocType":"transfer","TLocWidth":5},{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"343.662;231.23;243.791","TLocType":"turn","TLocWidth":5,"TurnAngle":"180"},{"Align":"middle","Id":"19","IsAnterograde":false,"Status":"0","TLoc":"337.005;230.588;244.032","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","CameraPose":"95:1/334.177,274.978,234.062,50.0,50.0,1,14,down,0.0,0.0,0.0,1.0,0,0.0/1/62","Id":"1077","IsAnterograde":false,"Status":"0","TLoc":"338.11;231.294;274.624","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"97:1/341.161,270.616,232.634,100.0,100.0,1,5,down,0.0,41.0,0.0,6.0,0,0.0/1/62","Id":"1079","IsAnterograde":false,"Status":"0","TLoc":"338.146;231.275;275.65","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"98:1/341.163,270.616,232.702,30.0,30.0,1,8,down,0.0,0.0,0.0,3.0,0,0.0/1/62","Id":"1080","IsAnterograde":false,"Status":"0","TLoc":"338.164;231.265;276.164","TLocType":"transfer","TLocWidth":5},{"Align":"middle","Id":"22","IsAnterograde":false,"Status":"0","TLoc":"338.364;230.509;281.809","TLocType":"turn","TLocWidth":5,"TurnAngle":"-90"},{"Align":"middle","Id":"27","IsAnterograde":false,"Status":"0","TLoc":"330.231;230.518;282.096","TLocType":"turn","TLocWidth":5,"TurnAngle":"-90"},{"Align":"middle","CameraPose":"102:1/326.087,271.171,232.467,30.0,30.0,1,8,down,0.0,0.0,0.0,3.0,0,0.0/1/62","Id":"1083","IsAnterograde":false,"Status":"0","TLoc":"330.098;231.227;278.334","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"101:1/326.09,271.171,232.497,100.0,100.0,1,5,down,0.0,41.0,0.0,6.0,0,0.0/1/62","Id":"1082","IsAnterograde":false,"Status":"0","TLoc":"330.079;231.236;277.796","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"99:1/333.635,270.888,232.521,100.0,100.0,1,6,down,0.0,41.0,0.0,6.0,0,0.0/1/62;100:1/333.633,270.885,232.488,30.0,30.0,1,8,down,0.0,0.0,0.0,3.0,0,0.0/1/62","Id":"1081","IsAnterograde":false,"Status":"0","TLoc":"330.022;231.261;276.184","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"96:1/326.617,275.254,234.042,50.0,50.0,1,14,down,0.0,0.0,0.0,1.0,0,0.0/1/62","Id":"1078","IsAnterograde":false,"Status":"0","TLoc":"329.984;231.278;275.109","TLocType":"transfer","TLocWidth":5},{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"329.984;231.278;275.109","TLocType":"turn","TLocWidth":5,"TurnAngle":"180"},{"Align":"middle","Id":"27","IsAnterograde":false,"Status":"0","TLoc":"330.231;230.518;282.096","TLocType":"turn","TLocWidth":5,"TurnAngle":"-90"},{"Align":"middle","Id":"34","IsAnterograde":false,"Status":"0","TLoc":"302.28;230.553;283.084","TLocType":"turn","TLocWidth":5,"TurnAngle":"-90"},{"Align":"middle","CameraPose":"127:1/298.669,276.296,234.095,50.0,50.0,1,14,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1108","IsAnterograde":false,"Status":"0","TLoc":"302.038;231.301;276.212","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"129:1/305.427,276.012,234.118,50.0,50.0,1,14,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1110","IsAnterograde":false,"Status":"0","TLoc":"302.038;231.301;276.212","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"119:1/303.265,219.046,235.07,100.0,100.0,1,3,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1100","IsAnterograde":false,"Status":"0","TLoc":"299.988;231.305;219.255","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"117:1/295.508,182.277,235.017,100.0,100.0,1,3,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1098","IsAnterograde":false,"Status":"0","TLoc":"298.712;231.338;183.647","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"114:1/294.364,150.198,234.985,100.0,100.0,1,3,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1095","IsAnterograde":false,"Status":"0","TLoc":"297.507;231.37;150.044","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"104:1/301.436,149.711,234.878,50.0,50.0,1,7,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1085","IsAnterograde":false,"Status":"0","TLoc":"297.159;231.393;140.507","TLocType":"transfer","TLocWidth":5},{"Align":"middle","Id":"37","IsAnterograde":false,"Status":"0","TLoc":"296.566;230.664;124.436","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","CameraPose":"105:1/293.838,150.132,234.737,50.0,50.0,1,7,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1086","IsAnterograde":false,"Status":"0","TLoc":"287.168;231.331;124.806","TLocType":"transfer","TLocWidth":5},{"Align":"middle","Id":"41","IsAnterograde":false,"Status":"0","TLoc":"276.187;230.681;125.239","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","CameraPose":"118:1/295.741,219.266,235.053,100.0,100.0,1,3,down,0.0,0.0,0.0,0.0,0,0.0/1/62","Id":"1099","IsAnterograde":false,"Status":"0","TLoc":"279.64;231.272;220.883","TLocType":"transfer","TLocWidth":5},{"Align":"middle","Id":"72","IsAnterograde":false,"Status":"0","TLoc":"280.5391;230.654;246.0837","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","Id":"29","IsAnterograde":false,"Status":"0","TLoc":"308.973;230.621;245.044","TLocType":"turn","TLocWidth":5,"TurnAngle":"90"},{"Align":"middle","Id":"31","IsAnterograde":false,"Status":"0","TLoc":"304.833;230.657;124.11","TLocType":"turn","TLocWidth":5,"TurnAngle":"-90"},{"Align":"middle","Id":"1","IsAnterograde":false,"Status":"0","TLoc":"356.451;230.577;121.917","TLocType":"turn","TLocWidth":5,"TurnAngle":"89"},{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"355.062;230.642;86.714","TLocType":"end","TLocWidth":5}]},
       };
     },
     props: ['irDataTaskHistoryId'],
@@ -198,8 +199,8 @@
         //请求shp文件
         /*_this.ajax_api('post',url_api + '/shpfile/shpToGeoJson',
           {
-            localUrl: 'D:\\abc\\route.geojson',
-            shpUrl: url_img+'/shp/route.shp'
+            localUrl: 'D:\\abc\\targets.geojson',
+            shpUrl: url_img+'/shp/targets/targets.shp'
           },
           true,function (res) {
             console.log(res)
@@ -209,13 +210,13 @@
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
             //url: '../../static/route.json',
-            url: '../../static/geojson/route.geojson',
+            url: '../../static/geojson/route_yu_new.geojson',
             format:new ol.format.GeoJSON()
           }),
           style: function (feature, resolution) {
             return new ol.style.Style({
               stroke: new ol.style.Stroke({
-                color:'#6abcff',
+                color:'#6ad864',  // 6abcff
                 width: 2
               }),
 
@@ -229,7 +230,7 @@
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
             //url: '../../static/point.json',
-            url: '../../static/geojson/stops.geojson',
+            url: '../../static/geojson/stops_yu_new.geojson',
             format:new ol.format.GeoJSON()
           }),
           style: function (feature, resolution) {
@@ -237,7 +238,7 @@
               image: new ol.style.Circle({
                 radius: 5,
                 fill: new ol.style.Fill({
-                  color: '#3837ae'
+                  color: '#ffaf43'  //#3837ae
                 })
               }),
 
@@ -292,7 +293,7 @@
             title: 'add Layer Point',
             source: new ol.source.Vector({
                 //projection: 'EPSG:4326',
-                url: '../../static/geojson/targets3.geojson',
+                url: '../../static/geojson/targets_yu_new.geojson',
                 //url: '../../static/geojson/stops.geojson',
                 format:new ol.format.GeoJSON()
             }),
@@ -322,7 +323,7 @@
 
                 });
             },
-            visible: false
+            visible: true
         });
 
         var m_center = [28, 20]
@@ -331,10 +332,10 @@
 
         _this.map = new ol.Map({
           layers: [
-            //_this.geoJsonLayerRoute,
-            //_this.geoJsonLayerPoint,
-            geoJsonLayerRoute3,
-            _this.geoJsonLayerPoint3,
+            _this.geoJsonLayerRoute,
+            _this.geoJsonLayerPoint,
+            //geoJsonLayerRoute3,
+            //_this.geoJsonLayerPoint3,
             _this.geoJsonLayerPointTargets3
           ],
           target: 'map',
@@ -362,7 +363,7 @@
             style: new ol.style.Style({
                 stroke: new ol.style.Stroke({ //边界样式
                     color: '#3a4c69',
-                    width: 3
+                    width: 4
                 })
             })
         })
@@ -540,8 +541,8 @@
         //_this.choosePointText = '地图选点'
         //_this.addTaskDisabled = true
       },
-      //任务暂停-继续
-      taskStop(){
+      //任务暂停-继续  原来重新计算的-开始
+      taskStop_xxx(){
       	let _this = this
       	if(_this.taskStopText == '任务暂停'){
           _this.taskStopText = '任务继续'
@@ -586,12 +587,12 @@
           });
           _this.taskServerClear.callService({flag:2},function(result) {
               console.log('任务继续');
-              _this.$message('任务继续');
+              //_this.$message('任务继续');
               //发id到后台
               _this.ajax_api('post',url_api + '/task/proceed',
                 {irDataTaskHistoryId:_this.irDataTaskHistoryId,irBaseRobotId:robotIdCurrent},
                 true,function (res) {
-                  console.log(res)
+                  //console.log(res)
                   console.log(res.data.path)
                   //取到计划线路的点
                   if(!res.data.path){
@@ -607,7 +608,7 @@
                   }
                   for(var i=0;i<linePlanObj.Tasks.length;i++){
                     var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
-                    var point = [pointArr[0]*1,pointArr[2]*1]
+                    var point = projRobotXY(pointArr[0]*1,pointArr[2]*1)//[pointArr[0]*1,pointArr[2]*1]
                     lineArr.push(point)
                   }
                   planLinePointArr = lineArr
@@ -624,20 +625,79 @@
                   });
                   _this.taskServerClear.callService({flag:0},function(result) {
                     console.log('Clear');
-                    var request = new ROSLIB.ServiceRequest({
-                      plan : res.data.path,
-                      //plan : JSON.stringify(aa),
-                    });
-
-                    _this.taskServer.callService(request, function(result) {
-                      console.log(result);
-                    });
+                    if(result){
+                      var request = new ROSLIB.ServiceRequest({
+                        plan : res.data.path,
+                        //plan : JSON.stringify(aa),
+                      });
+                      _this.taskServer.callService(request, function(result) {
+                        console.log(result);
+                        if(result){
+                          _this.$message({
+                            type: 'success',
+                            message: '任务继续',
+                          });
+                        }
+                      });
+                    }else {
+                      _this.taskServerClear.callService({flag:0},function(result) {
+                        if(result){
+                          var request = new ROSLIB.ServiceRequest({
+                            plan : res.data.path,
+                            //plan : JSON.stringify(aa),
+                          });
+                          _this.taskServer.callService(request, function(result) {
+                            console.log(result);
+                            _this.$message({
+                              type: 'success',
+                              message: '任务继续',
+                            });
+                          });
+                        }else{
+                          _this.$message({
+                            type: 'success',
+                            message: '任务继续失败',
+                          });
+                        }
+                      })
+                    }
                   });
                 })
           })
         }
 
       },
+      //任务暂停-继续  原来重新计算的-结束
+
+      //任务暂停-继续  简单的
+      taskStop(){
+        let _this = this
+        if(_this.taskStopText == '任务暂停'){
+          _this.taskStopText = '任务继续'
+          _this.taskServerClear = new ROSLIB.Service({
+            ros : _this.ros,
+            name : '/taskclear',
+            serviceType : 'robotmsg/TaskControl'
+          });
+          _this.taskServerClear.callService({flag:1},function(result) {
+            console.log('任务暂停');
+            _this.$message('任务暂停');
+          })
+        }else {
+          _this.taskStopText = '任务暂停'
+          _this.taskServerClear = new ROSLIB.Service({
+            ros : _this.ros,
+            name : '/taskclear',
+            serviceType : 'robotmsg/TaskControl'
+          });
+          _this.taskServerClear.callService({flag:2},function(result) {
+            console.log('任务继续');
+            _this.$message('任务继续');
+          })
+        }
+
+      },
+
       //一键返航
       backStartPoint(){
         let _this = this
@@ -652,10 +712,16 @@
                     console.log(res)
                     if(res.data=='null'){
                         console.log('没有data')
+                        _this.$message({
+                          message: '获取路径失败',
+                        });
                         return
                     }
                     if(!res.data){
                         console.log(res.data)
+                        _this.$message({
+                          message: '获取路径失败',
+                        });
                         return
                     }
                     var linePlanObj = JSON.parse(res.data)
@@ -665,7 +731,7 @@
                     }
                     for(var i=0;i<linePlanObj.Tasks.length;i++){
                         var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
-                        var point = [pointArr[0]*1,pointArr[2]*1]
+                        var point = projRobotXY(pointArr[0]*1,pointArr[2]*1)
                         lineArr.push(point)
                     }
                     planLinePointArr = lineArr
@@ -692,6 +758,48 @@
                         serviceType : 'robotmsg/TaskList'
                     });
                     _this.taskServerClear.callService({flag:0},function(result) {
+                      console.log('Clear'+result);
+                      if(result){
+                        var request = new ROSLIB.ServiceRequest({
+                          plan : res.data,
+                          //plan : JSON.stringify(_this.aa),
+                        });
+                        //console.log(request)
+                        _this.taskServer.callService(request, function(result1) {
+                          //console.log(result1);
+                          if(result1){
+                            _this.$message({
+                              type: 'success',
+                              message: '准备返航',
+                            });
+                            _this.$root.eventHub.$emit('taskSuccess', '1111');
+                          }
+                        });
+                      }else {
+                        _this.taskServerClear.callService({flag:0},function(result) {
+                          if(result){
+                            var request = new ROSLIB.ServiceRequest({
+                              plan : res.data,
+                              //plan : JSON.stringify(aa),
+                            });
+                            _this.taskServer.callService(request, function(result) {
+                              console.log(result);
+                              _this.$message({
+                                type: 'success',
+                                message: '准备返航',
+                              });
+                              _this.$root.eventHub.$emit('taskSuccess', '1111');
+                            });
+                          }else{
+                            _this.$message({
+                              type: 'success',
+                              message: '准备返航失败',
+                            });
+                          }
+                        })
+                      }
+                    });
+                    /*_this.taskServerClear.callService({flag:0},function(result) {
                         console.log('Clear');
                         var request = new ROSLIB.ServiceRequest({
                             plan : res.data,
@@ -701,7 +809,8 @@
                         _this.taskServer.callService(request, function(result) {
                             console.log(result);
                         });
-                    })
+                    })*/ //原来的没有判断
+
 
                 })
 
@@ -812,7 +921,7 @@
       },
       //挂牌
       addPlate(){
-    	  console.log(this.irDataTaskHistoryId)
+    	  //console.log(this.irDataTaskHistoryId)
       	let _this = this
         //如果选点打开先关闭
         if(_this.choosePointText == '停止'){
@@ -877,6 +986,7 @@
             });
             routeVectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
               selectedFeatures.push(feature)
+              console.log(feature.getId())
               routeIdsArr.push(feature.getId().slice(6))
             });
             _this.routeId = routeIdsArr.toString()
@@ -949,7 +1059,7 @@
           });
           return
         }
-        //console.log(addFenceData)
+        console.log(addFenceData)
         //localStorage.setItem("fence_shp",fence_shp);
         //POST /ui/fence/addFence
         _this.ajax_api('post',url_api + '/fence/addFence',
@@ -1166,8 +1276,8 @@
               source: passRouteSource,
               style: new ol.style.Style({
                   stroke: new ol.style.Stroke({ //边界样式
-                      color: '#4ec0df',
-                      width: 3
+                      color: '#df5ca8',  //#4ec0df
+                      width: 2
                   }),
                   image: new ol.style.Circle({
                       radius: 1,
@@ -1190,7 +1300,8 @@
 
           _this.listener = new ROSLIB.Topic({
               ros : _this.ros,
-              name : '/robot_pose',
+              //name : '/robot_pose',
+              name : '/computer_pose',
               messageType : 'robotmsg/robot_pose'
           });
           var routeArr = [],
@@ -1253,6 +1364,12 @@
       },
       taskExecuteStatus(){
     	  let _this = this
+        /*_this.$alert('任务完成', '提示', {  //测试用
+          confirmButtonText: '确定',
+          callback: action => {
+            _this.$root.eventHub.$emit('taskEnd', 'true');
+          }
+        })*/
         //接收任务是否完成-消息
         _this.listener = new ROSLIB.Topic({
           ros : _this.ros,
@@ -1260,7 +1377,7 @@
           messageType : 'robotmsg/TaskExecuteStatus'
         });
         _this.listener.subscribe(function(message) {
-          //console.log(message.task_status)
+          console.log(message.task_status)
           if(message.task_status==0){
             /*_this.$message({
               type: 'success',
@@ -1269,7 +1386,11 @@
             _this.$alert('任务完成', '提示', {
               confirmButtonText: '确定',
               callback: action => {
-
+                _this.$root.eventHub.$emit('taskEnd', true);
+                //清除计划的线  &  走过的线路
+                _this.planLinePointVector.getSource().clear()
+                _this.passRouteLayer.getSource().clear()
+                localStorage.setItem("planLine",'');
               }
             })
           }
@@ -1278,6 +1399,7 @@
 
 
       planLineShow(val){
+    	  //console.log(val)
         let _this = this
         //console.log(_this.planLinePoint)
         if(_this.planLinePointVector){
@@ -1286,9 +1408,20 @@
         var geomPlanLine = new ol.geom.LineString(val);
         geomPlanLine.transform('EPSG:4326', 'EPSG:3857');
         var featurePlanLine = new ol.Feature({
-            geometry:geomPlanLine
+          geometry:geomPlanLine
         });
         _this.planLinePointVector.getSource().addFeature(featurePlanLine);
+
+
+
+        //原来的计划线路-开始
+        /*var geomPlanLine = new ol.geom.LineString(val);
+        geomPlanLine.transform('EPSG:4326', 'EPSG:3857');
+        var featurePlanLine = new ol.Feature({
+            geometry:geomPlanLine
+        });
+        _this.planLinePointVector.getSource().addFeature(featurePlanLine);*/
+        //原来的计划线路-结束
 
       },
 
@@ -1311,6 +1444,7 @@
           _this.taskServerClear.callService({flag:0},function(result) {
               console.log('任务终止');
               _this.$message('任务终止');
+              _this.planLinePointVector.getSource().clear()
           })
       },
 
@@ -1338,7 +1472,7 @@
     destroyed(){
       let _this = this
       if(_this.listener){
-          console.log('unsub')
+          //console.log('unsub')
           _this.listener.unsubscribe();
       }
       _this.ros.close()

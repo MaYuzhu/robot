@@ -153,7 +153,7 @@
             </div>
             <div>
               <p style="background: #D9ECEA;height: 26px;line-height: 26px;padding-left: 10px">音频文件</p>
-              <div>123</div>
+              <div>124</div>
             </div>
             <div>
               <p style="background: #D9ECEA;height: 26px;line-height: 26px;padding-left: 10px">阈值信息</p>
@@ -410,7 +410,7 @@
       menuBottom
     },
     mounted(){
-    	this.value_end = this.getDateTime()
+    	this.value_end = this.getDateTime() + '23:59:59'
       this.value_start = this.convertToLateDate()
       this.getTableData()
       this.getImgData()
@@ -453,7 +453,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res.data.items)
+              console.log(res.data.items)
               _this.tableDataResults = res.data.items
               _this.total1 = res.data.total
             }

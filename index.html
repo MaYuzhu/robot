@@ -28,8 +28,8 @@
       //var url_api = 'http://192.168.1.120:8098/ui'
       //var url_img = 'http://192.168.1.120:8090'
 
-      //var url_api = 'http://192.168.1.52:8098/ui'
-      //var url_img = 'http://192.168.1.52:8090'
+      //var url_api = 'http://192.168.1.119:8098/ui'
+      //var url_img = 'http://192.168.1.119:8080'
 
       //var url_api = 'http://58.57.83.230:8098/ui'
       //var url_api = 'http://localhost:8098/ui'
@@ -39,13 +39,33 @@
 
       var routersArr = []
       var robotIdCurrent = ''
-      var planLinePointArr = []
+
+      //刷新保存计划线路
+      var planLinePointArr = localStorage.getItem("planLine") ? localStorage.getItem("planLine") : '';
+      //console.log(planLinePointArr.split(','))  //var stringResult = string.split(',');
+      if(planLinePointArr != ''){
+        planLinePointArr = arrTrans(2,planLinePointArr.split(','))
+      }
+      //console.log(planLinePointArr)
+
       var robotUrl = 'ws://192.168.1.10:9090'
       var hKUrl = '192.168.1.13'
 
       var projRobotXY = function (x,y) {
-        var point = 1
+        var point = 10
         return [x/point,y/point]
+      }
+
+      function arrTrans(num, arr) { // 一维数组转换为二维数组
+        const iconsArr = []; // 声明数组
+        arr.forEach((item, index) => {
+          const page = Math.floor(index / num); // 计算该元素为第几个素组内
+          if (!iconsArr[page]) { // 判断是否存在
+            iconsArr[page] = [];
+          }
+          iconsArr[page].push(item*1);
+        });
+        return iconsArr;
       }
 
     </script>
