@@ -740,8 +740,8 @@
       atOnce(){
       	let _this = this
         _this.dialogVisible = false
-        _this.$root.eventHub.$emit('taskSuccess', '1111');
-        _this.$router.push({path:'/robots/robot-management'})
+        /*_this.$root.eventHub.$emit('taskSuccess', '1111');
+        _this.$router.push({path:'/robots/robot-management'})*/
         /*var linePlan = {
             "InspectId":"1",
             "Tasks":[
@@ -810,7 +810,7 @@
                 //console.log(resData)
                 _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
                     {},true,function (res) {
-                        //console.log(res)
+                        console.log(res)
                         //console.log(res.data.path)
                         //取到计划线路的点
                         if(!res.data.path){
@@ -836,7 +836,7 @@
                             lineArr.push(point)
                         }
                         planLinePointArr = lineArr
-                        console.log(planLinePointArr)
+                        //console.log(planLinePointArr)
                         localStorage.setItem("planLine",lineArr);
 
                         _this.taskServer = new ROSLIB.Service({

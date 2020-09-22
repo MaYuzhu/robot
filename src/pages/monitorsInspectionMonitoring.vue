@@ -26,7 +26,7 @@
     </div>
 
     <div class="tabs_bottom">
-      <TabsBottom @isVideo="isVideo"></TabsBottom>
+      <TabsBottom @isVideo="isVideo" :irDataTaskHistoryId="irDataTaskHistoryId"></TabsBottom>
     </div>
     <menuBottom></menuBottom>
   </div>
@@ -66,7 +66,6 @@
         });
         if(robotIdCurrent){
           _this.robotId = robotIdCurrent
-          _this.getTaskInfo()
         }else {
           _this.getRobotList()
         }
@@ -115,6 +114,7 @@
         //可见光，红外自动接收
         _this.test_login()
         _this.red_pic()
+        _this.isTaskStatus()
 
     },
     methods:{
@@ -127,17 +127,36 @@
               _this.options = res.data.items
               _this.robotId = _this.options[0].id
               robotIdCurrent = _this.robotId
+              //_this.getTaskInfo()
+              _this.isTaskStatus()
+            }
+          })
+      },
+
+      //查看是否正在执行任务
+      isTaskStatus(){
+        let _this = this
+        if(!_this.robotId){
+          return
+        }
+        //console.log(_this.robotId)
+        _this.ajax_api('get',url_api + '/task-history/findCurrentTask/'+ _this.robotId ,
+          null,
+          true,function (res) {
+            //console.log(res)   //taskStatus: 1 正在执行
+            if(res.data.taskStatus!=0){
               _this.getTaskInfo()
             }
           })
       },
       getTaskInfo(){
-        let _this = this//GET /ui/robot/{id}/current-task
+        //console.log('getTaskInfo-----')
+        let _this = this  //GET /ui/robot/{id}/current-task  //GET /ui/findCurrentTask/{id}
         _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
           null,
           true,function (res) {
             if(res.code == 200){
-              //console.log(res)
+              //console.log(res.data)
               _this.taskInfo = {
                 name:res.data.taskName,
                 taskStatus:res.data.taskStatus,
@@ -147,34 +166,32 @@
                 passPointNum:res.data.passPointNum,
                 totalRunTime:res.data.totalRunTime,
                 cumulativeRunTime:res.data.cumulativeRunTime,
-
               }
               //console.log(_this.taskInfo)
               currentTaskInfo()
             }
           })
-          function currentTaskInfo() {
-              _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
-                  null,
-                  true,function (res) {
-                      if(res.code == 200){
-                          console.log(res)
-                          _this.irDataTaskHistoryId = res.data.irDataTaskHistoryId
-                          _this.taskInfo = {
-                              name:res.data.taskName,
-                              taskStatus:res.data.taskStatus,
-                              abnormalPointNum:res.data.abnormalPointNum,
-                              pointTotal:res.data.pointTotal,
-                              currentPoint:res.data.currentPoint,
-                              passPointNum:res.data.passPointNum,
-                              totalRunTime:res.data.totalRunTime,
-                              cumulativeRunTime:res.data.cumulativeRunTime,
-
-                          }
-                      }
-                  })
-              _this.currentTaskInfoTimeId = setTimeout(currentTaskInfo,_this.time)
-          }
+        function currentTaskInfo() {
+          _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
+            null,
+            true,function (res) {
+              if(res.code == 200){
+                //console.log(res)
+                _this.irDataTaskHistoryId = res.data.irDataTaskHistoryId
+                _this.taskInfo = {
+                  name:res.data.taskName,
+                  taskStatus:res.data.taskStatus,
+                  abnormalPointNum:res.data.abnormalPointNum,
+                  pointTotal:res.data.pointTotal,
+                  currentPoint:res.data.currentPoint,
+                  passPointNum:res.data.passPointNum,
+                  totalRunTime:res.data.totalRunTime,
+                  cumulativeRunTime:res.data.cumulativeRunTime,
+                }
+              }
+            })
+          _this.currentTaskInfoTimeId = setTimeout(currentTaskInfo,_this.time)
+        }
 
       },
 

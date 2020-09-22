@@ -26,7 +26,7 @@
     </div>
     <div style="display: flex;">
       <div style="width:60%;height:300px;background:white;float: left;">
-        <TabsBottom @isVideo="isVideo" class="tabs_wrap"></TabsBottom>
+        <TabsBottom @isVideo="isVideo"  :irDataTaskHistoryId="irDataTaskHistoryId" class="tabs_wrap"></TabsBottom>
       </div>
       <div class="control_wrap">
         <div class="control_header">
@@ -221,9 +221,9 @@
         ros:null,
         mo_but:0,
         car_direction_mask: true,
-        irDataTaskHistoryId:'',
         taskServer:null,
         playbackShow:false,
+        irDataTaskHistoryId:'',
       }
     },
     methods:{
@@ -267,16 +267,33 @@
               _this.robotId = _this.options[0].id
               robotIdCurrent = _this.robotId
               //_this.getTaskInfo()
+              _this.isTaskStatus()
+            }
+          })
+      },
+      //查看是否正在执行任务
+      isTaskStatus(){
+        let _this = this
+        if(!_this.robotId){
+          return
+        }
+        _this.ajax_api('get',url_api + '/task-history/findCurrentTask/'+ _this.robotId ,
+          null,
+          true,function (res) {
+            //console.log(res)   //taskStatus: 1 正在执行
+            if(res.data.taskStatus!=0){
+              _this.getTaskInfo()
             }
           })
       },
       getTaskInfo(){
-        let _this = this//GET /ui/robot/{id}/current-task
+        console.log('getTaskInfo-----')
+        let _this = this  //GET /ui/robot/{id}/current-task  //GET /ui/findCurrentTask/{id}
         _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
           null,
           true,function (res) {
             if(res.code == 200){
-              //console.log(res)
+              //console.log(res.data)
               _this.taskInfo = {
                 name:res.data.taskName,
                 taskStatus:res.data.taskStatus,
@@ -286,34 +303,32 @@
                 passPointNum:res.data.passPointNum,
                 totalRunTime:res.data.totalRunTime,
                 cumulativeRunTime:res.data.cumulativeRunTime,
-
               }
               //console.log(_this.taskInfo)
               currentTaskInfo()
             }
           })
-          function currentTaskInfo() {
-              _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
-                  null,
-                  true,function (res) {
-                      if(res.code == 200){
-                          //console.log(res)
-                          _this.irDataTaskHistoryId = res.data.irDataTaskHistoryId
-                          _this.taskInfo = {
-                              name:res.data.taskName,
-                              taskStatus:res.data.taskStatus,
-                              abnormalPointNum:res.data.abnormalPointNum,
-                              pointTotal:res.data.pointTotal,
-                              currentPoint:res.data.currentPoint,
-                              passPointNum:res.data.passPointNum,
-                              totalRunTime:res.data.totalRunTime,
-                              cumulativeRunTime:res.data.cumulativeRunTime,
-
-                          }
-                      }
-                  })
-              _this.currentTaskInfoTimeId = setTimeout(currentTaskInfo,_this.time)
-          }
+        function currentTaskInfo() {
+          _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
+            null,
+            true,function (res) {
+              if(res.code == 200){
+                //console.log(res)
+                _this.irDataTaskHistoryId = res.data.irDataTaskHistoryId
+                _this.taskInfo = {
+                  name:res.data.taskName,
+                  taskStatus:res.data.taskStatus,
+                  abnormalPointNum:res.data.abnormalPointNum,
+                  pointTotal:res.data.pointTotal,
+                  currentPoint:res.data.currentPoint,
+                  passPointNum:res.data.passPointNum,
+                  totalRunTime:res.data.totalRunTime,
+                  cumulativeRunTime:res.data.cumulativeRunTime,
+                }
+              }
+            })
+          _this.currentTaskInfoTimeId = setTimeout(currentTaskInfo,_this.time)
+        }
 
       },
       //可见光
@@ -1205,6 +1220,7 @@
       //可见光，红外自动接收
       _this.test_login()
       _this.red_pic()
+      _this.isTaskStatus()
 
       //设置视频文件保存路径
       _this.clickSetLocalCfg()

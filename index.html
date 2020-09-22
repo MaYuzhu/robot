@@ -28,8 +28,8 @@
       //var url_api = 'http://192.168.1.120:8098/ui'
       //var url_img = 'http://192.168.1.120:8090'
 
-      //var url_api = 'http://192.168.1.119:8098/ui'
-      //var url_img = 'http://192.168.1.119:8080'
+      //var url_api = 'http://192.168.1.113:8098/ui'
+      //var url_img = 'http://192.168.1.113:8080'
 
       //var url_api = 'http://58.57.83.230:8098/ui'
       //var url_api = 'http://localhost:8098/ui'
@@ -45,6 +45,8 @@
       //console.log(planLinePointArr.split(','))  //var stringResult = string.split(',');
       if(planLinePointArr != ''){
         planLinePointArr = arrTrans(2,planLinePointArr.split(','))
+      }else {
+        planLinePointArr = []
       }
       //console.log(planLinePointArr)
 

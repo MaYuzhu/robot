@@ -202,7 +202,7 @@
         clearTimeout(_this.pointAlarmNowTimeId)
         clearTimeout(_this.SysAlarmNowTimeId)
         if(target){
-          _this.tableDataPointNow = []
+          //_this.tableDataPointNow = []
         }
       });
     },
@@ -246,7 +246,9 @@
           //console.log(_this.irDataTaskHistoryId)
           _this.ajaxTablePointNowData.irDataTaskHistoryId = _this.irDataTaskHistoryId
           _this.ajax_api('post',url_api + '/point-history',
-              _this.ajaxTablePointNowData,
+              {page:1, size:10000,
+                irDataTaskHistoryId:_this.irDataTaskHistoryId
+              },
               true,
               function (res) {
                 //console.log(res)
@@ -262,18 +264,23 @@
           function pointNowTime(){
               //console.log(_this.irDataTaskHistoryId)
               _this.ajax_api('post',url_api + '/point-history',
-                  {page:1, size:1,
+                  {page:1, size:10000,
                     irDataTaskHistoryId:_this.irDataTaskHistoryId
                   },
                   true,
                   function (res) {
-                      //console.log(res.data.items.length)
-                      if(_this.irDataTaskHistoryId == ''){
+                      //console.log(res.data.items)
+                      if(! _this.irDataTaskHistoryId){
                         //console.log('id为空')
                         return
                       }
-                      if(_this.tableDataPointNow.length==0 && res.data.items.length>0){
+                      //请求所有-倒序  reverse
+                      _this.tableDataPointNow = res.data.items
+
+                      //原来一条一条加-start
+                      /*if(_this.tableDataPointNow.length==0 && res.data.items.length>0){
                         console.log('+1')
+                        console.log(_this.irDataTaskHistoryId+'id')
                         _this.tableDataPointNow.unshift(res.data.items[0])
                       }
                       if(res.code == 200 && res.data.items.length>0){
@@ -281,7 +288,8 @@
                           if(_this.tableDataPointNow[0].createTime!=res.data.items[0].createTime){
                               _this.tableDataPointNow.unshift(res.data.items[0])
                           }
-                      }
+                      }*/
+                      //原来一条一条加-end
                   })
               _this.pointNowTimeId = setTimeout(pointNowTime,_this.time)
           }

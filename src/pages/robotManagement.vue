@@ -124,7 +124,6 @@
       _this.listener_task.subscribe(function(message) {
         console.log(message.task_status)
         if(message.task_status==0){
-
           clearTimeout(_this.currentTaskInfoTimeId)
         }else if(message.task_status==1){
           _this.getTaskInfo()
@@ -133,11 +132,8 @@
       //可见光，红外自动接收
       _this.test_login()
       _this.red_pic()
-      _this.$root.eventHub.$on('taskSuccess',(target) => {
-        console.log(target+'222222')
-        _this.tableDataPointNow = []
-        _this.getTaskInfo()
-      });
+      _this.getRobotList()
+
     },
     methods: {
     	red_pic(){
@@ -362,7 +358,6 @@
 
       getRobotList(){
       	let _this = this
-
         _this.ajax_api('get',url_api + '/robot',
           {page:1,size:100},
           true,function (res) {
@@ -375,14 +370,28 @@
                 _this.robotId = _this.options[0].id
                 robotIdCurrent = _this.robotId
               }
-              //setTimeout(()=>{_this.getTaskInfo()},5000)
+              _this.isTaskStatus()
+            }
+          })
+      },
+      //查看是否正在执行任务
+      isTaskStatus(){
+        let _this = this
+        if(!_this.robotId){
+          return
+        }
+        _this.ajax_api('get',url_api + '/task-history/findCurrentTask/'+ _this.robotId,
+          null,
+          true,function (res) {
+            //console.log(res)   //taskStatus: 1 正在执行
+            if(res.data.taskStatus!=0){
               _this.getTaskInfo()
             }
           })
       },
       getTaskInfo(){
-        console.log('getTaskInfo-----')
-        let _this = this  //GET /ui/robot/{id}/current-task
+        //console.log('getTaskInfo-----')
+        let _this = this  //GET /ui/robot/{id}/current-task  //GET /ui/findCurrentTask/{id}
         _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
           null,
           true,function (res) {
@@ -418,7 +427,6 @@
                               passPointNum:res.data.passPointNum,
                               totalRunTime:res.data.totalRunTime,
                               cumulativeRunTime:res.data.cumulativeRunTime,
-
                           }
                       }
                   })
@@ -430,7 +438,7 @@
       	let _this = this
       	//console.log(val)
         robotIdCurrent = _this.robotId
-        //_this.getTaskInfo()
+        _this.isTaskStatus()
 
         _this.ajax_api('get',url_api + '/robot-param',
           {irBaseRobotId:robotIdCurrent,page:1,size:1000},
@@ -527,12 +535,9 @@
         console.log(target)
         clearTimeout(_this.currentTaskInfoTimeId)
       });
-      /*_this.$root.eventHub.$on('taskSuccess',(target) => {
-        console.log(target)
-        _this.tableDataPointNow = []
-        _this.getRobotList()
-      });*/
+
     },
+
 
     beforeRouteLeave(to, form, next) {
       next()

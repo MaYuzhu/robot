@@ -410,8 +410,8 @@
       menuBottom
     },
     mounted(){
-    	this.value_end = this.getDateTime() + '23:59:59'
-      this.value_start = this.convertToLateDate()
+    	this.value_end = this.getDateTime() + ' 23:59:59'
+      this.value_start = this.convertToLateDate() + ' 00:00:00'
       this.getTableData()
       this.getImgData()
     },

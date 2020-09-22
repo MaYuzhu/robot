@@ -738,6 +738,7 @@
                     _this.planLinePoint = lineArr
                     //console.log(_this.planLinePointVector) //.refresh()
                     _this.planLinePointVector.getSource().refresh()
+                    localStorage.setItem("planLine",lineArr);
                     //_this.init()
                     /*var ros = new ROSLIB.Ros({
                         url : _this.url
@@ -1377,7 +1378,7 @@
           messageType : 'robotmsg/TaskExecuteStatus'
         });
         _this.listener.subscribe(function(message) {
-          console.log(message.task_status)
+          //console.log(message.task_status)
           if(message.task_status==0){
             /*_this.$message({
               type: 'success',
@@ -1445,6 +1446,7 @@
               console.log('任务终止');
               _this.$message('任务终止');
               _this.planLinePointVector.getSource().clear()
+              localStorage.setItem("planLine",'');
           })
       },
 
