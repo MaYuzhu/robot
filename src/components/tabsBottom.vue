@@ -299,32 +299,37 @@
       },
 
       pointAlarmNow(){
-            let _this = this
-            _this.ajax_api('post',url_api + '/point-alarm-history',
-                {page:1, size:3},
-                true,
-                function (res) {
-                  //console.log(res)
-                    if(res.code == 200){
-                        //console.log(res.data.items)
-                        _this.tableDataPointAlarmNow = res.data.items
-                        pointAlarmNowTime()
-                    }
-                })
+        let _this = this
+        _this.ajax_api('post',url_api + '/point-alarm-history',
+          {page:1, size:10000,
+            irDataTaskHistoryId:_this.irDataTaskHistoryId
+          },
+          true,
+          function (res) {
+            //console.log(res)
+            if(! _this.irDataTaskHistoryId){
+              //console.log('id为空')
+              return
+            }
+            if(res.code == 200){
+                //console.log(res.data.items)
+                _this.tableDataPointAlarmNow = res.data.items
+                pointAlarmNowTime()
+            }
+          })
 
-            function pointAlarmNowTime(){
+          function pointAlarmNowTime(){
                 _this.ajax_api('post',url_api + '/point-alarm-history',
-                    {page:1, size:1},
-                    true,
-                    function (res) {
-                        if(res.code == 200 && res.data.items.length>0){
-                            //console.log(res.data.items)
-                            if(_this.tableDataPointAlarmNow[0].createTime!=res.data.items[0].createTime){
-                                _this.tableDataPointAlarmNow.unshift(res.data.items[0])
-                            }
-                        }
-                    })
-                _this.pointAlarmNowTimeId = setTimeout(pointAlarmNowTime,_this.time)
+                  {page:1, size:10000,
+                    irDataTaskHistoryId:_this.irDataTaskHistoryId
+                  },
+                  true,
+                  function (res) {
+                      if(res.code == 200){
+                        _this.tableDataPointAlarmNow = res.data.items
+                      }
+                  })
+              _this.pointAlarmNowTimeId = setTimeout(pointAlarmNowTime,_this.time)
             }
         },
       alarmLevelText(row){
@@ -352,31 +357,29 @@
       pointSysAlarmNow(){
           let _this = this
           _this.ajax_api('get',url_api + '/sys-point-alarm-history',
-              {page:1, size:3},
-              true,
-              function (res) {
-                  if(res.code == 200){
-                      //console.log(res.data.items)
-                      _this.tableDataSysAlarmNow = res.data.items
-                      pointSysAlarmNowTime()
-                  }
-              })
+            {page:1, size:10000,
+              irDataTaskHistoryId:_this.irDataTaskHistoryId
+            },
+            true,
+            function (res) {
+                if(res.code == 200){
+                    //console.log(res.data.items)
+                    _this.tableDataSysAlarmNow = res.data.items
+                    pointSysAlarmNowTime()
+                }
+            })
 
           function pointSysAlarmNowTime(){
               _this.ajax_api('get',url_api + '/sys-point-alarm-history',
-                  {page:1, size:1},
-                  true,
-                  function (res) {
-                      if(res.code == 200){
-                          //console.log(res.data.items)
-                          if(res.data.items.length<1){
-                              return
-                          }
-                          if(_this.tableDataSysAlarmNow[0].createTime!=res.data.items[0].createTime){
-                              _this.tableDataSysAlarmNow.unshift(res.data.items[0])
-                          }
-                      }
-                  })
+                {page:1, size:10000,
+                  irDataTaskHistoryId:_this.irDataTaskHistoryId
+                },
+                true,
+                function (res) {
+                  if(res.code == 200){
+                    _this.tableDataSysAlarmNow = res.data.items
+                  }
+                })
               _this.SysAlarmNowTimeId = setTimeout(pointSysAlarmNowTime,_this.time)
           }
       },
