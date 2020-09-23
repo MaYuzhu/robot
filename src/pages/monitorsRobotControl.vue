@@ -1025,8 +1025,8 @@
         //arrXml.push("<PackgeSize>" + $("#packSize").val() + "</PackgeSize>");
         //arrXml.push("<PlayWndType>" + $("#wndSize").val() + "</PlayWndType>");
         //arrXml.push("<BuffNumberType>" + $("#netsPreach").val() + "</BuffNumberType>");
-        arrXml.push("<RecordPath>" + 'C:\\tomcat\\apache-tomcat-8.5.57\\webapps\\video_a' + "</RecordPath>");
-        arrXml.push("<CapturePath>" + 'C:\\tomcat\\apache-tomcat-8.5.57\\webapps\\pic_a' + "</CapturePath>");
+        arrXml.push("<RecordPath>" + video_save_url + "</RecordPath>");
+        arrXml.push("<CapturePath>" + pic_save_url + "</CapturePath>");
         //arrXml.push("<PlaybackFilePath>" + $("#playbackFilePath").val() + "</PlaybackFilePath>");
         //arrXml.push("<PlaybackPicPath>" + $("#playbackPicPath").val() + "</PlaybackPicPath>");
         //arrXml.push("<DownloadPath>" + $("#downloadPath").val() + "</DownloadPath>");
