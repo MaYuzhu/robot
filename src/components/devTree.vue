@@ -77,7 +77,7 @@
         taskId:'',
       };
     },
-    props:['toTreeData'],
+    props:['toTreeData','toTreeCheckData'],
     created() {
       this.$root.eventHub.$on('eventName',(target) => {
         if(target==''){
@@ -283,6 +283,13 @@
         },
         //immediate: true,
         deep: true
+      },
+      toTreeCheckData:{
+        handler(n,o){
+          let _this = this
+          //console.log(n,o)
+          _this.$refs.tree.setCheckedKeys(n);
+        }
       }
     },
   }

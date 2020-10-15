@@ -76,7 +76,7 @@
     <XunjianFindTool @xunjianFind="xunjianFind" :saveData="saveData" :savePutData="savePutData"></XunjianFindTool>
     <div class="content">
       <div class="left">
-        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTree>
+        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData" :toTreeCheckData="toTreeCheckData"></devTree>
       </div>
       <div class="right">
         <taskTable v-if="taskTableReset" :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"></taskTable>
@@ -176,6 +176,7 @@
         },
         savePutData:{},
         taskTableReset:true,
+        toTreeCheckData:[],
       }
     },
     components: {
@@ -187,7 +188,18 @@
       menuBottom
     },
     mounted(){
-      this.init()
+      let _this = this
+      _this.init()
+      _this.ajax_api('get',url_api + '/point/tree',
+        null,
+        true,
+        function (res) {
+          if(res.code == 200){
+            //_this.toTreeCheckData = res.data
+            //console.log(res.data)
+            _this.setName(res.data)
+          }
+        })
     },
     methods: {
       init(){
@@ -224,7 +236,7 @@
               }
               //console.log(choose_id_arr)
               _this.checkedQuyu = choose_id_arr
-              _this.isIndeterminateQuyu = true
+              //_this.isIndeterminateQuyu = true
             })
 
         })
@@ -252,7 +264,6 @@
               }
               //console.log(choose_id_arr)
               _this.checkedDevType = choose_id_arr
-              _this.isIndeterminateDevType = true
             })
         })
 
@@ -276,7 +287,7 @@
               }
               //console.log(choose_id_arr)
               _this.checkedReconType = choose_id_arr
-              _this.isIndeterminateReconType = true
+              //_this.isIndeterminateReconType = true
             })
         })
 
@@ -300,7 +311,7 @@
               }
               //console.log(choose_id_arr)
               _this.checkedMeterType = choose_id_arr
-              _this.isIndeterminateMeterType = true
+              //_this.isIndeterminateMeterType = true
             })
         })
 
@@ -324,13 +335,21 @@
               }
               //console.log(choose_id_arr)
               _this.checkedFaceType = choose_id_arr
-              _this.isIndeterminateFaceType = true
+              //_this.isIndeterminateFaceType = true
             })
         })
 
-
       },
 
+      setName(datas){ //遍历树  获取id数组
+        let _this = this
+        for(var i in datas){
+          _this.toTreeCheckData.push(datas[i].id)
+          if(datas[i].treeNode){
+            _this.setName(datas[i].treeNode);
+          }
+        }
+      },
       handleSizeChange(val) {
         console.log(`每页 ${val} 条`);
       },
@@ -344,6 +363,7 @@
       },
       handleCheckedCitiesChange(value) {
         let checkedCount = value.length;
+        console.log(checkedCount)
         this.checkAllQuyu = checkedCount === this.citiesQuyu.length;
         this.isIndeterminateQuyu = checkedCount > 0 && checkedCount < this.citiesQuyu.length;
       },

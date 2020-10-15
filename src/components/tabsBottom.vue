@@ -220,7 +220,7 @@
           messageType : 'robotmsg/TaskExecuteStatus'
         });
         _this.listener.subscribe(function(message) {
-          console.log(message.task_status)
+          //console.log(message.task_status)
           if(message.task_status==0){
             clearTimeout(_this.pointNowTimeId)
             clearTimeout(_this.pointAlarmNowTimeId)

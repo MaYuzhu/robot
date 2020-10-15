@@ -77,7 +77,7 @@
     <XunjianFindTool @xunjianFind="xunjianFind" :saveData="saveData" :savePutData="savePutData"></XunjianFindTool>
     <div class="content">
       <div class="left">
-        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTree>
+        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData" :toTreeCheckData="toTreeCheckData"></devTree>
       </div>
       <div class="right">
         <taskTable :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"
@@ -180,6 +180,7 @@
         },
         savePutData:{},
         taskTableReset:true,
+        toTreeCheckData:[],  //默认选择的树节点
       }
     },
     components: {
@@ -191,7 +192,18 @@
       menuBottom,
     },
     mounted(){
-  		this.init()
+  	  let _this = this
+  		_this.init(),
+      _this.ajax_api('get',url_api + '/point/tree',
+        null,
+        true,
+        function (res) {
+          if(res.code == 200){
+            //_this.toTreeCheckData = res.data
+            //console.log(res.data)
+            _this.setName(res.data)
+          }
+        })
     },
     methods: {
     	init(){
@@ -243,6 +255,16 @@
           //console.log(inspect)
         })
 
+      },
+
+      setName(datas){ //遍历树  获取id数组
+    	  let _this = this
+        for(var i in datas){
+          _this.toTreeCheckData.push(datas[i].id)
+          if(datas[i].treeNode){
+            _this.setName(datas[i].treeNode);
+          }
+        }
       },
 
       handleSizeChange(val) {

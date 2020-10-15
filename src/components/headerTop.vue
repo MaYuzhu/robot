@@ -161,7 +161,7 @@
                   <dt>地图选点</dt>
                   <span>|</span>
                   <dd>
-                    <div>
+                    <div @click="xuandian()">
                       <router-link to="/robots/robot-management">地图选点</router-link>
                       <span>|</span>
                     </div>
@@ -341,7 +341,7 @@
                   <dt>检修区域设置</dt>
                   <span>|</span>
                   <dd>
-                    <div>
+                    <div @click="guapai()">
                       <router-link to="/robots/robot-management">检修区域设置</router-link>
                       <span>|</span>
                     </div>
@@ -649,6 +649,21 @@
       playClose(id,obj){
         var audio = document.getElementById('audio');
         audio.pause();
+      },
+
+      //地图选点
+      xuandian(){
+        this.$message({
+          duration: 6000,
+          message: '请在地图上点击"地图选点"按钮操作'
+        });
+      },
+      //挂牌
+      guapai(){
+        this.$message({
+          duration: 6000,
+          message: '请在地图上点击"挂牌"按钮操作'
+        });
       },
 
     }

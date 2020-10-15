@@ -66,7 +66,7 @@
             >
             </el-table-column>
             <el-table-column
-              prop="value" align="center"
+              prop="valueDesc" align="center"
               label="识别结果" width="90"
             >
             </el-table-column>

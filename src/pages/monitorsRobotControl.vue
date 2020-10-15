@@ -31,15 +31,17 @@
       <div class="control_wrap">
         <div class="control_header">
           <div class="control_header_left">
-            <p class="button_control_header"><img src="../../static/images/control.png" alt=""></p>
+            <p title="获取权限" class="button_control_header"><img src="../../static/images/control.png" alt=""></p>
             <p @click="clickCapturePic" title="抓图" class="button_control_header"><img src="../../static/images/pictures.png" alt=""></p>
             <p @click="clickVoice" :title="voice_title" class="button_control_header"><img :src='voice_img' alt=""></p>
             <p @click="clickVideo" :title="video_title" class="button_control_header"><img :src="video_img" alt=""></p>
             <p @click="clickDuijiang" :title="duijiang_title" class="button_control_header duijiang">
               <img :src="duijiang_img" alt="">
             </p>
-            <p class="button_control_header"><img src="../../static/images/lookpicture.png" alt=""></p>
-            <p class="button_control_header"><img src="../../static/images/audio.png" alt=""></p>
+            <p title="看图" @click="backPic()" class="button_control_header"><img src="../../static/images/lookpicture.png" alt=""></p>
+            <input id="files" style="display: none" type="file" @change="showPic()">
+
+            <p title="回放音频" class="button_control_header"><img src="../../static/images/audio.png" alt=""></p>
             <p @click="clickPlayback" :title="playback_title" class="button_control_header"><img :src="playback_img" alt=""></p>
           </div>
           <div class="control_header_right">
@@ -69,35 +71,35 @@
                   </el-option>
                 </el-select>
               </div>
-              <span style="float: left">车体控制</span>
+              <span @click="carBodyStop()" style="float: left">车体控制</span>
               <el-button v-if="false" type="info" size="mini" class="xunhuan_button">循环</el-button>
             </div>
             <div class="car-direction">
               <el-tooltip class="item car-direction-but car-top-but car-direction-but-disabled"
                           effect="dark" content="W" :disabled="disabled"
                           placement="top-start">
-                <div @click="carBodyC(1)">
+                <div @mousedown="carBodyC(1)" @mouseup="carBodyStop()">
                   <span class="car-but-text car-top-but-text car-but-text-disabled">W</span>
                 </div>
               </el-tooltip>
               <el-tooltip class="item car-direction-but car-right-but car-direction-but-disabled"
                           effect="dark" content="D" :disabled="disabled"
                           placement="right-start">
-                <div @click="carBodyC(2)">
+                <div @mousedown="carBodyC(2)" @mouseup="carBodyStop()">
                   <span class="car-but-text car-right-but-text car-but-text-disabled">D</span>
                 </div>
               </el-tooltip>
               <el-tooltip class="item car-direction-but car-bottom-but car-direction-but-disabled"
                           effect="dark" content="S" :disabled="disabled"
                           placement="bottom-start">
-                <div @click="carBodyC(3)">
+                <div @mousedown="carBodyC(3)" @mouseup="carBodyStop()">
                   <span class="car-but-text car-bottom-but-text car-but-text-disabled">S</span>
                 </div>
               </el-tooltip>
               <el-tooltip class="item car-direction-but car-left-but car-direction-but-disabled"
                           effect="dark" content="A" :disabled="disabled"
                           placement="left-start">
-                <div @click="carBodyC(4)">
+                <div @mousedown="carBodyC(4)" @mouseup="carBodyStop()">
                   <span class="car-but-text car-left-but-text car-but-text-disabled">A</span>
                 </div>
               </el-tooltip>
@@ -122,28 +124,28 @@
               <el-tooltip class="item holder-direction-but holder-left-but"
                           effect="dark" content="a" :disabled="disabled"
                           placement="top-start">
-                <div style="cursor: pointer" onmousedown="mouseDownPTZControl(3);" onmouseup="mouseUpPTZControl();">
+                <div style="cursor: pointer"  @click="mouseDownPTZControlNew(3)" @mouseup="mouseUpPTZControlNew()">
                   <span class="holder-but-text holder-left-but-text holder-but-text-disabled">A</span>
-                </div>
+                </div><!--onmousedown="mouseDownPTZControl(3);" onmouseup="mouseUpPTZControl();"-->
               </el-tooltip>
               <el-tooltip class="item holder-direction-but holder-top-but"
                           effect="dark" content="w" :disabled="disabled"
                           placement="top-start">
-                <div style="cursor: pointer" onmousedown="mouseDownPTZControl(1);" onmouseup="mouseUpPTZControl();">
+                <div style="cursor: pointer" @click="mouseDownPTZControlNew(1)" @mouseup="mouseUpPTZControlNew()">
                   <span class="holder-but-text holder-top-but-text holder-but-text-disabled">W</span>
                 </div>
               </el-tooltip>
               <el-tooltip class="item holder-direction-but holder-right-but"
                           effect="dark" content="d" :disabled="disabled"
                           placement="top-start">
-                <div style="cursor: pointer" onmousedown="mouseDownPTZControl(4);" onmouseup="mouseUpPTZControl();">
+                <div style="cursor: pointer" @click="mouseDownPTZControlNew(4)" @mouseup="mouseUpPTZControlNew()">
                   <span class="holder-but-text holder-right-but-text holder-but-text-disabled">D</span>
                 </div>
               </el-tooltip>
               <el-tooltip class="item holder-direction-but holder-bottom-but"
                           effect="dark" content="s" :disabled="disabled"
                           placement="top-start">
-                <div style="cursor: pointer" onmousedown="mouseDownPTZControl(6);" onmouseup="mouseUpPTZControl();">
+                <div style="cursor: pointer" @click="mouseDownPTZControlNew(6)" @mouseup="mouseUpPTZControlNew()">
                   <span class="holder-but-text holder-bottom-but-text holder-but-text-disabled">S</span>
                 </div>
               </el-tooltip>
@@ -163,11 +165,19 @@
         </div>
       </div>
     </div>
-    <div class="playbackdiv" v-show="playbackShow"><!--192.168.1.13_null_1600583539105-->
-      <video src="http://localhost:8080/video_a/2020-09-20/aaa.mp4" controls="controls" style="width: 100%;height: 100%">
+    <iframe v-show="false" class="playbackdiviframe" style="z-index: 999" frameborder="0"></iframe>
+    <div class="playbackdiv" v-show="playbackShow">
+      <p @click="closeVideo()" class="video_box_close"><i class="el-dialog__close el-icon el-icon-close"></i></p>
+      <video id="video" src="" autoplay
+             controls="controls" style="width: 100%;height: 100%">
         您的浏览器不支持 video 标签。
       </video>
     </div>
+    <div class="picbackdiv">
+      <p @click="closePic()" class="video_box_close"><i class="el-dialog__close el-icon el-icon-close"></i></p>
+      <img src="" id="pic">
+    </div>
+
     <menuBottom></menuBottom>
   </div>
 </template>
@@ -200,6 +210,9 @@
         },
         src:'',
         listener:null,
+        listener_v:null,
+        listener_yun:null,
+        server_yun:null,
         hkUrl:hKUrl,
         voice_title:'录制音频',
         voice_img:"../../static/images/recordingvoice.png",
@@ -226,6 +239,128 @@
         irDataTaskHistoryId:'',
       }
     },
+
+    mounted() {
+      let _this = this
+      _this.play_but()
+      _this.ros = new ROSLIB.Ros({
+        url : _this.url
+      });
+      // 初始化插件参数及插入插件
+      WebVideoCtrl.I_InitPlugin('100%', '100%', {
+        iWndowType: 1,
+        cbSelWnd: function (xmlDoc) {
+          _this.g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
+          var szInfo = "当前选择的窗口编号：" + _this.g_iWndIndex;
+          console.log(szInfo);
+        }
+      });
+
+      // 窗口事件绑定
+      $(window).bind({
+        resize: function () {
+          var $Restart = $("#restartDiv");
+          if ($Restart.length > 0) {
+            var oSize = _this.getWindowSize();
+            $Restart.css({
+              width: oSize.width + "px",
+              height: oSize.height + "px"
+            });
+          }
+        }
+      });
+
+      //this.createWebSocket();
+      if(robotIdCurrent){
+        _this.robotId = robotIdCurrent
+        _this.getTaskInfo()
+      }else {
+        _this.getRobotList()
+      }
+
+      //console.log(ros)
+      _this.ros.on('connection', function() {
+        //console.log('car body');
+      });
+
+      _this.listener_v = new ROSLIB.Topic({
+        ros : _this.ros,
+        name : '/joy_vel',
+        messageType : 'geometry_msgs/Twist'
+      });
+      _this.listener_yun = new ROSLIB.Topic({
+        ros : _this.ros,
+        name : '/cloudplat_angle',
+        messageType : 'std_msgs/String'
+      });
+      _this.server_yun = new ROSLIB.Service({
+        ros : _this.ros,
+        name : '/cloudplatform_control',
+        serviceType : 'robotmsg/CloudPlatControl'
+      });
+
+      /*$(document).keydown(function(event){
+
+          if(event.keyCode === 87){
+            _this.carBodyC(1)
+          }
+          if(event.keyCode === 68){
+            _this.carBodyC(2)
+          }
+          if(event.keyCode === 83){
+            _this.carBodyC(3)
+          }
+          if(event.keyCode === 65){
+            _this.carBodyC(4)
+          }
+      });
+      $(document).keyup(function(event){
+
+          if(event.keyCode === 87){
+            console.log('stop_key')
+            _this.carBodyStop()
+          }
+          if(event.keyCode === 68){
+            _this.carBodyStop()
+
+          }
+          if(event.keyCode === 83){
+              _this.carBodyStop()
+
+          }
+          if(event.keyCode === 65){
+              _this.carBodyStop()
+
+          }
+      });
+      */
+      //监听任务是否正在执行
+      /*_this.listener_task = new ROSLIB.Topic({
+        ros : _this.ros,
+        name : '/task_execute_status',
+        messageType : 'robotmsg/TaskExecuteStatus'
+      });
+      _this.listener_task.subscribe(function(message) {
+        //console.log(message.task_status)
+        if(message.task_status==0){
+          clearTimeout(_this.currentTaskInfoTimeId)
+        }else if(message.task_status==1){
+          _this.getTaskInfo()
+        }
+      });*/
+
+      //可见光，红外自动接收
+      _this.test_login()
+      _this.red_pic()
+      _this.isTaskStatus()
+
+      //设置视频文件保存路径
+      _this.clickSetLocalCfg()
+      //POST /ui/file/tranform
+      _this.vedioTranform()
+
+    },
+
     methods:{
       red_pic(){
           $('.red_pic_but').hide()
@@ -250,7 +385,6 @@
           var i = message.data
           _this.src = url+ i
           setTimeout(function () {
-
             $("#chatterMessage").src = _this.src
           },1000)
 
@@ -287,7 +421,7 @@
           })
       },
       getTaskInfo(){
-        console.log('getTaskInfo-----')
+        //console.log('getTaskInfo-----')
         let _this = this  //GET /ui/robot/{id}/current-task  //GET /ui/findCurrentTask/{id}
         _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
           null,
@@ -406,10 +540,10 @@
                 }
                 oSel.append("<option value='" + id + "' bZero='false'>" + name + "</option>");
               });
-              console.log(szIP + " 获取数字通道成功！");
+              //console.log(szIP + " 获取数字通道成功！");
             },
             error: function () {
-              console.log(szIP + " 获取数字通道失败！");
+              //console.log(szIP + " 获取数字通道失败！");
             }
           });
           // 零通道
@@ -428,10 +562,10 @@
                   oSel.append("<option value='" + id + "' bZero='true'>" + name + "</option>");
                 }
               });
-              console.log(szIP + " 获取零通道成功！");
+              //console.log(szIP + " 获取零通道成功！");
             },
             error: function () {
-              console.log(szIP + " 获取零通道失败！");
+              //console.log(szIP + " 获取零通道失败！");
             }
           });
         }
@@ -763,6 +897,8 @@
           }
           console.log(oWndInfo.szIP + " " + szInfo);
         }
+        $('#video').attr('src',null)
+        _this.vedioTranform()
       },
       // 开始回放
       clickStartPlayback_xxx() {
@@ -841,7 +977,63 @@
         let _this = this
         _this.playbackShow = true
         _this.isVideo(false)
+
+        $('#video').attr('src',url_img+'/video_a/small_video.mp4?t=' + new Date().getTime())
+
       },
+      //POST /ui/file/tranform
+      vedioTranform(){
+        let _this = this
+        _this.ajax_api('post',url_api + '/file/tranform',
+          {"localUrl": video_save_url,},
+          true,function (res) {
+            //console.log(res)
+          })
+      },
+      closeVideo(){
+        let _this = this
+        _this.playbackShow = false
+        _this.isVideo(true)
+        $('#video').attr('src',null)
+      },
+
+      //回看图片
+      backPic(){
+        let _this = this
+        $("#files").click();
+      },
+      closePic(){
+        let _this = this
+        _this.isVideo(true)
+        $('.picbackdiv').hide()
+      },
+      showPic() {
+        var _this = this
+        var selectedFile = document.getElementById('files').files[0];
+        var name = selectedFile.name;//读取选中文件的文件名
+        var size = selectedFile.size;//读取选中文件的大小
+        //console.log("文件名:"+name+"大小:"+size);
+        var reader = new FileReader();//这是核心,读取操作就是由它完成.
+        //reader.readAsText(selectedFile);//读取文件的内容,也可以读取文件的URL
+        reader.onload = function () {
+          //当读取完成后回调这个函数,然后此时文件的内容存储到了result中,直接操作即可
+          //console.log(this.result);
+        }
+        //获取年月日
+        var date = new Date();
+        var year = date.getFullYear(); //获取完整的年份(4位)
+        var month = date.getMonth()+1; //获取当前月份(0-11,0代表1月)
+        var data = date.getDate(); //获取当前日(1-31)
+
+        if (name) {
+          //document.getElementById("pic").src = url_img + '/pic_a/2020-10-14/' + name + "";
+          $('#pic').attr('src',`${url_img}/pic_a/${year}-${month}-${data}/${name}`)
+        }
+        _this.isVideo(false)
+        $('.picbackdiv').show()
+
+      },
+
       // 格式化时间
       dateFormat(oDate, fmt) {
         var o = {
@@ -900,6 +1092,106 @@
         }
       },
 
+      //新改的 云台控制  /cloudplatform_control  robotmsg/CloudPlatControl
+      /*例子：水平设置  id=0 action=1 type=0  value=度数×100，顺时针
+        垂直设置：
+        id=0 action=1 type=1  value=度数×100，顺时针
+      */
+      mouseDownPTZControlNew(n){  //6-s   1-w  3-a   4-d
+        let _this = this
+        //console.log(n)
+        _this.listener_yun = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/cloudplat_angle',
+          messageType : 'std_msgs/String'
+        });
+        //_this.listener_yun.unsubscribe()
+        _this.listener_yun.subscribe(function (message) {
+          //console.log(message)
+          let arr = message.data.split('/')
+          //console.log(arr)
+          if(n == 3){
+            let left = arr[0]*1 - 10
+            if(left<0){
+              left = 360 + left
+            }
+            //console.log(left)
+            var request = new ROSLIB.ServiceRequest({
+              id:0, action:1, type:0, value:left*100
+            });
+            _this.server_yun.callService(request, function(result) {
+              console.log(result);
+              _this.listener_yun.unsubscribe()
+              //_this.ros.close()
+            });
+          }
+          if(n == 4){
+            let right = arr[0]*1 + 10
+            if(right>=360){
+              right = right - 360
+            }
+            //console.log(right)
+            var request = new ROSLIB.ServiceRequest({
+              id:0, action:1, type:0, value:right*100
+            });
+            _this.server_yun.callService(request, function(result) {
+              //console.log(result);
+              _this.listener_yun.unsubscribe()
+            });
+          }
+          if(n == 1){
+            let up = arr[1]*1 - 10
+            console.log(up)
+            if(up<0){
+              up = 360 + up
+            }
+            if(up<=270 && up>=90){
+              up = 270
+            }
+            //console.log(up)
+            var request = new ROSLIB.ServiceRequest({
+              id:0, action:1, type:1, value:up*100
+            });
+            _this.server_yun.callService(request, function(result) {
+              console.log(result);
+              _this.listener_yun.unsubscribe()
+            });
+          }
+          if(n == 6){
+            let down = arr[1]*1 + 10
+            if(down>=360){
+              down = down - 360
+            }
+            if(down>=90 && down<=270){
+              down = 90
+            }
+            //console.log(down)
+            var request = new ROSLIB.ServiceRequest({
+              id:0, action:1, type:1, value:down*100
+            });
+            _this.server_yun.callService(request, function(result) {
+              //console.log(result);
+              _this.listener_yun.unsubscribe()
+            });
+          }
+
+
+        })
+
+        /*var request = new ROSLIB.ServiceRequest({
+          id:0, action:1, type:0, value:0*100
+        });
+        _this.server_yun.callService(request, function(result) {
+          console.log(result);
+        });*/
+      },
+      //停止云台
+      mouseUpPTZControlNew(){
+        /*let _this = this
+        _this.listener_yun.unsubscribe()
+        console.log('停止')*/
+      },
+
       //车体控制
       carBodyC(n){
           let _this = this
@@ -924,39 +1216,47 @@
               case 1:
                   x = 0.1
                   z = 0
+
+                  //_this.listener_v.publish(twist);
                   _this.time_id = window.setInterval(function () {
                       //console.log(x)
-                      _this.listener.publish(twist);
-                  },1000)
+                      _this.listener_v.publish(twist);
+                  },100)
                   break
               case 2:
                   x = 0
-                  z = -0.024
+                  z = -0.05
                   _this.time_id = window.setInterval(function () {
                       //console.log(x)
-                      _this.listener.publish(twist);
-                  },1000)
+                      _this.listener_v.publish(twist);
+                  },100)
                   break
               case 3:
                   x = -0.1
                   z = 0
                   _this.time_id = window.setInterval(function () {
                       //console.log(x)
-                      _this.listener.publish(twist);
-                  },1000)
+                      _this.listener_v.publish(twist);
+                  },100)
                   break
               case 4:
                   x = 0
-                  z = 0.024
+                  z = 0.05
                   _this.time_id = window.setInterval(function () {
                       //console.log(x)
-                      _this.listener.publish(twist);
-                  },1000)
+                      _this.listener_v.publish(twist);
+                  },100)
                   break
               case 5:
                   x = 0
                   z = 0
                   console.log('stop')
+                  //_this.listener_v.publish(twist);
+                  _this.time_id = window.setTimeout(function () {
+                    //console.log(x)
+                    _this.listener_v.publish(twist);
+                    window.clearInterval(_this.time_id)
+                  },1000)
                   window.clearInterval(_this.time_id)
                   break
           }
@@ -976,7 +1276,24 @@
 
           //_this.listener.publish(twist);
 
-
+      },
+      carBodyStop(){
+        console.log('停')
+        let _this = this
+        let twist = new ROSLIB.Message({
+          linear : {
+            x : 0,
+            y : 0,
+            z : 0
+          },
+          angular : {
+            x : 0,
+            y : 0,
+            z : 0
+          }
+        });
+        _this.listener_v.publish(twist)
+        window.clearInterval(_this.time_id)
       },
 
       //视频窗口按钮
@@ -1000,6 +1317,7 @@
       },
 
       mo_change(val){
+        let _this = this
         this.mo_but = val
         if(val == 0){
           this.car_direction_mask = true
@@ -1009,9 +1327,29 @@
         }
         if(val == 2){
           this.car_direction_mask = false
+          _this.taskServerClear = new ROSLIB.Service({
+            ros : _this.ros,
+            name : '/taskclear',
+            serviceType : 'robotmsg/TaskList'
+          });
+          _this.taskServerClear.callService({flag:0},function(result) {
+            _this.$message('任务终止');
+            //_this.planLinePointVector.getSource().clear()
+            sessionStorage.setItem("planLine",'');
+          })
         }
         if(val == 3){
           this.car_direction_mask = true
+          _this.taskServerClear = new ROSLIB.Service({
+            ros : _this.ros,
+            name : '/taskclear',
+            serviceType : 'robotmsg/TaskList'
+          });
+          _this.taskServerClear.callService({flag:0},function(result) {
+            _this.$message('任务终止');
+            //_this.planLinePointVector.getSource().clear()
+            sessionStorage.setItem("planLine",'');
+          })
         }
       },
 
@@ -1046,190 +1384,14 @@
   }
 
     },
-    mounted() {
-      let _this = this
-      _this.play_but()
-      _this.ros = new ROSLIB.Ros({
-          url : _this.url
-      });
-      // 初始化插件参数及插入插件
-      WebVideoCtrl.I_InitPlugin('100%', '100%', {
-        iWndowType: 1,
-        cbSelWnd: function (xmlDoc) {
-          _this.g_iWndIndex = $(xmlDoc).find("SelectWnd").eq(0).text();
-          var szInfo = "当前选择的窗口编号：" + _this.g_iWndIndex;
-          console.log(szInfo);
-        }
-      });
 
-      // 窗口事件绑定
-      $(window).bind({
-        resize: function () {
-          var $Restart = $("#restartDiv");
-          if ($Restart.length > 0) {
-            var oSize = _this.getWindowSize();
-            $Restart.css({
-              width: oSize.width + "px",
-              height: oSize.height + "px"
-            });
-          }
-        }
-      });
 
-      //this.createWebSocket();
-      if(robotIdCurrent){
-        _this.robotId = robotIdCurrent
-        _this.getTaskInfo()
-      }else {
-        _this.getRobotList()
-      }
-
-      var ros = new ROSLIB.Ros({
-          url : _this.url
-      });
-      //console.log(ros)
-      ros.on('connection', function() {
-          console.log('car body');
-      });
-
-      _this.listener = new ROSLIB.Topic({
-          ros : ros,
-          name : '/navigation/cmd_vel',
-          messageType : 'geometry_msgs/Twist'
-      });
-
-      var x, z
-
-      $(document).keydown(function(event){
-
-          if(event.keyCode === 87){
-              x = 0.1
-              z = 0
-              var twist = new ROSLIB.Message({
-                  linear : {
-                      x : x,
-                      y : 0,
-                      z : 0
-                  },
-                  angular : {
-                      x : 0,
-                      y : 0,
-                      z : z
-                  }
-              });
-              window.clearInterval(_this.time_id_key)
-              _this.time_id_key = window.setInterval(function () {
-                  //console.log('a')
-                  _this.listener.publish(twist);
-              },1000)
-          }
-          if(event.keyCode === 68){
-              x = 0
-              z = -0.05
-              var twist = new ROSLIB.Message({
-                  linear : {
-                      x : x,
-                      y : 0,
-                      z : 0
-                  },
-                  angular : {
-                      x : 0,
-                      y : 0,
-                      z : z
-                  }
-              });
-              window.clearInterval(_this.time_id_key)
-              _this.time_id_key = window.setInterval(function () {
-                  //console.log('a')
-                  _this.listener.publish(twist);
-              },1000)
-          }
-          if(event.keyCode === 83){
-              x = -0.1
-              z = 0
-              var twist = new ROSLIB.Message({
-                  linear : {
-                      x : x,
-                      y : 0,
-                      z : 0
-                  },
-                  angular : {
-                      x : 0,
-                      y : 0,
-                      z : z
-                  }
-              });
-              window.clearInterval(_this.time_id_key)
-              _this.time_id_key = window.setInterval(function () {
-                  //console.log('a')
-                  _this.listener.publish(twist);
-              },1000)
-          }
-          if(event.keyCode === 65){
-              x = 0
-              z = 0.05
-              var twist = new ROSLIB.Message({
-                  linear : {
-                      x : x,
-                      y : 0,
-                      z : 0
-                  },
-                  angular : {
-                      x : 0,
-                      y : 0,
-                      z : z
-                  }
-              });
-              window.clearInterval(_this.time_id_key)
-              _this.time_id_key = window.setInterval(function () {
-                  //console.log('a')
-                  _this.listener.publish(twist);
-              },1000)
-          }
-      });
-      $(document).keyup(function(event){
-          if(event.keyCode === 87){
-              console.log('stop_key')
-              window.clearInterval(_this.time_id_key)
-          }
-          if(event.keyCode === 68){
-              window.clearInterval(_this.time_id_key)
-          }
-          if(event.keyCode === 83){
-              window.clearInterval(_this.time_id_key)
-          }
-          if(event.keyCode === 65){
-              window.clearInterval(_this.time_id_key)
-          }
-      });
-      //监听任务是否正在执行
-      _this.listener_task = new ROSLIB.Topic({
-        ros : _this.ros,
-        name : '/task_execute_status',
-        messageType : 'robotmsg/TaskExecuteStatus'
-      });
-      _this.listener_task.subscribe(function(message) {
-        console.log(message.task_status)
-        if(message.task_status==0){
-          clearTimeout(_this.currentTaskInfoTimeId)
-        }else if(message.task_status==1){
-          _this.getTaskInfo()
-        }
-      });
-
-      //可见光，红外自动接收
-      _this.test_login()
-      _this.red_pic()
-      _this.isTaskStatus()
-
-      //设置视频文件保存路径
-      _this.clickSetLocalCfg()
-
-    },
     destroyed(){
         let _this = this
         clearTimeout(_this.currentTaskInfoTimeId)
         _this.ros.close()
+        _this.listener_v.unsubscribe();
+
     },
     created() {
       let _this = this
@@ -1618,9 +1780,6 @@
                 background-color: #7c9eac;
                 cursor: not-allowed;
 
-
-
-
       .right_top
         height 50%
         border 1px solid
@@ -1643,14 +1802,39 @@
         height calc(100% - 87px)
 
 
-    .playbackdiv
-      width 700px
+    .playbackdiviframe
+      width 100%
       height 500px
-      border 1px solid #00ffff
-      background #3d8fff
       position absolute
-      z-index: 99999;
+      z-index 10
+      background pink
+      opacity 0.4
+      top 215px
+      left 377px
+    .playbackdiv, .picbackdiv
+      width 700px
+      height 446px
+      border 1px solid #00b9b9
+      background #11bed7
+      position absolute
+      z-index: 9999;
       top 50%
       left 50%
       transform translate(-50%,-50%)
+    .picbackdiv
+      height 472px
+      display none
+    #pic
+      width 100%
+      height 446px
+      margin-top 25px
+    .video_box_close
+      font-size 20px
+      position absolute
+      z-index 555
+      top 3px
+      right 6px
+      color white
+      cursor pointer
+
 </style>

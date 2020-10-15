@@ -117,11 +117,16 @@
             label="序号"
             width="50">
           </el-table-column>
-          <el-table-column align="center"
+          <el-table-column align="center" width="50"
                            prop="point.id"
                            label="ID"
           >
           </el-table-column>
+          <el-table-column align="center" width="60"
+                           prop="irDataTaskHistoryId"
+                           label="任务ID"
+          >
+          </el-table-column>  //irDataTaskHistoryId
           <!--<el-table-column type="selection" align="center"
                            prop="address"
                            label=""
@@ -132,7 +137,7 @@
             label="识别结果" v-if="tableVisibleObj['1']"
           >
             <template slot-scope="scope">
-              <span>{{scope.row.value}}{{scope.row.point.unit}}</span>
+              <span>{{scope.row.valueDesc}}{{scope.row.point.unit}}</span>
             </template>
           </el-table-column>
           <el-table-column align="center"
@@ -248,7 +253,7 @@
             @current-change="handleCurrentChange"
             :current-page="currentPage"
             :page-sizes="[10, 50, 200, 500, 5000, 10000]"
-            :page-size="10"
+            :page-size="200"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
           </el-pagination>
@@ -327,7 +332,7 @@
         tableDataResults:[], //tableDataResults:[],
         value_start:'',
         value_end:'',
-        ajaxTableData:{page:1, size:10},
+        ajaxTableData:{page:1, size:200},
         dialogVisible: false,
         chapterNameIdList:[1,2,3],
         chapterNameList:[
@@ -490,8 +495,8 @@
     },
     mounted(){
     	this.init()
-      this.value_start = this.convertToLateDate()
-      this.value_end = this.getDateTime()
+      this.value_start = this.convertToLateDate() + ' 00:00:00'
+      this.value_end = this.getDateTime() + ' 23:59:59'
       this.getTableData()
     },
     methods:{
@@ -767,7 +772,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res.data.items)
+              console.log(res.data.items)
               _this.tableDataResults = res.data.items
               _this.total = res.data.total
               //自己得到表格显示的内容

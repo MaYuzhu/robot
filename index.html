@@ -45,7 +45,7 @@
       var robotIdCurrent = ''
 
       //刷新保存计划线路
-      var planLinePointArr = localStorage.getItem("planLine") ? localStorage.getItem("planLine") : '';
+      var planLinePointArr = sessionStorage.getItem("planLine") ? sessionStorage.getItem("planLine") : '';
       //console.log(planLinePointArr.split(','))  //var stringResult = string.split(',');
       if(planLinePointArr != ''){
         planLinePointArr = arrTrans(2,planLinePointArr.split(','))
@@ -64,7 +64,7 @@
 
       function arrTrans(num, arr) { // 一维数组转换为二维数组
         const iconsArr = []; // 声明数组
-        arr.forEach((item, index) => {
+        arr.forEach(function(item, index){
           const page = Math.floor(index / num); // 计算该元素为第几个素组内
           if (!iconsArr[page]) { // 判断是否存在
             iconsArr[page] = [];

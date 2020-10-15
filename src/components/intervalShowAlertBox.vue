@@ -9,7 +9,7 @@
         <span class="title_dev">{{title_dev}}</span>
         <ul>
           <li v-for="(item, index) in items">
-            <span :class="[item.type=='green'?'green':'green']"></span>
+            <span class="alarm" :class="'alarm'+item.alarmLevel"></span>
             <span>{{item.name}}</span>
           </li>
         </ul>
@@ -42,6 +42,7 @@
           true,function (res) {
             //console.log(_this.title_dev_id)
             if(res.code == 200){
+              console.log(res.data)
               _this.items = res.data
             }
           })
@@ -54,7 +55,8 @@
           .catch(_ => {});*/
         this.dialogVisible_ = false
         this.$emit('childVisible', this.dialogVisible_)
-      }
+      },
+
     },
     watch:{
       title_dev_id:function (newVal,oldVal) {
@@ -81,7 +83,8 @@
         overflow hidden
         >li
           border 1px solid
-          width 25%
+          /*width 25%*/
+          min-width 25%
           float left
           height: 36px;
           display flex
@@ -92,20 +95,22 @@
           span
             display inline-block
             margin 0 10px
-          .green
-            display inline-block
+            margin-right 5px
+          .alarm
             width 16px
             height 16px
             border-radius 50%
-            background #0f0
-            margin-right 5px
-          .red
-            display inline-block
-            width 16px
-            height 16px
-            border-radius 50%
-            background #f00
-            margin-right 5px
+          .alarm0
+            background : #00f100;
+          .alarm1
+            background : #447bff;
+          .alarm2
+            background : #fdff59;
+          .alarm3
+            background : #ffaf43;
+          .alarm4
+            background : #ff3d14;
+
     div>>>.el-dialog
       background #d7efec
       width: 65%;

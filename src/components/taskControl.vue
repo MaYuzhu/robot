@@ -1,5 +1,6 @@
 <template>
 	<div class="task_control_wrap">
+    <div v-if="false" @click="shp_to_json">json</div>
     <select id="selecttype" style="display: none">
       <option value="none" selected>None</option>
       <option value="pointSelect">点选</option>
@@ -64,8 +65,24 @@
         <!--<li @click="test(true)"><el-button type="text" size="mini">go</el-button></li>
         <li @click="test(false)"><el-button type="text" size="mini">stop</el-button></li>
         <li @click="plateShow"><el-button type="text" size="mini">区域</el-button></li>-->
-        <li><el-button type="text" size="mini"></el-button></li>
+        <li @click="editMapBtn"><el-button type="text" size="mini">{{editMap}}</el-button></li>
       </ul>
+      <div class="map_edit_box">
+        <p @click="closeEditMap()" class="map_edit_box_close"><i class="el-dialog__close el-icon el-icon-close"></i></p>
+        <select class="select_box" id="type" @change="onAddOrDel">
+          <option value="Point">新增点位</option>
+          <option value="LineString">新增线路</option>
+          <option value="delPoint">删除点位</option>
+          <option value="delLine">删除线路</option>
+          <!--<option value="Polygon">Polygon</option>
+          <option value="Circle">Circle</option>
+          <option value="None">None</option>-->
+        </select>
+        <div class="del_point" @click="delNewPointLineY()">确认删除</div>
+        <div class="clear_point" @click="clearPoint()">清除绘制</div>
+        <div class="save_point" @click="savePoint()">保存点位</div>
+        <div class="save_line" @click="saveLine()">保存线路</div>
+      </div>
       <!--<img src="../../static/aaaa.jpg" style="width: 100%" alt="">-->
     </div>
     <div class="plate_dialog">
@@ -109,6 +126,8 @@
         <p><span>结束时间：</span><span>{{popupEndTime}}</span></p>
       </div>
     </div>
+    <div style="width: 500px;height: 100px;background: #fffcf9;display: none;
+    color:white;position:absolute;z-index:999;margin: -2px 0 0 5px" id="mouseposition"></div>
   </div>
 </template>
 
@@ -138,6 +157,7 @@
         choosePointText:'地图选点',
         taskStopText:'任务暂停',
         addPlateText:'挂牌',
+        editMap:'地图编辑',
         pointmove:null,
         isShowStopPoint:false,
         pointSelect:null,
@@ -151,6 +171,14 @@
         dragBoxPlate: null,
         addPlateVector: null,
         allPlateVector: null,
+
+        addPointVector: null,
+        addLineVector:null,
+        allNewPointVector:null,
+        allNewLineVector:null,
+        delPointArr:[],
+        delLineArr:[],
+
         popupStartTime:'',
         popupEndTime:'',
         routeId:'',
@@ -181,7 +209,7 @@
       });
       //console.log(_this.ros)
       _this.ros.on('connection', function() {
-          console.log('point.server');
+          //console.log('point.server');
       });
 
       _this.init()
@@ -191,20 +219,30 @@
       //_this.planLineShow()
       _this.planLinePoint = planLinePointArr
 
+      _this.showNewPointLine()
     },
 
     methods:{
     	init(){
     		let _this = this
-        //请求shp文件
-        /*_this.ajax_api('post',url_api + '/shpfile/shpToGeoJson',
-          {
-            localUrl: 'D:\\abc\\targets.geojson',
-            shpUrl: url_img+'/shp/targets/targets.shp'
-          },
-          true,function (res) {
-            console.log(res)
-        })*/
+
+        var extent = [16.2149, 35.8646, 54.2111, -4.9501];
+        var iconStyle = new ol.style.Style({
+
+        });
+        let image = new ol.layer.Image({
+          source: new ol.source.ImageStatic({
+            url: '../../static/img/map_img.png',//这里添加静态图片的地址
+            /*projection: projection,
+            imageExtent: extent*/
+            projection: 'EPSG:3857',
+            imageExtent: ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857'),
+          }),
+          //style: iconStyle,
+
+        })
+        //console.log(image.getSource())
+
         _this.geoJsonLayerRoute = new ol.layer.Vector({
           title: 'add Layer',
           source: new ol.source.Vector({
@@ -216,14 +254,14 @@
           style: function (feature, resolution) {
             return new ol.style.Style({
               stroke: new ol.style.Stroke({
-                color:'#6ad864',  // 6abcff
-                width: 2
+                color:'#6ad864',  //6ad864   6abcff
+                width: 2,
               }),
-
             });
           },
           visible: true
         });
+
         //console.log("123");
         _this.geoJsonLayerPoint = new ol.layer.Vector({
           title: 'add Layer Point',
@@ -330,8 +368,17 @@
         //var m_center = [10, 9]
         m_center = ol.proj.transform(m_center,'EPSG:4326','EPSG:3857');
 
+        var mousePositionControl = new ol.control.MousePosition({
+          coordinateFormat: ol.coordinate.createStringXY(4),
+          projection: 'EPSG:4326',
+          className: 'custom-mouse-position',
+          target: document.getElementById('mouseposition'),
+          undefinedHTML: '&nbsp;'
+        });
+
         _this.map = new ol.Map({
           layers: [
+            //image,
             _this.geoJsonLayerRoute,
             _this.geoJsonLayerPoint,
             //geoJsonLayerRoute3,
@@ -355,6 +402,9 @@
           ]),
 
         });
+
+        //添加控件到地图
+        //_this.map.addControl(mousePositionControl);
 
         //计划线路
         var planLineSource = new ol.source.Vector({});
@@ -738,7 +788,7 @@
                     _this.planLinePoint = lineArr
                     //console.log(_this.planLinePointVector) //.refresh()
                     _this.planLinePointVector.getSource().refresh()
-                    localStorage.setItem("planLine",lineArr);
+                    sessionStorage.setItem("planLine",lineArr);
                     //_this.init()
                     /*var ros = new ROSLIB.Ros({
                         url : _this.url
@@ -1391,13 +1441,12 @@
                 //清除计划的线  &  走过的线路
                 _this.planLinePointVector.getSource().clear()
                 _this.passRouteLayer.getSource().clear()
-                localStorage.setItem("planLine",'');
+                sessionStorage.setItem("planLine",'');
               }
             })
           }
         });
       },
-
 
       planLineShow(val){
     	  //console.log(val)
@@ -1446,7 +1495,7 @@
               console.log('任务终止');
               _this.$message('任务终止');
               _this.planLinePointVector.getSource().clear()
-              localStorage.setItem("planLine",'');
+              sessionStorage.setItem("planLine",'');
           })
       },
 
@@ -1457,6 +1506,401 @@
         view.setCenter(_this.mapCenter); //初始中心点
         view.setRotation(_this.mapRotation); //初始旋转角度
         view.setZoom(_this.mapZoom); //平移地图
+      },
+
+      //地图编辑
+      editMapBtn(){
+    	  let _this = this
+        var typeSelect = document.getElementById('type');
+        var draw; // 在这儿定义一个全局的绘制变量，方便一会去除它
+    	  if(_this.editMap=='地图编辑'){
+          _this.editMap = '取消编辑'
+          $('.map_edit_box').show()
+          var stylePoint = new ol.style.Style({
+            image: new ol.style.Circle({
+              radius: 5,
+              fill: new ol.style.Fill({
+                color: '#ffbc1e'
+              })
+            })
+          })
+          var styleLine = new ol.style.Style({
+            stroke: new ol.style.Stroke({
+              color:'#6ad864',
+              width: 2
+            })
+          })
+          _this.addPointVector = new ol.layer.Vector({
+            style: stylePoint,
+            source: new ol.source.Vector(),
+          })
+          _this.addLineVector = new ol.layer.Vector({
+            style: styleLine,
+            source: new ol.source.Vector(),
+          })
+          //把layer加入到地图中
+          _this.map.addLayer(_this.addLineVector)
+          _this.map.addLayer(_this.addPointVector)
+
+          function addInteraction() {
+            var value = typeSelect.value; //LineString
+            if (value == 'Point') {
+              draw = new ol.interaction.Draw({
+                source: _this.addPointVector.getSource(),
+                type: typeSelect.value
+              });
+              _this.map.addInteraction(draw);
+            }else if(value == 'LineString'){
+              draw = new ol.interaction.Draw({
+                source: _this.addLineVector.getSource(),
+                type: typeSelect.value
+              });
+              _this.map.addInteraction(draw);
+            }
+          }
+
+          typeSelect.onchange = function () {
+            //先移除上一个Interaction
+            _this.map.removeInteraction(draw);
+            //再根据typeSelect的值绘制新的Interaction
+            addInteraction();
+          };
+
+          addInteraction();
+
+        }else if(_this.editMap=='取消编辑'){
+          _this.editMap = '地图编辑'
+          $('.map_edit_box').hide()
+          _this.map.getInteractions().forEach(function (interaction) {
+            if (interaction instanceof ol.interaction.Draw) {
+              _this.map.removeInteraction(interaction);//pointer
+            }
+            if (interaction instanceof ol.interaction.Select) {
+              _this.map.removeInteraction(interaction);
+            }
+            if (interaction instanceof ol.interaction.Pointer) {
+              _this.map.removeInteraction(interaction);
+            }
+          });
+        }
+
+      },
+      //保存绘制
+      savePoint(){
+        let _this = this
+        let pointFeatures = _this.addPointVector.getSource().getFeatures()
+
+        let newPointArr = []
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i); //获取本地存储的Key
+
+          if(key.substr(0,4) == 'addP'){
+            newPointArr.push({
+              id:key.substr(key.length-1,1),
+            })
+          }
+        }
+
+        //console.log(pointFeatures)
+        pointFeatures.forEach((v,k) => {
+          //console.log(v,k)
+          let plateCoordinate = pointFeatures[k].getGeometry().getCoordinates()
+          let ol_ep =  ol.proj.transform([plateCoordinate[0],plateCoordinate[1]], 'EPSG:3857', 'EPSG:4326')
+          //console.log(ol_ep)
+          let polygon_d = ''
+          polygon_d += ol_ep[0] + " " + ol_ep[1];
+          let point_shp = 'POINT(' + polygon_d + ')'
+          //console.log(point_shp)
+
+          localStorage.setItem('addPoint'+(newPointArr.length+k),point_shp)
+
+        })
+        _this.showNewPointLine()
+      },
+      saveLine(){
+        let _this = this
+        let lineFeatures = _this.addLineVector.getSource().getFeatures()
+        let newLineArr = []
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i); //获取本地存储的Key
+          if(key.substr(0,4) == 'addL'){
+            //console.log(key + '-p');
+            newLineArr.push({
+              id:key.substr(key.length-1,1),
+              //value:localStorage.getItem(key)
+            })
+          }
+        }
+        //console.log(lineFeatures)
+        lineFeatures.forEach((w,i) => {
+          //console.log(i)
+          let line_shp
+          let plateCoordinate = lineFeatures[i].getGeometry().getCoordinates()
+          let polygon_d = ''
+          plateCoordinate.forEach((v, k) => {
+            var ol_ep =  ol.proj.transform([v[0],v[1]], 'EPSG:3857', 'EPSG:4326')
+            polygon_d += ol_ep[0] + " " + ol_ep[1];
+            if (plateCoordinate.length != k + 1) {
+              polygon_d += ", ";
+            }
+            line_shp = 'linestring(' + polygon_d + ')'
+          });
+          //console.log(line_shp)
+          localStorage.setItem('addLine'+(newLineArr.length+i),line_shp)
+        })
+
+        _this.showNewPointLine()
+      },
+      //清除画布
+      clearPoint(){
+    	  let _this = this
+        if(_this.addPointVector){
+          _this.addPointVector.getSource().clear();
+        }
+        if(_this.addLineVector){
+          _this.addLineVector.getSource().clear();
+        }
+      },
+      //显示new点线
+      showNewPointLine(){
+        let _this = this
+        if(_this.addPointVector){
+          _this.addPointVector.getSource().clear();
+        }
+        if(_this.addLineVector){
+          _this.addLineVector.getSource().clear();
+        }
+
+    	  let newPointArr = []
+        let newLineArr = []
+        for (var i = 0; i < localStorage.length; i++) {
+          var key = localStorage.key(i); //获取本地存储的Key
+          /*console.log(key);
+          console.log(localStorage.getItem(key));//所有value
+          console.log("---------------------------------");*/
+          if(key.substr(0,4) == 'addP'){
+            //console.log(key + '-p');
+            newPointArr.push({
+              id:key.substring(8),
+              value:localStorage.getItem(key)
+            })
+          }else if(key.substr(0,4) == 'addL'){
+            //console.log(key + '-l');
+            newLineArr.push({
+              id:key.substring(7),
+              value:localStorage.getItem(key)
+            })
+          }
+        }
+        //console.log(newPointArr)
+        //console.log(newLineArr)
+
+        if(_this.allNewPointVector){
+          _this.allNewPointVector.getSource().clear()
+        }
+        if(_this.allNewLineVector){
+          _this.allNewLineVector.getSource().clear()
+        }
+
+        let featuresPoint = []
+        let featuresLine = []
+        for(let i=0;i<newPointArr.length;i++){
+          //localStorage.removeItem('addPoint'+newPointArr[i].id)
+          let wkt = newPointArr[i].value
+          let format = new ol.format.WKT();
+          let feature = format.readFeature(wkt,{
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+          });
+          let idProperties = {
+            id:newPointArr[i].id,
+          }
+          //feature.setProperties(idProperties)
+          feature.setId(newPointArr[i].id)
+          featuresPoint.push(feature)
+        }
+        for(let i=0;i<newLineArr.length;i++){
+          //localStorage.removeItem('addLine'+newLineArr[i].id)
+          let wkt = newLineArr[i].value
+          let format = new ol.format.WKT();
+          let feature = format.readFeature(wkt,{
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+          });
+          let idProperties = {
+            id:newLineArr[i].id,
+          }
+          feature.setId(newLineArr[i].id)
+          featuresLine.push(feature)
+        }
+
+        let sourcePoint = new ol.source.Vector({
+          features: featuresPoint
+        });
+        let stylePoint = new ol.style.Style({
+          image: new ol.style.Circle({
+            radius: 5,
+            fill: new ol.style.Fill({
+              color: '#ffaf43'
+            })
+          })
+        })
+        _this.allNewPointVector = new ol.layer.Vector({
+          source: sourcePoint,
+          style: stylePoint,
+        })
+
+        let sourceLine = new ol.source.Vector({
+          features: featuresLine
+        });
+        let styleLine = new ol.style.Style({
+          stroke: new ol.style.Stroke({
+            color:'#6ad864',
+            width: 2
+          })
+        })
+        _this.allNewLineVector = new ol.layer.Vector({
+          source: sourceLine,
+          style: styleLine
+        })
+
+        _this.map.addLayer(_this.allNewLineVector)
+        _this.map.addLayer(_this.allNewPointVector)
+
+      },
+      //删除new点线 框选
+      onAddOrDel(){
+    	  var _this = this
+        //选择-删除
+        var typeSelect = document.getElementById('type');
+        var value = typeSelect.value; //LineString
+
+        if (value == 'delPoint') {
+          _this.pointmove = new ol.interaction.Select({
+            condition: ol.events.condition.pointerMove,
+            layers: [_this.allNewPointVector]
+          })
+          var pointFeatures = _this.allNewPointVector.getSource().getFeatures()
+          var vectorSource = new ol.source.Vector({
+            features: pointFeatures
+          })
+          _this.delPointArr = []
+          //框选
+          _this.boxSelect = new ol.interaction.Select({
+            layers: [_this.allNewPointVector]
+          });
+          _this.selectedFeatures = _this.boxSelect.getFeatures();
+          _this.dragBoxPoint = new ol.interaction.DragBox({
+            //condition : ol.events.condition.always  //默认是always
+            condition: ol.events.condition.platformModifierKeyOnly
+          });
+          _this.map.addInteraction(_this.dragBoxPoint);
+          _this.dragBoxPoint.on('boxend', function() {
+            var extent = _this.dragBoxPoint.getGeometry().getExtent();
+            vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
+              _this.selectedFeatures.push(feature)
+              //console.log(feature.getId())
+              _this.delPointArr.push(feature.getId())
+            });
+          });
+          _this.dragBoxPoint.on('boxstart', function() {
+            _this.selectedFeatures.clear();
+            _this.delPointArr = []
+          });
+          _this.map.on('click', function() {
+            _this.selectedFeatures.clear();
+            _this.delPointArr = []
+          });
+          _this.map.addInteraction(_this.boxSelect);
+          _this.map.addInteraction(_this.pointmove);
+
+        }else if(value == 'delLine'){
+          _this.pointmove = new ol.interaction.Select({
+            condition: ol.events.condition.pointerMove,
+            layers: [_this.allNewLineVector]
+          })
+          var pointFeatures = _this.allNewLineVector.getSource().getFeatures()
+          var vectorSource = new ol.source.Vector({
+            features: pointFeatures
+          })
+          _this.delPointArr = []
+          //框选
+          _this.boxSelect = new ol.interaction.Select({
+            layers: [_this.allNewLineVector]
+          });
+          _this.selectedFeatures = _this.boxSelect.getFeatures();
+          _this.dragBoxPoint = new ol.interaction.DragBox({
+            //condition : ol.events.condition.always  //默认是always
+            condition: ol.events.condition.platformModifierKeyOnly
+          });
+          _this.map.addInteraction(_this.dragBoxPoint);
+          _this.dragBoxPoint.on('boxend', function() {
+            var extent = _this.dragBoxPoint.getGeometry().getExtent();
+            vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
+              _this.selectedFeatures.push(feature)
+              console.log(feature.getId())
+              _this.delLineArr.push(feature.getId())
+            });
+          });
+          _this.dragBoxPoint.on('boxstart', function() {
+            _this.selectedFeatures.clear();
+            _this.delLineArr = []
+          });
+          _this.map.on('click', function() {
+            _this.selectedFeatures.clear();
+            _this.delLineArr = []
+          });
+          _this.map.addInteraction(_this.boxSelect);
+          _this.map.addInteraction(_this.pointmove);
+        }else {
+          _this.map.removeInteraction(_this.boxSelect);
+          _this.map.removeInteraction(_this.pointmove);
+        }
+
+      },
+      //确认删除 new 点线
+      delNewPointLineY(){
+    	  let _this = this
+        let delPointArr = _this.delPointArr
+        let delLineArr = _this.delLineArr
+        //console.log(delPointArr)
+        for(let i=0;i<delPointArr.length;i++){
+          localStorage.removeItem(`addPoint${delPointArr[i]}`)
+        }
+        for(let i=0;i<delLineArr.length;i++){
+          localStorage.removeItem(`addLine${delLineArr[i]}`)
+        }
+        _this.showNewPointLine()
+      },
+      //关闭编辑地图小框
+      closeEditMap(){
+    	  let _this = this
+        $('.map_edit_box').hide()
+        _this.map.getInteractions().forEach(function (interaction) {
+          if (interaction instanceof ol.interaction.Draw) {
+            _this.map.removeInteraction(interaction);//pointer
+          }
+          if (interaction instanceof ol.interaction.Select) {
+            _this.map.removeInteraction(interaction);
+          }
+          if (interaction instanceof ol.interaction.Pointer) {
+            _this.map.removeInteraction(interaction);
+          }
+        });
+      },
+
+      //shp转换
+      shp_to_json(){
+    	  let _this = this
+        //请求shp文件
+        _this.ajax_api('post',url_api + '/shpfile/shpToGeoJson',
+          {
+            localUrl: 'D:\\abc\\hubei_s.geojson', //'D:\\0317湖北\\0317湖北\\省界.shp',
+            shpUrl: url_img + '/shp/hb/hb_s.shp'
+          },
+          true,function (res) {
+            console.log(res)
+        })
       }
     },
     computed:{
@@ -1506,6 +1950,41 @@
         img
           width 100%
           height 100%
+      .map_edit_box
+        width 120px
+        /*height 184px*/
+        position absolute
+        top 40px
+        right 10px
+        z-index 99
+        border 1px solid #10a7bf
+        background linear-gradient(#e3f2ee, #cae7ee)
+        border-radius 3px
+        display none
+        .map_edit_box_close
+          color #10a7bf
+          position absolute
+          top 5px
+          right 5px
+          font-size 20px
+          cursor pointer
+        .select_box
+          width 100px
+          height 22px
+          margin 40px 0 6px 10px
+          border 1px solid #10a7bf
+        .del_point, .clear_point, .save_point, .save_line
+          background #109cb4
+          width 100px
+          height 24px
+          margin 10px auto
+          text-align center
+          line-height 25px
+          color white
+          border-radius 5px
+          cursor pointer
+        .del_point:hover, .clear_point:hover, .save_point:hover, .save_line:hover
+          background #10b6ce
       >ul
         background-color: #109cb4;
         border: 1px solid #c6cdd3;

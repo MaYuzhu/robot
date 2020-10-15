@@ -817,7 +817,7 @@
                           _this.$message({
                             message: '未获取到有效路径',
                           });
-                          return
+                          //return
                         }else {
                           /*_this.$message({
                             type: 'success',
@@ -831,13 +831,16 @@
                             lineArr = []
                         }
                         for(var i=0;i<linePlanObj.Tasks.length;i++){
+                            if(linePlanObj.Tasks[i].CameraPose){
+                              return;
+                            }
                             var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
                             var point = projRobotXY(pointArr[0]*1,pointArr[2]*1)
                             lineArr.push(point)
                         }
                         planLinePointArr = lineArr
-                        //console.log(planLinePointArr)
-                        localStorage.setItem("planLine",lineArr);
+                        console.log(planLinePointArr)
+                        sessionStorage.setItem("planLine",lineArr);
 
                         _this.taskServer = new ROSLIB.Service({
                             ros : _this.ros,

@@ -104,7 +104,7 @@
           messageType : 'robotmsg/TaskExecuteStatus'
         });
         _this.listener_task.subscribe(function(message) {
-          console.log(message.task_status)
+          //console.log(message.task_status)
           if(message.task_status==0){
             clearTimeout(_this.currentTaskInfoTimeId)
           }else if(message.task_status==1){
