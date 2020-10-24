@@ -15,9 +15,16 @@ import tasksHydraulicTranscribe from '@/pages/tasksHydraulicTranscribe'
 import tasksPositionStatus from '@/pages/tasksPositionStatus'
 import tasksBadWeather from '@/pages/tasksBadWeather'
 import tasksDefectTracking from '@/pages/tasksDefectTracking'
+
+import tasksDefectTracking1 from '@/pages/tasksDefectTracking1'
+import tasksDefectTracking2 from '@/pages/tasksDefectTracking2'
+import tasksDefectTracking3 from '@/pages/tasksDefectTracking3'
+import tasksDefectTracking4 from '@/pages/tasksDefectTracking4'
+
 import tasksMultispectralInspection from '@/pages/tasksMultispectralInspection'
 import tasksCustomTask from '@/pages/tasksCustomTask'
 import tasksTaskShow from '@/pages/tasksTaskShow'
+import tasksPicUpload from '@/pages/pictureUpload'  //异物识别上传图片
 
 import monitorsInspectionMonitoring from '@/pages/monitorsInspectionMonitoring'
 import monitorsRobotControl from '@/pages/monitorsRobotControl'
@@ -27,6 +34,9 @@ import resultsConfirmIntervalShow from '@/pages/resultsConfirmIntervalShow'
 import resultsConfirmInspectionResultsBrowse from '@/pages/resultsConfirmInspectionResultsBrowse'
 import resultsConfirmInspectionTaskAudit from '@/pages/resultsConfirmInspectionTaskAudit'
 import resultsConfirmInspectionReportGenerate from '@/pages/resultsConfirmInspectionReportGenerate'
+import resultsLinePictureShow from '@/pages/resultsLinePictureShow'  //主接线展示
+//import resultsLinePictureShow from '@/pages/testTableEdit.vue'     //表格编辑
+
 
 import resultsAnalysisComparisonAnalysis from '@/pages/resultsAnalysisComparisonAnalysis'
 import resultsAnalysisGenerateReports from '@/pages/resultsAnalysisGenerateReports'
@@ -143,6 +153,14 @@ const router = new Router({
       }
     },
     {
+      path: '/tasks/tasks-picture-upload',
+      name: 'tasksPicUpload',
+      component: tasksPicUpload,
+      meta:{
+        name:'异物缺陷识别'
+      }
+    },
+    {
       path: '/tasks/bad-weather',
       name: 'tasksBadWeather',
       component: tasksBadWeather,
@@ -156,6 +174,38 @@ const router = new Router({
       component: tasksDefectTracking,
       meta:{
         name:'缺陷跟踪'
+      }
+    },
+    {
+      path: '/tasks/defect-tracking1',
+      name: 'tasksDefectTracking1',
+      component: tasksDefectTracking1,
+      meta:{
+        name:'远方状态'
+      }
+    },
+    {
+      path: '/tasks/defect-tracking2',
+      name: 'tasksDefectTracking2',
+      component: tasksDefectTracking2,
+      meta:{
+        name:'远方异常'
+      }
+    },
+    {
+      path: '/tasks/defect-tracking3',
+      name: 'tasksDefectTracking3',
+      component: tasksDefectTracking3,
+      meta:{
+        name:'安防联动'
+      }
+    },
+    {
+      path: '/tasks/defect-tracking4',
+      name: 'tasksDefectTracking4',
+      component: tasksDefectTracking4,
+      meta:{
+        name:'协助应急'
       }
     },
     {
@@ -215,6 +265,14 @@ const router = new Router({
       component: resultsConfirmIntervalShow,
       meta:{
         name:'间隔展示'
+      }
+    },
+    {
+      path: '/resultsConfirm/lineShow',
+      name: 'resultsLinePictureShow',
+      component: resultsLinePictureShow,
+      meta:{
+        name:'主接线展示'
       }
     },
     {

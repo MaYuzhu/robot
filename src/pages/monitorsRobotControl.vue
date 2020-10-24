@@ -41,8 +41,8 @@
             <p title="看图" @click="backPic()" class="button_control_header"><img src="../../static/images/lookpicture.png" alt=""></p>
             <input id="files" style="display: none" type="file" @change="showPic()">
 
-            <p title="回放音频" class="button_control_header"><img src="../../static/images/audio.png" alt=""></p>
-            <p @click="clickPlayback" :title="playback_title" class="button_control_header"><img :src="playback_img" alt=""></p>
+            <p @click="clickPlaybackMp3()" title="回放音频" class="button_control_header"><img src="../../static/images/audio.png" alt=""></p>
+            <p @click="clickPlayback()" :title="playback_title" class="button_control_header"><img :src="playback_img" alt=""></p>
           </div>
           <div class="control_header_right">
             <p class="mo_but" @click="mo_change(0)" :class="{'active':mo_but==0}">任务模式</p>
@@ -172,7 +172,11 @@
              controls="controls" style="width: 100%;height: 100%">
         您的浏览器不支持 video 标签。
       </video>
+      <div class="sound_wrap"></div>
+      <!--<audio id="audio" src="" controls="controls" autoplay="autoplay" style="margin: 8px 0 0 33px">
+      </audio>-->
     </div>
+
     <div class="picbackdiv">
       <p @click="closePic()" class="video_box_close"><i class="el-dialog__close el-icon el-icon-close"></i></p>
       <img src="" id="pic">
@@ -213,6 +217,7 @@
         listener_v:null,
         listener_yun:null,
         server_yun:null,
+        listener_sound: null,
         hkUrl:hKUrl,
         voice_title:'录制音频',
         voice_img:"../../static/images/recordingvoice.png",
@@ -298,6 +303,11 @@
         name : '/cloudplatform_control',
         serviceType : 'robotmsg/CloudPlatControl'
       });
+      _this.listener_sound = new ROSLIB.Topic({
+        ros : _this.ros,
+        name : '/record_sound',
+        messageType : 'robotmsg/record_sound'
+      });
 
       /*$(document).keydown(function(event){
 
@@ -365,13 +375,6 @@
       red_pic(){
           $('.red_pic_but').hide()
         let _this = this
-        /*var ros = new ROSLIB.Ros({
-          url : _this.url
-        });
-        //console.log(ros)
-        ros.on('connection', function() {
-          console.log('red server.');
-        });*/
 
         _this.listener = new ROSLIB.Topic({
           ros : _this.ros,
@@ -414,7 +417,7 @@
         _this.ajax_api('get',url_api + '/task-history/findCurrentTask/'+ _this.robotId ,
           null,
           true,function (res) {
-            //console.log(res)   //taskStatus: 1 正在执行
+            //console.log(res)   //taskStatus: 1 正在执行 返回数据不存在40403
             if(res.data.taskStatus!=0){
               _this.getTaskInfo()
             }
@@ -623,15 +626,27 @@
         var _this = this
         var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
         szInfo = "";
-
+        this.$message({
+          duration: 6000,
+          message: '请选择手持遥控模式'
+        });
         if (oWndInfo != null) {
           var szChannelID = $("#channels").val(),
             szPicName = oWndInfo.szIP + "_" + szChannelID + "_" + new Date().getTime(),
             iRet = WebVideoCtrl.I_CapturePic(szPicName);
           if (0 == iRet) {
             szInfo = "抓图成功！";
+            this.$message({
+              duration: 3000,
+              message: '抓图成功！',
+              type: 'success'
+            });
           } else {
             szInfo = "抓图失败！";
+            this.$message({
+              duration: 6000,
+              message: '抓图失败'
+            });
           }
           console.log(oWndInfo.szIP + " " + szInfo);
         }
@@ -642,13 +657,11 @@
         if(_this.voice_title == '停止录制'){
           _this.voice_title = '录制声音'
           _this.voice_img = "../../static/images/recordingvoice.png"
-          _this.clickCloseSound()
-          _this.clickStopRecord()
+          _this.startOrEndMp3('end')
         }else {
           _this.voice_title = '停止录制'
           _this.voice_img = "../../static/images/recordStop.png"
-          _this.clickOpenSound()
-          _this.clickStartRecord()
+          _this.startOrEndMp3('start')
         }
 
       },
@@ -661,7 +674,7 @@
           _this.clickStopRecord()
         }else {
           _this.video_title = '停止录像'
-          _this.video_img = "../../static/images/info.png"
+          _this.video_img = "../../static/images/info.gif"
           _this.clickStartRecord()
         }
       },
@@ -675,8 +688,13 @@
         }else {
           //_this.playback_title = '停止回放'
           //_this.playback_img = "../../static/images/recordStop.png"
-          _this.clickStartPlayback()
+          _this.clickStartPlayback('video')
         }
+      },
+      //回放音频
+      clickPlaybackMp3(){
+        let _this = this
+        _this.clickStartPlayback('sound')
       },
 
       //语音对讲
@@ -972,13 +990,40 @@
         }
       },
 
-      //回放按钮
-      clickStartPlayback(){
+      //回放 视频  音频 按钮
+      clickStartPlayback(type){
         let _this = this
-        _this.playbackShow = true
-        _this.isVideo(false)
+        if(type == 'video'){
+          _this.playbackShow = true
+          $('.playbackdiv .sound_wrap').empty().hide()
+          _this.isVideo(false)
+          $('.playbackdiv').css({width:'700px',height:'446px'})
+          $('.playbackdiv #video').attr('src',null)
+          $('.playbackdiv #video').attr('src', url_img+'/video_a/small_video.mp4?t=' + new Date().getTime())
+          $('#video').show()
+        }else if(type == 'sound'){
+          $('#video').hide()
+          $('.playbackdiv #video').attr('src',null)
+          $('.playbackdiv .sound_wrap').empty()
+          _this.ajax_api('get',url_api + '/file/fileList',null,true,function (res) {
+            console.log(res)
+            if(res.data.length<1){
+              _this.$message({ message: '暂无音频',});
+              return
+            }else {
+              for(let  i=0;i<res.data.length;i++){
+                $('.playbackdiv .sound_wrap').append(`
+                    <audio class="audio_" src='${url_img}/smcsp/file/${res.data[i]}' controls="controls" style="margin: 8px 0 0 33px">
+                    </audio>`)
+              }
+              _this.isVideo(false)
+              _this.playbackShow = true
+              $('.playbackdiv .sound_wrap').show()
+            }
+          })
+          $('.playbackdiv').css({width:'400px',height:'auto',padding:'20px 0'}) //http://localhost:8080/sound/nokia.mp3
+        }
 
-        $('#video').attr('src',url_img+'/video_a/small_video.mp4?t=' + new Date().getTime())
 
       },
       //POST /ui/file/tranform
@@ -994,7 +1039,14 @@
         let _this = this
         _this.playbackShow = false
         _this.isVideo(true)
-        $('#video').attr('src',null)
+        $('.playbackdiv #video').attr('src',null)
+
+        //音频
+        var myAuto = document.querySelectorAll('.audio_');
+        for(let i=0;i<myAuto.length;i++){
+          myAuto[i].pause()
+          myAuto[i].load()
+        }
       },
 
       //回看图片
@@ -1010,9 +1062,10 @@
       showPic() {
         var _this = this
         var selectedFile = document.getElementById('files').files[0];
+        document.getElementById('files').value = ''
         var name = selectedFile.name;//读取选中文件的文件名
         var size = selectedFile.size;//读取选中文件的大小
-        //console.log("文件名:"+name+"大小:"+size);
+        console.log("文件名:"+name+"大小:"+size);
         var reader = new FileReader();//这是核心,读取操作就是由它完成.
         //reader.readAsText(selectedFile);//读取文件的内容,也可以读取文件的URL
         reader.onload = function () {
@@ -1033,6 +1086,37 @@
         $('.picbackdiv').show()
 
       },
+
+      //录音
+      startOrEndMp3(val){
+        //console.log(val)
+        let _this = this
+
+        if(val == 'start'){
+          console.log(val)
+          let sound = new ROSLIB.Message({
+            path: url_api + '/file/uploadImage',
+            status: true
+          });
+          _this.listener_sound.publish(sound);
+
+          setTimeout(() =>{
+            if(_this.voice_title == '停止录制'){
+              _this.voice_title = '录制声音'
+              _this.voice_img = "../../static/images/recordingvoice.png"
+              _this.startOrEndMp3('end')
+            }
+          },1000*30)
+        }else {
+          console.log(val)
+          let sound = new ROSLIB.Message({
+            path: url_api + '/file/uploadImage',
+            status: false
+          });
+          _this.listener_sound.publish(sound);
+        }
+      },
+      //回放 录音
 
       // 格式化时间
       dateFormat(oDate, fmt) {
@@ -1390,7 +1474,11 @@
         let _this = this
         clearTimeout(_this.currentTaskInfoTimeId)
         _this.ros.close()
-        _this.listener_v.unsubscribe();
+        _this.listener_v.unsubscribe()
+        if(_this.voice_title == '停止录制'){
+          _this.startOrEndMp3('end')
+        }
+
 
     },
     created() {
@@ -1406,7 +1494,7 @@
         console.log('连接已断开')
         this.listener.unsubscribe();
       }
-
+      this.clickVoice()
     },
     components: {
       HeaderTop,

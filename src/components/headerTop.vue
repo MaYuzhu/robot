@@ -105,6 +105,10 @@
                       <router-link to="/tasks/position-status">位置状态识别</router-link>
                       <span>|</span>
                     </div>
+                    <div>
+                      <router-link to="/tasks/tasks-picture-upload">异物缺陷识别</router-link>
+                      <span>|</span>
+                    </div>
                   </dd>
                 </dl>
                 <dl>
@@ -120,19 +124,23 @@
                       <span>|</span>
                     </div>
                     <div>
-                      <router-link to="/tasks/defect-tracking">远方状态确认</router-link>
+                      <router-link to="/tasks/defect-tracking1">远方状态确认</router-link>
                       <span>|</span>
                     </div>
                     <div>
-                      <router-link to="/tasks/defect-tracking">远方异常告警确认</router-link>
+                      <router-link to="/tasks/defect-tracking2">远方异常告警确认</router-link>
                       <span>|</span>
                     </div>
                     <div>
-                      <router-link to="/tasks/defect-tracking">安防联动</router-link>
+                      <router-link to="/tasks/defect-tracking3">安防联动</router-link>
                       <span>|</span>
                     </div>
                     <div>
-                      <router-link to="/tasks/defect-tracking">协助应急事故处理</router-link>
+                      <router-link to="/tasks/defect-tracking4">协助应急事故处理</router-link>
+                      <span>|</span>
+                    </div>
+                    <div @click="rengong">
+                      <router-link to="/monitors/robot-control">人工遥控巡检</router-link>
                       <span>|</span>
                     </div>
                   </dd>
@@ -226,7 +234,7 @@
                       <span>|</span>
                     </div>
                     <div>
-                      <router-link to="/resultsConfirm/interval-show">主接线展示</router-link>
+                      <router-link to="/resultsConfirm/lineShow">主接线展示</router-link>
                       <span>|</span>
                     </div>
                     <div>
@@ -380,8 +388,8 @@
                   <dt>巡检地图设置</dt>
                   <span>|</span>
                   <dd>
-                    <div>
-                      <router-link to="/systems/software-settings">巡检地图维护</router-link>
+                    <div @click="map_edit">
+                      <router-link to="/robots/robot-management">巡检地图维护</router-link>
                       <span>|</span>
                     </div>
                   </dd>
@@ -465,6 +473,9 @@
         listener:null,
         listenerController:null,
         timesListenerController:null,
+        listener_power:null,
+        battery_capacity:'',
+        timesWebsocketAlarm: null,
       }
 
     },
@@ -473,12 +484,15 @@
     	this.getCompanyName()
       this.countAlarmShow()
       _this.ros = new ROSLIB.Ros({
-        url : _this.url
+        url: _this.url
       });
       _this.ros.on('connection', function() {
-        console.log('all_alarm');
+        //console.log('all_alarm');
       });
-      //this.allAlarm()
+
+      this.allAlarm()
+      this.power_now()
+      //this.websocketAlarm()
     },
     props:['title'],
     methods: {
@@ -565,6 +579,7 @@
       //报警
       allAlarm(){
         let _this = this
+        clearTimeout(_this.timesListenerController)
         //接收任务是否完成-消息
         _this.listener = new ROSLIB.Topic({
           ros : _this.ros,
@@ -574,17 +589,21 @@
         _this.listener.subscribe(function(message) {
           //console.log(message)
           if(!message.joy){
-            _this.open('遥控信号')
+            _this.open('遥控信号故障')
             _this.playOrPaused()
+            _this.listener.unsubscribe();
           }else if(!message.ipc){
-            _this.open('工控机信号')
+            _this.open('工控机信号故障')
             _this.playOrPaused()
+            _this.listener.unsubscribe();
           }else if(!message.xavier){
-            _this.open('计算单元信号')
+            _this.open('计算单元信号故障')
             _this.playOrPaused()
+            _this.listener.unsubscribe();
           }else if(!message.infrared_camera){
-            _this.open('红外信号')
+            _this.open('红外信号故障')
             _this.playOrPaused()
+            _this.listener.unsubscribe();
           }
 
         });
@@ -595,14 +614,6 @@
           messageType : 'std_msgs/Bool'
         });
 
-        /*_this.listenerController.subscribe(function(message) {
-          console.log(message)
-          if(message) {
-            _this.open('驱动系统')
-            _this.playOrPaused()
-            _this.listenerController.unsubscribe();
-          }
-        });*/
         var bool_controller = true
         _this.listenerController.subscribe(function(message) {
           //console.log(message.data)
@@ -611,28 +622,74 @@
 
         listenerControllerTimeout()
         function listenerControllerTimeout(){
-          _this.timesListenerController = setTimeout(function () {
-            if(!bool_controller) {
-              _this.open('驱动系统')
-              _this.playOrPaused()
-              _this.listenerController.unsubscribe();
-            }
-          },2000)
+          if(!bool_controller) {
+            _this.open('驱动系统故障')
+            _this.playOrPaused()
+            _this.listenerController.unsubscribe();
+          }
         }
 
-
       },
+      //电池电量报警
+      power_now(){
+        let _this = this
+        clearTimeout(_this.timesListenerController)
+        _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
+          {irBaseRobotId:1,size:200,page:1,},
+          true, function (res) {
+            let battery_capacity = res.data.items.filter(item => {
+              return item.name == 'battery_capacity'
+            })
+            _this.battery_capacity = battery_capacity[0].value*1
+          })
+        _this.listener_power = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/car_status_now',
+          messageType : 'robotmsg/nrcar_status'
+        });
+        _this.listener_power.subscribe(function(message) {
+          //console.log(message.battery_info);
+          if(message.battery_info<_this.battery_capacity){
+            _this.open(`电池电量低于${_this.battery_capacity}%，请及时充电`)
+            _this.playOrPaused()
+          }
+          _this.listener_power.unsubscribe();
+        });
+      },
+      //网络中断
+      websocketAlarm(){
+        let _this = this
+        _this.ros = new ROSLIB.Ros({
+          url: _this.url
+        });
+        _this.ros.on('error', function(error) {
+          //console.log('Error');
+          _this.open('网络信号故障')
+          _this.playOrPaused()
+          clearTimeout(_this.timesWebsocketAlarm)
+        });
+        _this.timesWebsocketAlarm = setTimeout(() =>{
+          _this.websocketAlarm()
+        },3000)
+      },
+
       open(message) {
         let _this = this
-        this.$alert(`${message}故障`, '系统警报', {
+        this.$alert(`${message}`, '系统警报', {
           confirmButtonText: '确定',
           callback: action => {
+            //console.log(_this.ros)
             _this.playClose()
-            clearTimeout(_this.timesListenerController)
+            _this.timesListenerController = setTimeout(() => {
+              _this.allAlarm()
+              _this.power_now()
+              _this.websocketAlarm()
+            },1000*60*5)  //1000*60*5
             /*this.$message({
               type: 'info',
               message: `action: ${ action }`
             });*/
+            clearTimeout(_this.timesWebsocketAlarm)
           }
         })
       },
@@ -665,8 +722,26 @@
           message: '请在地图上点击"挂牌"按钮操作'
         });
       },
+      //地图维护
+      map_edit(){
+        this.$message({
+          duration: 6000,
+          message: '请在地图上点击"地图编辑"按钮操作'
+        });
+      },
+      //人工遥控巡检
+      rengong(){
+        this.$message({
+          duration: 6000,
+          message: '请选择手持遥控模式'
+        });
+      },
 
-    }
+    },
+    destroyed(){
+      let _this = this
+      _this.ros.close()
+    },
   }
 </script>
 

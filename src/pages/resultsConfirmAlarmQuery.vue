@@ -98,7 +98,7 @@
         <ul>
           <li @click="queryList"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
           <li @click="resetList"><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
-          <li><img src="../../static/images/export.png" alt=""><span>导出</span></li>
+          <li @click="exportExcel_zanshi()"><img src="../../static/images/export.png" alt=""><span>导出</span></li>
           <li @click="dialogVisibleMoreCheckShow"><img src="../../static/images/confirm.png" alt=""><span>批量确认</span></li>
         </ul>
       </div>
@@ -109,7 +109,7 @@
       </div>
       <div class="right">
         <p>设备告警查询确认</p>
-        <el-table class="table_alarm" :row-class-name="tableRowClassName"
+        <el-table class="table_alarm" :row-class-name="tableRowClassName" id="out_table"
                   :data="tableDataAlarm" @selection-change="handleSelectionChangeTable"
                   border highlight-current-row @row-dblclick="dblBoxShow"
                   style="width: 100%">
@@ -172,7 +172,7 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[10, 20, 50, 80]"
+            :page-sizes="[10, 20, 100, 200]"
             :page-size="10"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
@@ -337,6 +337,9 @@
   import HeaderTop from '../components/headerTop.vue'
   import AlarmQueryTop from '../components/alarmQueryTop.vue'
   import devTreeNoCheck from '../components/devTreeNoCheck.vue'
+
+  import FileSaver from "file-saver";
+  import XLSX from "xlsx";
 
   export default {
     data(){
@@ -1015,6 +1018,51 @@
           _this.tableDataChaOld = result4
           //console.log(result)
         })
+      },
+
+      //暂时导出结果
+      exportExcel_zanshi() {
+        var _this = this
+        /* 从表生成工作簿对象 */
+        var wb = XLSX.utils.table_to_book(document.querySelector("#out_table"));
+        /* 获取二进制字符串作为输出 */
+        var wbout = XLSX.write(wb, {
+          bookType: "xlsx",
+          bookSST: true,
+          type: "array"
+        });
+        try {
+          FileSaver.saveAs(
+            //Blob 对象表示一个不可变、原始数据的类文件对象。
+            //Blob 表示的不一定是JavaScript原生格式的数据。
+            //File 接口基于Blob，继承了 blob 的功能并将其扩展使其支持用户系统上的文件。
+            //返回一个新创建的 Blob 对象，其内容由参数中给定的数组串联组成。
+            new Blob([wbout], { type: "application/octet-stream" }),
+            //设置导出文件名称 name生成报表
+            "告警报表" + _this.getDateTimeHhMmSs() + ".xlsx"
+            //"sheetjs.xlsx"
+          );
+        } catch (e) {
+          if (typeof console !== "undefined") console.log(e, wbout);
+        }
+        return wbout;
+      },
+      getDateTimeHhMmSs(){ //默认显示今天
+        var Da = new Date();
+        //var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var ss = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
+        return y + "-" + m + "-" + d + "-" + H + "-" + mm + "-" + ss;
       },
     },
     components: {

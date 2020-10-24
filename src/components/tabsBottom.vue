@@ -1,6 +1,6 @@
 <template>
 	<div id="tabs">
-    <div class="linshi" @click="exportExcel">临时导出</div>
+    <!--<div class="linshi" @click="exportExcel">临时导出</div>-->
     <el-tabs v-model="activeName" type="card" @tab-click="handleClick">
       <el-tab-pane label="实时信息" name="first">
         <div style="padding:0 0px;" class="box_height"><!--height:144px;overflow: auto-->
@@ -61,7 +61,7 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="设备警告信息" name="second">
-        <div style="padding:0 4px;height:146px;overflow: auto">
+        <div class="box_height" style="padding:0 4px;overflow: auto">
           <el-table size="mini" align="right"
                     :data="tableDataPointAlarmNow"
                     border
@@ -82,15 +82,23 @@
             >
             </el-table-column>
             <el-table-column align="center"
-              prop="checkTime" width="260"
+              prop="createTime" width="260"
               label="识别时间"
             >
             </el-table-column>
             <el-table-column align="center"
+                             prop="pointHistory.value"
+                             label="识别结果"
+            >
+            </el-table-column>
+            <!--<el-table-column align="center"
               prop="pointHistory.value"
               label="识别结果"
             >
-            </el-table-column>
+              <template slot-scope="scope">
+                <span v-if="scope.row">{{scope.row.valueDesc}}{{scope.row.point.unit}}</span>
+              </template>
+            </el-table-column>-->
             <el-table-column align="center"
               prop="reconType.name"
               label="识别类型"
@@ -115,7 +123,7 @@
         </div>
       </el-tab-pane>
       <el-tab-pane label="系统警告信息" name="third">
-        <div style="padding:0 4px">
+        <div class="box_height" style="padding:0 4px">
           <el-table size="mini"
                     :data="tableDataSysAlarmNow"
                     border
@@ -202,7 +210,7 @@
         clearTimeout(_this.pointAlarmNowTimeId)
         clearTimeout(_this.SysAlarmNowTimeId)
         if(target){
-          //_this.tableDataPointNow = []
+          _this.tableDataPointNow = []
         }
       });
     },
@@ -239,11 +247,17 @@
     },
     methods: {
       handleClick(tab, event) {
-        //console.log(tab, event);
+        console.log(tab, event);
+        console.log('tab')
+        this.pointAlarmNow()
       },
       pointNow(){
           let _this = this
           //console.log(_this.irDataTaskHistoryId)
+          /*if(!_this.irDataTaskHistoryId){
+            _this.tableDataPointNow = []
+            return
+          }*/
           _this.ajaxTablePointNowData.irDataTaskHistoryId = _this.irDataTaskHistoryId
           _this.ajax_api('post',url_api + '/point-history',
               {page:1, size:10000,

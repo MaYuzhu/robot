@@ -10,7 +10,7 @@
                     :label="item.id"
                     :value="item.id">{{item.name}}</el-radio>
           <el-radio v-model="radio_infrared" v-for="item in radio_items_infrared"
-                    :key="item.id" :disabled="item.id!=12"
+                    :key="item.id" :disabled="item.id!=21"
                     :label="item.id"
                     :value="item.id">{{item.name}}</el-radio>
         </div>
@@ -112,10 +112,10 @@
   export default {
     data(){
       return{
-        title: '特殊巡检 > 缺陷跟踪',
+        title: '特殊巡检 > 安防联动',
 
         radio: 4,
-        radio_infrared:12,
+        radio_infrared:21,
         radio_sky: 13,
         radio_items:[
           {
@@ -745,7 +745,6 @@
         .all_content_quyu,.all_content_recon_type,.all_content_dev_type,.all_content_meter_type,
         .all_content_face_type
           height 20px
-
 
     .content
       background white

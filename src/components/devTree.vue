@@ -14,10 +14,10 @@
         :props="defaultProps">
         <span class="custom-tree-node" slot-scope="{ node, data }">
 
-          <!--<span style="width: 10px;height:10px;background: red;display: inline-block"></span>-->
+          <!--<span style="width: 10px;height:10px;background: #329632;display: inline-block"></span>-->
           <span>
             <i :class="node.data.treeNode?'el-icon-s-cooperation':'el-icon-s-order'"></i>
-            <span style="width: 13px;height:13px;background:#329632;display: inline-block"></span>
+            <span :class="'alarm'+node.data.alarmLevel" style="width: 13px;height:13px;display: inline-block"></span>
             {{ node.data.name }}
           </span>
           <!--<span>{{node.data.id}}</span>-->
@@ -111,6 +111,7 @@
     methods: {
     	getAllDev(){
     		let _this = this
+        //console.log(_this.getTreeDataDev)
         _this.ajax_api('get',url_api + '/point/tree',
           _this.getTreeDataDev,
           true,
@@ -122,7 +123,7 @@
                 _this.idArr.push(m.id) //默认展开
               })
               //console.log(_this.idArr)
-              if(_this.toTreeData.quyu.length>0){
+              /*if(_this.toTreeData.quyu.length>0){
                 let newDataQuyu = []
                 for(let i=0;i<_this.toTreeData.quyu.length;i++){
                   //console.log(_this.dataTreeAll)
@@ -144,7 +145,7 @@
                   parentId: 3,
                   treeNode:newDataQuyu
                 }]
-              }
+              }*/
 
               //回显任务包含的points
               if(_this.taskId){
@@ -229,7 +230,6 @@
 
             if(_this.dataTreeAll.length<1){
               _this.getAllDev()
-
             }else {
               for(let i=0;i<n.quyu.length;i++){
                 //console.log(_this.dataTreeAll)
@@ -261,7 +261,7 @@
             })
             let reconTypeIds = []
             n.recon.forEach(m=>{
-              reconTypeIds.push(m.id)
+              reconTypeIds.push(m)
             })
             let meterTypeIds = []
             n.meter.forEach(m=>{
@@ -276,7 +276,7 @@
             _this.getTreeDataDev.meterTypeIds = meterTypeIds.toString()
             _this.getTreeDataDev.faceTypeIds = faceTypeIds.toString()
 
-            _this.getAllDev()
+            //_this.getAllDev()
           }
 
 
@@ -307,6 +307,18 @@
     font-size: 14px;
     padding-right: 8px;
   }
+  .alarm0
+    background : #329632;
+  .alarm1
+    background : #447bff;
+  .alarm2
+    background : #fdff59;
+  .alarm3
+    background : #ffaf43;
+  .alarm4
+    background : #ff3d14;
+  .alarmundefined
+    background : #37b837;
 
   div>>>.el-tree .el-tree-node__content
     display flex!important

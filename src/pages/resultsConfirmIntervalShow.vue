@@ -73,7 +73,7 @@
         _this.ajax_api('get',url_api + '/device/intervals',
           {deviceRegionId:index},
           true,function (res) {
-          //console.log(res.data)
+          //console.log(res)
           if(res.code == 200){
             _this.rightContent = res.data
             _this.loading = false
@@ -191,7 +191,7 @@
             background : #fdff59;
           .alarm3
             background : #ffaf43;
-          .alarm5
+          .alarm4
             background : #ff3d14;
 
 

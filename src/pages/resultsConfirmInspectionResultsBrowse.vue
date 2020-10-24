@@ -36,7 +36,7 @@
             <ul>
               <li @click="queryList"><img src="../../static/images/query.png" alt=""><span>查询</span></li>
               <li @click="resetList"><img src="../../static/images/reset_a.png" alt=""><span>重置</span></li>
-              <li><img src="../../static/images/export.png" alt=""><span>导出</span></li>
+              <li @click="exportExcel"><img src="../../static/images/export.png" alt=""><span>导出</span></li>
             </ul>
           </div>
         </div>
@@ -401,6 +401,8 @@
         tableDataWenOld:[],
         tableDataDuiOld:[],
         tableDataChaOld:[],
+
+        ajaxExportData:{},
       }
     },
     components: {
@@ -410,16 +412,25 @@
       menuBottom
     },
     mounted(){
-    	this.value_end = this.getDateTime() + ' 23:59:59'
       this.value_start = this.convertToLateDate() + ' 00:00:00'
+      this.value_end = this.getDateTime() + ' 23:59:59'
       this.getTableData()
       this.getImgData()
     },
     methods:{
       getTableData(){
         let _this = this
-        _this.ajaxTableData.startTime = _this.value_start
-        _this.ajaxTableData.endTime = _this.value_end
+        if(_this.value_start.length<19){
+          _this.ajaxTableData.startTime = _this.value_start + ' 00:00:00'
+        }else {
+          _this.ajaxTableData.startTime = _this.value_start
+        }
+        if(_this.value_end.length<19){
+          _this.ajaxTableData.endTime = _this.value_end + ' 23:59:59'
+        }else {
+          _this.ajaxTableData.endTime = _this.value_end
+        }
+
         _this.ajaxTableData.checkStatus = _this.radio*1
 
 /*{
@@ -453,7 +464,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              console.log(res.data.items)
+              //console.log(res.data.items)
               _this.tableDataResults = res.data.items
               _this.total1 = res.data.total
             }
@@ -462,8 +473,17 @@
       },
       getImgData(){
           let _this = this
-          _this.ajaxTableImgData.startTime = _this.value_start
-          _this.ajaxTableImgData.endTime = _this.value_end
+          if(_this.value_start.length<19){
+            _this.ajaxTableImgData.startTime = _this.value_start + ' 00:00:00'
+          }else {
+            _this.ajaxTableImgData.startTime = _this.value_start
+          }
+          if(_this.value_end.length<19){
+            _this.ajaxTableImgData.endTime = _this.value_end + ' 23:59:59'
+          }else {
+            _this.ajaxTableImgData.endTime = _this.value_end
+          }
+
           _this.ajaxTableImgData.checkStatus = _this.radio*1
 
           _this.ajax_api('post',url_api + '/point-history',
@@ -636,13 +656,65 @@
       },
       resetList(){
         this.radio = '0'
-        this.value_end = this.getDateTime()
-        this.value_start = this.convertToLateDate()
+        this.value_end = this.getDateTime() + ' 23:59:59'
+        this.value_start = this.convertToLateDate() + ' 00:00:00'
         this.pointIds = ''
         this.ajaxTableData.pointIds = this.pointIds
         this.ajaxTableImgData.pointIds = this.pointIds
         this.getTableData()
         this.getImgData()
+      },
+      //导出
+      exportExcel(){
+        let _this = this
+        if(_this.tableDataResults.length<1){
+          this.$message({
+            message: '暂无数据',
+          });
+          return
+        }
+        if(_this.value_start.length<19){
+          _this.ajaxExportData.stDate = _this.value_start + ' 00:00:00'
+        }else {
+          _this.ajaxExportData.stDate = _this.value_start
+        }
+        if(_this.value_end.length<19){
+          _this.ajaxExportData.edDate = _this.value_end + ' 23:59:59'
+        }else {
+          _this.ajaxExportData.edDate = _this.value_end
+        }
+
+        _this.ajaxExportData.sheetName = '111'
+        //console.log(_this.ajaxExportData)
+
+        var nameExcel = '巡检结果'+_this.getDateTimeHhMmSs()+'.xlsx'
+        var url = url_api + '/file/downloadFile1';
+        var xhr = new XMLHttpRequest();
+        xhr.open('post', url, true);    // 也可以使用POST方式，根据接口
+        xhr.setRequestHeader("Content-type", "application/json;charset=utf-8");
+        xhr.setRequestHeader("token",localStorage.getItem('token'));
+        xhr.send(JSON.stringify(_this.ajaxExportData))
+        xhr.responseType = "blob";  // 返回类型blob
+        // 定义请求完成的处理函数，请求前也可以增加加载框/禁用下载按钮逻辑
+        xhr.onload = function () {
+          // 请求完成
+          if (this.status === 200) {
+            // 返回200
+            var blob = this.response;
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
+            reader.onload = function (e) {
+              // 转换完成，创建一个a标签用于下载
+              var a = document.createElement('a');
+              a.download = nameExcel;
+              a.href = e.target.result;
+              $("body").append(a);  // 修复firefox中无法触发click
+              a.click();
+              $(a).remove();
+            }
+          }
+        };
+
       },
       prevData(){
         let _this = this
@@ -872,6 +944,24 @@
         }
         return result
       },
+
+      getDateTimeHhMmSs(){ //文件名字
+        var Da = new Date();
+        //var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var ss = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
+        return y + "-" + m + "-" + d + "-" + H + "-" + mm + "-" + ss;
+      },
     },
   }
 </script>
@@ -897,7 +987,7 @@
           margin 0 30px
     .results_browse_content
       height calc(100% - 90px)
-      min-height 840px
+      min-height 837px
       display flex
       .results_browse_left
         width 300px
@@ -953,7 +1043,7 @@
 
         .table_box
           height calc(100% - 618px)
-          min-height 234px
+          min-height 230px
           /*overflow-y auto*/
           position relative
           /deep/ .el-table th
@@ -970,6 +1060,7 @@
             bottom 0
         .right_bottom
           height 545px
+          overflow hidden
           .ul_img_wrap
             height calc(100% - 30px)
             overflow-y auto

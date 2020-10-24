@@ -98,7 +98,7 @@
         })
 
         //监听任务是否正在执行
-        _this.listener_task = new ROSLIB.Topic({
+        /*_this.listener_task = new ROSLIB.Topic({
           ros : _this.ros,
           name : '/task_execute_status',
           messageType : 'robotmsg/TaskExecuteStatus'
@@ -110,7 +110,7 @@
           }else if(message.task_status==1){
             _this.getTaskInfo()
           }
-        });
+        });*/
         //可见光，红外自动接收
         _this.test_login()
         _this.red_pic()
@@ -143,7 +143,7 @@
         _this.ajax_api('get',url_api + '/task-history/findCurrentTask/'+ _this.robotId ,
           null,
           true,function (res) {
-            //console.log(res)   //taskStatus: 1 正在执行
+            //console.log(res)   //taskStatus: 1 正在执行  错误40403
             if(res.data.taskStatus!=0){
               _this.getTaskInfo()
             }
@@ -287,7 +287,7 @@
               szInfo = "开始预览失败！";
           }
 
-          console.log(szIP + " " + szInfo);
+          //console.log(szIP + " " + szInfo);
       },
       // 获取窗口尺寸
       getWindowSize() {

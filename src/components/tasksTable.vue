@@ -2,8 +2,8 @@
 	<div class="tasks_table_wrap">
     <p class="title">任务编制列表</p>
     <el-table class="table"
-      :data="tableData" @current-change="taskCurrentChange"
-      border highlight-current-row @row-dblclick="editTaskTable"
+      :data="tableData" @current-change="taskCurrentChange" @select="selectChange"
+      border highlight-current-row @row-dblclick="editTaskTable" @select-all="selectChangeAll"
       style="width: 100%">
       <el-table-column
         type="index" :index="index"
@@ -414,6 +414,22 @@
 
       },
 
+      //复选删除
+      selectChange(selection,row){
+    	  let _this = this
+        console.log(selection)
+        let arrSelection = []
+        for(let i=0;i<selection.length;i++){
+          arrSelection.push(selection[i].id)
+        }
+        _this.$root.eventHub.$emit('currentChange', arrSelection.toString());
+      },
+      selectChangeAll(selection){
+        let _this = this
+        console.log(selection)
+        //_this.$root.eventHub.$emit('currentChange', row.id);
+      },
+
       handleClickGo(row) {
         let _this = this
         //console.log(row);
@@ -817,7 +833,7 @@
                           _this.$message({
                             message: '未获取到有效路径',
                           });
-                          //return
+                          return
                         }else {
                           /*_this.$message({
                             type: 'success',
@@ -825,15 +841,19 @@
                           });
                           _this.$root.eventHub.$emit('taskSuccess', '1111');*/
                         }
+                        _this.$router.push({path:'/'})
                         var linePlanObj = JSON.parse(res.data.path)
+                        //三楼var aa = '{"InspectId":"1041","Tasks":[{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"27.0;24.181;9.928","TLocType":"start","TLocWidth":5},{"Align":"middle","Id":"23","IsAnterograde":false,"Status":"0","TLoc":"25.25;24.18;9.77","TLocType":"back","TLocWidth":5,"TurnAngle":"180"},{"Align":"middle","Id":"22","IsAnterograde":false,"Status":"0","TLoc":"25.15;24.18;9.76","TLocType":"turn","TLocWidth":5,"TurnAngle":"95"},{"Align":"middle","Id":"21","IsAnterograde":false,"Status":"0","TLoc":"25.12;24.15;13.15","TLocType":"turn","TLocWidth":5,"TurnAngle":"-93"},{"Align":"middle","CameraPose":"23:1/10.339,17.74,25.558,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;24:1/10.578,17.738,25.522,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.8/1/1041;25:1/10.757,17.768,25.543,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.73/1/1041;32:1/10.295,17.707,25.167,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;33:1/10.54,17.749,25.2,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,2.4/1/1041;34:1/10.74,17.771,25.189,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,2.1/1/1041;41:1/10.22,17.705,24.818,100.0,100.0,1,8,down,-0.1,330.0,-0.1,3.0,0,0.0/1/1041;42:1/10.468,17.74,24.847,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.42/1/1041;43:1/10.695,17.752,24.795,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.58/1/1041","Id":"1015","IsAnterograde":false,"Status":"0","TLoc":"11.066;24.356;11.859","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"20:1/9.601,17.636,25.517,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,3.5/1/1041;21:1/9.852,17.685,25.528,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;22:1/10.14,17.696,25.487,100.0,100.0,2,3,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;29:1/9.494,17.626,25.167,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.58/1/1041;30:1/9.783,17.673,25.186,150.0,150.0,1,8,down,-0.1,330.0,-0.1,3.0,0,0.0/1/1041;31:1/10.023,17.704,25.177,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,2.35/1/1041;38:1/9.418,17.626,24.846,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.03/1/1041;39:1/9.693,17.654,24.823,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.295/1/1041;40:1/9.932,17.675,24.795,100.0,100.0,2,3,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041","Id":"1014","IsAnterograde":false,"Status":"0","TLoc":"10.26;24.359;11.775","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"17:1/8.975,17.587,25.474,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.124/1/1041;18:1/9.146,17.612,25.538,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,17.9/1/1041;19:1/9.335,17.622,25.505,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;26:1/8.955,17.594,25.199,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.89/1/1041;27:1/9.096,17.611,25.182,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;28:1/9.281,17.62,25.217,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.35/1/1041;35:1/8.939,17.576,24.857,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.58/1/1041;36:1/9.047,17.6,24.846,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.5/1/1041;37:1/9.178,17.61,24.836,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.3/1/1041","Id":"1013","IsAnterograde":false,"Status":"0","TLoc":"9.656;24.361;11.712","TLocType":"transfer","TLocWidth":5},{"Align":"middle","Id":"2","IsAnterograde":false,"Status":"0","TLoc":"8.85;23.714;11.628","TLocType":"turn","TLocWidth":5,"TurnAngle":"180"},{"Align":"middle","Id":"21","IsAnterograde":false,"Status":"0","TLoc":"25.12;24.15;13.15","TLocType":"turn","TLocWidth":5,"TurnAngle":"93"},{"Align":"middle","Id":"22","IsAnterograde":false,"Status":"0","TLoc":"25.15;24.18;9.76","TLocType":"turn","TLocWidth":5,"TurnAngle":"-95"},{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"25.25;24.18;9.77","TLocType":"end","TLocWidth":5}]}'
+                        //var linePlanObj = JSON.parse(aa)
+                        //console.log(linePlanObj)
                         var lineArr = []
                         if(lineArr.length>0){
                             lineArr = []
                         }
                         for(var i=0;i<linePlanObj.Tasks.length;i++){
-                            if(linePlanObj.Tasks[i].CameraPose){
+                            /*if(linePlanObj.Tasks[i].CameraPose){
                               return;
-                            }
+                            }*/
                             var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
                             var point = projRobotXY(pointArr[0]*1,pointArr[2]*1)
                             lineArr.push(point)
@@ -868,7 +888,7 @@
                                     message: '任务发送成功',
                                   });
                                   _this.$root.eventHub.$emit('taskSuccess', '1111');
-                                  _this.$router.push({path:'/'})
+                                  //_this.$router.push({path:'/'})
                                 }
                               });
                             }else {

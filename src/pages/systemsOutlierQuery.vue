@@ -25,7 +25,7 @@
     </div>
     <div class="content">
       <div class="left">
-        <devTreeNoCheck @childKey="childKey"></devTreeNoCheck>
+        <devTreeNoCheck @childKey="childKey"  :toTreeData="toTreeData"></devTreeNoCheck>
       </div>
       <div class="right">
         <p>用户操作</p>
@@ -122,6 +122,13 @@
             label:'识别异常'
           }
         ],
+        toTreeData:{
+          quyu:[],
+          type:[],
+          recon:[],
+          meter:[],
+          face:[]
+        },
         checked1: false,
         checked2: true,
         value1: '',

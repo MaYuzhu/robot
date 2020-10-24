@@ -4,7 +4,7 @@
     <div class="xunjian_wrap">
       <div class="li_xunjian_title" style="height:auto">
         <p style="line-height: 28px">任务名称：</p>
-        <el-input v-model="input_task_name" placeholder="请输入内容" size="mini" style="width: 190px"></el-input>
+        <el-input @input="saveName" v-model="input_task_name" placeholder="请输入内容" size="mini" style="width: 190px"></el-input>
         <p style="line-height: 28px;margin-left: 20px">自定义任务描述：</p>
         <el-input v-model="input_content" placeholder="请输入内容" size="mini" style="width: 290px"></el-input>
       </div>
@@ -27,7 +27,7 @@
           <el-checkbox style="float: left" :indeterminate="isIndeterminateQuyu"
                        v-model="checkAllQuyu" @change="handleCheckAllChange">全部</el-checkbox>
           <el-checkbox-group v-model="checkedQuyu" @change="handleCheckedCitiesChange">
-            <el-checkbox v-for="(item,index) in citiesQuyu" :label="item"
+            <el-checkbox v-for="(item,index) in citiesQuyu" :label="item.id"
                          :key="item.id">{{item.name}}</el-checkbox>
           </el-checkbox-group>
         </div>
@@ -40,7 +40,7 @@
           <el-checkbox style="float: left" :indeterminate="isIndeterminateDevType" v-model="checkAllDevType"
                        @change="handleCheckAllChangeDevType">全部</el-checkbox>
           <el-checkbox-group v-model="checkedDevType" @change="handleCheckedCitiesChangeDevType">
-            <el-checkbox v-for="(item,index) in listDevType" :label="item" :key="item.id">{{item.displayName}}</el-checkbox>
+            <el-checkbox v-for="(item,index) in listDevType" :label="item.id" :key="item.id">{{item.displayName}}</el-checkbox>
           </el-checkbox-group>
         </div>
         <el-checkbox v-model="moreDevType" @change="moreDevTypeF">查看更多</el-checkbox>
@@ -52,7 +52,7 @@
           <el-checkbox style="float: left" :indeterminate="isIndeterminateReconType" v-model="checkAllReconType"
                        @change="handleCheckAllChangeReconType">全部</el-checkbox>
           <el-checkbox-group v-model="checkedReconType" @change="handleCheckedCitiesChangeReconType">
-            <el-checkbox v-for="(item,index) in listReconType" :label="item" :key="item.id">{{item.name}}</el-checkbox>
+            <el-checkbox v-for="(item,index) in listReconType" :label="item.id" :key="item.id">{{item.name}}</el-checkbox>
           </el-checkbox-group>
         </div>
         <el-checkbox v-model="moreReconType" @change="moreReconTypeF">查看更多</el-checkbox>
@@ -64,7 +64,7 @@
           <el-checkbox style="float: left" :indeterminate="isIndeterminateMeterType" v-model="checkAllMeterType"
                        @change="handleCheckAllChangeMeterType">全部</el-checkbox>
           <el-checkbox-group v-model="checkedMeterType" @change="handleCheckedCitiesChangeMeterType">
-            <el-checkbox v-for="(item,index) in listMeterType" :label="item" :key="item.id">{{item.name}}</el-checkbox>
+            <el-checkbox v-for="(item,index) in listMeterType" :label="item.id" :key="item.id">{{item.name}}</el-checkbox>
           </el-checkbox-group>
         </div>
         <el-checkbox v-model="moreMeterType" @change="moreMeterTypeF">查看更多</el-checkbox>
@@ -76,7 +76,7 @@
           <el-checkbox style="float: left" :indeterminate="isIndeterminateFaceType" v-model="checkAllFaceType"
                        @change="handleCheckAllChangeFaceType">全部</el-checkbox>
           <el-checkbox-group v-model="checkedFaceType" @change="handleCheckedCitiesChangeFaceType">
-            <el-checkbox v-for="(item,index) in listFaceType" :label="item" :key="item.id">{{item.name}}</el-checkbox>
+            <el-checkbox v-for="(item,index) in listFaceType" :label="item.id" :key="item.id">{{item.name}}</el-checkbox>
           </el-checkbox-group>
         </div>
         <el-checkbox v-model="moreFaceType" @change="moreFaceTypeF">查看更多</el-checkbox>
@@ -87,7 +87,7 @@
                      @importBox='importBox' :importImg="true"></XunjianFindTool>
     <div class="content">
       <div class="left">
-        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTree>
+        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData" :toTreeCheckData="toTreeCheckData"></devTree>
       </div>
       <div class="right">
         <taskTable :irBaseRobotId="irBaseRobotId" :irBaseInspectTypeId="irBaseInspectTypeId"
@@ -202,7 +202,7 @@
         moreFaceType:false,
 
         irBaseRobotId:1,
-        irBaseInspectTypeId:-1,
+        irBaseInspectTypeId:1,
 
         toTreeData:{
           quyu:[],
@@ -213,7 +213,7 @@
         },
         saveData:{
           description:'',
-          irBaseInspectTypeId:'',
+          irBaseInspectTypeId:'1',
           irBaseRobotId:1,
           isCustom:'1',
           name:'自定义任务',
@@ -232,6 +232,14 @@
         checkedTaskArr:[],
         customTaskTable:[],
 
+        toTreeCheckData:[],  //默认选择的树节点
+        getTreeDataDev:{},
+        dataTreeAll:[],
+        checkedQuyuTreeIds:[],
+        checkedDevTypeTreeIds:[],
+        checkedReconTypeTreeIds:[],
+        checkedMeterTypeTreeIds:[],
+        checkedFaceTypeTreeIds:[],
       }
     },
     components: {
@@ -243,9 +251,11 @@
       menuBottom
     },
     mounted(){
-      this.init()
+      let _this = this
+      _this.getAllTree()
     },
     methods: {
+
       init(){
         let _this = this
         _this.ajax_api('get',url_api + '/inspect-type?size=30',null,true,function (res) {
@@ -268,26 +278,15 @@
             return item.parentId == 4
           })
           _this.citiesQuyu = result
-
-          _this.ajax_api('get',url_api + '/inspect-type-choose/default-checks?inspectId='+_this.irBaseInspectTypeId,
-            null,true,
-            function (res) {
-              let result_choose = res.data
-              result_choose = result_choose.filter(item =>{
-                return item.chooseType == 0
-              })
-              let choose_id_arr = []
-              for(let i=0;i<result_choose.length;i++){
-                //choose_id_arr.push(result_choose[i].chooseId)
-                choose_id_arr = _this.citiesQuyu.filter(item =>{
-                  return item.id == 6917
-                })
-              }
-              //console.log(choose_id_arr)
-              //_this.checkedQuyu = choose_id_arr
-              //_this.isIndeterminateQuyu = true
-            })
-
+          //_this.checkedQuyu = [result[1],result[3]]
+          /*let arrQuIds = []
+          for(let i=0;i<result.length;i++){
+            arrQuIds.push(result[i].id)
+          }
+          if(result.length>0){
+            _this.checkedQuyu = arrQuIds
+            _this.isIndeterminateQuyu = true
+          }*/
         })
 
         _this.ajax_api('get',url_api + '/device-type?size=100',null,true,function (res) {
@@ -297,110 +296,91 @@
             return item.name >2000
           })
           _this.listDevType = result
-          _this.ajax_api('get',url_api + '/inspect-type-choose/default-checks?inspectId='+_this.irBaseInspectTypeId,
-            null,true,
-            function (res) {
-              let result_choose = res.data
-              result_choose = result_choose.filter(item =>{
-                return item.chooseType == 1
-              })
-              let choose_id_arr = []
-              for(let i=0;i<result_choose.length;i++){
-                //choose_id_arr.push(result_choose[i].chooseId)
-                choose_id_arr = _this.listDevType.filter(item =>{
-                  return item.id == 8
-                })
-              }
-              //console.log(choose_id_arr)
-              //_this.checkedDevType = choose_id_arr
-              //_this.isIndeterminateDevType = true
-            })
         })
 
         _this.ajax_api('get',url_api + '/recon-type?size=30',null,true,function (res) {
           //console.log(res.data)
           let result = res.data.items
           _this.listReconType = result
-          _this.ajax_api('get',url_api + '/inspect-type-choose/default-checks?inspectId='+_this.irBaseInspectTypeId,
-            null,true,
-            function (res) {
-              let result_choose = res.data
-              result_choose = result_choose.filter(item =>{
-                return item.chooseType == 2
-              })
-              let choose_id_arr = []
-              for(let i=0;i<result_choose.length;i++){
-                //choose_id_arr.push(result_choose[i].chooseId)
-                choose_id_arr = _this.listReconType.filter(item =>{
-                  return item.id == 2
-                })
-              }
-              //console.log(choose_id_arr)
-              //_this.checkedReconType = choose_id_arr
-              //_this.isIndeterminateReconType = true
-            })
         })
 
         _this.ajax_api('get',url_api + '/meter-type?size=100',null,true,function (res) {
           //console.log(res.data)
           let inspect = res.data.items
           _this.listMeterType = inspect
-          _this.ajax_api('get',url_api + '/inspect-type-choose/default-checks?inspectId='+_this.irBaseInspectTypeId,
-            null,true,
-            function (res) {
-              let result_choose = res.data
-              result_choose = result_choose.filter(item =>{
-                return item.chooseType == 3
-              })
-              let choose_id_arr = []
-              for(let i=0;i<result_choose.length;i++){
-                //choose_id_arr.push(result_choose[i].chooseId)
-                choose_id_arr = _this.listMeterType.filter(item =>{
-                  return item.id == 2
-                })
-              }
-              //console.log(choose_id_arr)
-              //_this.checkedMeterType = choose_id_arr
-              //_this.isIndeterminateMeterType = true
-            })
         })
 
         _this.ajax_api('get',url_api + '/face-type?size=100',null,true,function (res) {
           //console.log(res.data)
           let inspect = res.data.items
           _this.listFaceType = inspect
-          _this.ajax_api('get',url_api + '/inspect-type-choose/default-checks?inspectId='+_this.irBaseInspectTypeId,
-            null,true,
-            function (res) {
-              let result_choose = res.data
-              result_choose = result_choose.filter(item =>{
-                return item.chooseType == 4
-              })
-              let choose_id_arr = []
-              for(let i=0;i<result_choose.length;i++){
-                //choose_id_arr.push(result_choose[i].chooseId)
-                choose_id_arr = _this.listFaceType.filter(item =>{
-                  return item.id == result_choose[i].chooseId
-                })
-              }
-              //console.log(choose_id_arr)
-              //_this.checkedFaceType = choose_id_arr
-              //_this.isIndeterminateFaceType = true
-            })
+          //console.log(inspect)
         })
 
+      },
+      getAllTree(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/point/tree',
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              _this.dataTreeAll = res.data
+            }
+            _this.init()
+          })
+      },
+      //勾选类型区域等 设备树同时勾选
+      updateTreeCheck(){
+        let _this = this
+        let arr = []
+        return new Promise(function(resolve) {
+          //console.log(_this.getTreeDataDev)
+          _this.ajax_api('get',url_api + '/point/tree',
+            _this.getTreeDataDev,  //{reconTypeIds:'5'},
+            true,
+            function (res) {
+              if(res.code == 200){
+                arr = _this.readNodes(res.data)
+                resolve(arr);
+              }
+            })
+        });
+
+        /*_this.ajax_api('get',url_api + '/point/tree',
+          _this.getTreeDataDev,  //{reconTypeIds:'5'},
+          true,
+          function (res) {
+            if(res.code == 200){
+              arr = _this.readNodes(res.data)
+              cb(arr)
+            }
+          })*/
 
       },
 
-      handleSizeChange(val) {
-        console.log(`每页 ${val} 条`);
-      },
-      handleCurrentChange(val) {
-        console.log(`当前页: ${val}`);
+      readNodes (nodes = [], arr = []) {
+        let _this = this
+        for (let item of nodes) {
+          //arr.push(item.id)
+          if (item.treeNode && item.treeNode.length){
+            _this.readNodes(item.treeNode, arr)
+          }else {
+            arr.push(item.id)
+          }
+        }
+        return arr
       },
 
       handleCheckAllChange(val) {
-        this.checkedQuyu = val ? this.citiesQuyu : [];
+        let _this = this
+        let idArr = []
+        if(val){
+          for(let i=0;i<_this.citiesQuyu.length;i++){
+            idArr.push(_this.citiesQuyu[i].id)
+          }
+        }
+        this.checkedQuyu = idArr;
         this.isIndeterminateQuyu = false;
       },
       handleCheckedCitiesChange(value) {
@@ -417,8 +397,15 @@
       },
 
       handleCheckAllChangeDevType(val) {
-        this.checkedDevType = val ? this.listDevType : [];
-        this.isIndeterminateDevType = false;
+        let _this = this
+        let idArr = []
+        if(val){
+          for(let i=0;i<_this.listDevType.length;i++){
+            idArr.push(_this.listDevType[i].id)
+          }
+        }
+        _this.checkedDevType = idArr;
+        _this.isIndeterminateDevType = false;
       },
       handleCheckedCitiesChangeDevType(value) {
         let checkedCount = value.length;
@@ -434,7 +421,14 @@
       },
 
       handleCheckAllChangeReconType(val) {
-        this.checkedReconType = val ? this.listReconType : [];
+        let _this = this
+        let idArr = []
+        if(val){
+          for(let i=0;i<_this.listReconType.length;i++){
+            idArr.push(_this.listReconType[i].id)
+          }
+        }
+        this.checkedReconType = idArr;
         this.isIndeterminateReconType = false;
       },
       handleCheckedCitiesChangeReconType(value) {
@@ -451,8 +445,15 @@
       },
 
       handleCheckAllChangeMeterType(val) {
-        this.checkedMeterType = val ? this.listMeterType : [];
-        this.isIndeterminateMeterType = false;
+        let _this = this
+        let idArr = []
+        if(val){
+          for(let i=0;i<_this.listMeterType.length;i++){
+            idArr.push(_this.listMeterType[i].id)
+          }
+        }
+        _this.checkedMeterType = idArr;
+        _this.isIndeterminateMeterType = false;
       },
       handleCheckedCitiesChangeMeterType(value) {
         let checkedCount = value.length;
@@ -468,8 +469,15 @@
       },
 
       handleCheckAllChangeFaceType(val) {
-        this.checkedFaceType = val ? this.listFaceType : [];
-        this.isIndeterminateFaceType = false;
+        let _this = this
+        let idArr = []
+        if(val){
+          for(let i=0;i<_this.listFaceType.length;i++){
+            idArr.push(_this.listFaceType[i].id)
+          }
+        }
+        _this.checkedFaceType = idArr;
+        _this.isIndeterminateFaceType = false;
       },
       handleCheckedCitiesChangeFaceType(value) {
         let checkedCount = value.length;
@@ -484,7 +492,6 @@
         }
       },
       treeCheck(data){
-        //console.log(data)
         this.saveData.points = data.toString()
         this.savePutData.points = data.toString()
       },
@@ -539,33 +546,165 @@
           this.taskTableReset= true;
         });
       },
+      saveName(){
+        this.saveData.name = this.input_task_name?this.input_task_name:'自定义任务'
+      },
     },
     watch:{
-
       checkedQuyu:function (newVal,oldVal) {
         let _this = this
         //console.log(newVal,oldVal)
-        _this.toTreeData.quyu = newVal
+        if(newVal.length<1){
+          _this.checkedQuyuTreeIds = []
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }else {
+          let quyuArr = []
+          for(let i=0;i<newVal.length;i++){
+            let li = _this.dataTreeAll[0].treeNode.filter(item => {
+              return item.id == newVal[i]
+            })
+            quyuArr.push.apply(quyuArr,_this.readNodes(li))
+          }
+          _this.checkedQuyuTreeIds = quyuArr
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }
       },
       checkedDevType:function (newVal,oldVal) {
         let _this = this
-        //console.log(newVal,oldVal)
-        _this.toTreeData.type = newVal
+        if(newVal.length<1){
+          _this.getTreeDataDev.typeIds = null
+          _this.checkedDevTypeTreeIds = []
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }else {
+          _this.getTreeDataDev.typeIds = newVal.toString()
+          //_this.toTreeData.recon = newVal
+          _this.updateTreeCheck().then(updateTreeArrAdd)
+          function updateTreeArrAdd(x) {
+            //console.log(x)
+            _this.checkedDevTypeTreeIds = x
+            _this.toTreeCheckData = []
+            _this.toTreeCheckData = _this.toTreeCheckData
+              .concat(_this.checkedQuyuTreeIds)
+              .concat(_this.checkedDevTypeTreeIds)
+              .concat(_this.checkedReconTypeTreeIds)
+              .concat(_this.checkedMeterTypeTreeIds)
+              .concat(_this.checkedFaceTypeTreeIds)
+          }
+        }
+
       },
       checkedReconType:function (newVal,oldVal) {
         let _this = this
-        //console.log(newVal,oldVal)
-        _this.toTreeData.recon = newVal
+        if(newVal.length<1){
+          _this.getTreeDataDev.reconTypeIds = null
+          _this.checkedReconTypeTreeIds = []
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }else {
+          _this.getTreeDataDev.reconTypeIds = newVal.toString()
+          _this.getTreeDataDev.faceTypeIds = null
+          _this.getTreeDataDev.meterTypeIds = null
+          _this.getTreeDataDev.typeIds = null
+          //_this.toTreeData.recon = newVal
+          //console.log(_this.getTreeDataDev.reconTypeIds)
+          _this.updateTreeCheck().then(updateTreeArrAdd)
+          function updateTreeArrAdd(x) {
+            _this.checkedReconTypeTreeIds = x
+            //console.log(x)
+            _this.toTreeCheckData = []
+            _this.toTreeCheckData = _this.toTreeCheckData
+              .concat(_this.checkedQuyuTreeIds)
+              .concat(_this.checkedDevTypeTreeIds)
+              .concat(_this.checkedReconTypeTreeIds)
+              .concat(_this.checkedMeterTypeTreeIds)
+              .concat(_this.checkedFaceTypeTreeIds)
+          }
+        }
       },
       checkedMeterType:function (newVal,oldVal) {
         let _this = this
-        //console.log(newVal,oldVal)
-        _this.toTreeData.meter = newVal
+        if(newVal.length<1){
+          _this.getTreeDataDev.meterTypeIds = null
+          _this.checkedMeterTypeTreeIds = []
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }else {
+          _this.getTreeDataDev.meterTypeIds = newVal.toString()
+          _this.getTreeDataDev.faceTypeIds = null
+          _this.getTreeDataDev.reconTypeIds = null
+          _this.getTreeDataDev.typeIds = null
+          _this.updateTreeCheck().then(updateTreeArrAdd)
+          function updateTreeArrAdd(x) {
+            //console.log(x)
+            _this.checkedMeterTypeTreeIds = x
+            _this.toTreeCheckData = []
+            _this.toTreeCheckData = _this.toTreeCheckData
+              .concat(_this.checkedQuyuTreeIds)
+              .concat(_this.checkedDevTypeTreeIds)
+              .concat(_this.checkedReconTypeTreeIds)
+              .concat(_this.checkedMeterTypeTreeIds)
+              .concat(_this.checkedFaceTypeTreeIds)
+          }
+        }
       },
       checkedFaceType:function (newVal,oldVal) {
         let _this = this
-        //console.log(newVal,oldVal)
-        _this.toTreeData.face = newVal
+        if(newVal.length<1){
+          _this.getTreeDataDev.faceTypeIds = null
+          _this.checkedFaceTypeTreeIds = []
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }else {
+          _this.getTreeDataDev.faceTypeIds = newVal.toString()
+          _this.getTreeDataDev.meterTypeIds = null
+          _this.getTreeDataDev.reconTypeIds = null
+          _this.getTreeDataDev.typeIds = null
+          _this.updateTreeCheck().then(updateTreeArrAdd)
+          function updateTreeArrAdd(x) {
+            //console.log(x)
+            _this.checkedFaceTypeTreeIds = x
+            _this.toTreeCheckData = []
+            _this.toTreeCheckData = _this.toTreeCheckData
+              .concat(_this.checkedQuyuTreeIds)
+              .concat(_this.checkedDevTypeTreeIds)
+              .concat(_this.checkedReconTypeTreeIds)
+              .concat(_this.checkedMeterTypeTreeIds)
+              .concat(_this.checkedFaceTypeTreeIds)
+          }
+        }
       },
 
       saveData:{
@@ -622,7 +761,7 @@
 
     .content
       background white
-      height calc(100% - 344px)
+      height calc(100% - 376px)
       .left
         width 300px
         height 100%

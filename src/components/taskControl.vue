@@ -247,8 +247,8 @@
           title: 'add Layer',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
-            //url: '../../static/route.json',
-            url: '../../static/geojson/route_yu_new.geojson',
+            url: '../../static/geojson/route.geojson',
+            //url: '../../static/geojson/route_yu_new.geojson',
             format:new ol.format.GeoJSON()
           }),
           style: function (feature, resolution) {
@@ -267,8 +267,8 @@
           title: 'add Layer Point',
           source: new ol.source.Vector({
             //projection: 'EPSG:4326',
-            //url: '../../static/point.json',
-            url: '../../static/geojson/stops_yu_new.geojson',
+            url: '../../static/geojson/stops.geojson',
+            //url: '../../static/geojson/stops_yu_new.geojson',
             format:new ol.format.GeoJSON()
           }),
           style: function (feature, resolution) {
@@ -331,8 +331,8 @@
             title: 'add Layer Point',
             source: new ol.source.Vector({
                 //projection: 'EPSG:4326',
-                url: '../../static/geojson/targets_yu_new.geojson',
-                //url: '../../static/geojson/stops.geojson',
+                //url: '../../static/geojson/targets_yu_new.geojson',
+                url: '../../static/geojson/targets.geojson',
                 format:new ol.format.GeoJSON()
             }),
             style: function (feature, resolution) {
@@ -364,7 +364,7 @@
             visible: true
         });
 
-        var m_center = [28, 20]
+        var m_center = mapCenter  //[28, 20]
         //var m_center = [10, 9]
         m_center = ol.proj.transform(m_center,'EPSG:4326','EPSG:3857');
 
@@ -391,9 +391,10 @@
           ]),
           view: new ol.View({
             center: m_center,
-            zoom: 5,
-            //rotation: Math.PI/180 * 4.5
-            rotation: Math.PI/180 * -2.4
+            zoom: zoom,
+            rotation: Math.PI/180 * mapRotate      //楼顶
+            //rotation: Math.PI/180 * 4.5    //三楼
+            //rotation: Math.PI/180 * -2.4   //玉贤
           }),
           //controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
           controls: ol.control.defaults().extend([
@@ -1505,7 +1506,7 @@
         var view = _this.map.getView();
         view.setCenter(_this.mapCenter); //初始中心点
         view.setRotation(_this.mapRotation); //初始旋转角度
-        view.setZoom(_this.mapZoom); //平移地图
+        view.setZoom(_this.mapZoom);
       },
 
       //地图编辑
@@ -1838,7 +1839,7 @@
             var extent = _this.dragBoxPoint.getGeometry().getExtent();
             vectorSource.forEachFeatureIntersectingExtent(extent, function(feature) {
               _this.selectedFeatures.push(feature)
-              console.log(feature.getId())
+              //console.log(feature.getId())
               _this.delLineArr.push(feature.getId())
             });
           });
@@ -1871,6 +1872,8 @@
           localStorage.removeItem(`addLine${delLineArr[i]}`)
         }
         _this.showNewPointLine()
+        _this.selectedFeatures.clear();
+        _this.onAddOrDel()
       },
       //关闭编辑地图小框
       closeEditMap(){

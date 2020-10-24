@@ -61,7 +61,11 @@
       },
       save(){
         let _this = this
-        console.log(_this.saveData)  //PUT /ui/task/updTask/{id}
+        //console.log(_this.saveData)  //PUT /ui/task/updTask/{id}
+        if(_this.saveData.points==''){
+          this.$message('请选择');
+          return
+        }
         if (_this.savePutId) {
           _this.ajax_api('put', url_api + '/task/updTask/' + _this.savePutId, _this.savePutData, true,
             function (res) {

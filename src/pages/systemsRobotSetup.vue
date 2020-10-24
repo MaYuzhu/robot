@@ -34,18 +34,25 @@
             </div>
             <div style="border:1px dashed;border-left: none;border-right: none">
               <div>
-                <p>机器人行进速度: </p>
-                <el-input v-model="body_speed" size="mini"></el-input>
+                <!--oninput="if(value > 1 || value < 0 ){alert('请输入0~1之间的数值！')}"-->
+                <p>机器人最高速度: </p>
+                <el-input placeholder="请输入0~1之间的数值"
+                    onblur="if(value > 1.0 || value < 0.0 ){alert('请输入0~1之间的数值！');value=0.5}"
+                    type="number" v-model="body_speed" size="mini"></el-input>
                 <span>m/s</span>
               </div>
               <div>
                 <p>雷达报警距离: </p>
-                <el-input v-model="alarm_distance" size="mini"></el-input>
+                <el-input v-model="alarm_distance" size="mini" type="number"
+                          onblur="if(value > 5 || value < 0 ){alert('请输入0~5之间的数值！');value=3}"
+                ></el-input>
                 <span>m</span>
               </div>
               <div>
                 <p>电池容量报警: </p>
-                <el-input v-model="battery_capacity" size="mini"></el-input>
+                <el-input v-model="battery_capacity" size="mini" type="number"
+                          onblur="if(value > 100 || value < 0 ){alert('请输入0~100之间的数值！');value=30}"
+                ></el-input>
                 <span>%</span>
               </div>
             </div>
@@ -63,22 +70,32 @@
               color: #f00">云台初始化位置</p>
             <div class="yun_item">
               <p>X:</p>
-              <el-input v-model="x_x" size="mini"></el-input>
+              <el-input v-model="x_x" size="mini" type="number"
+                        onblur="if(value > 360 || value < 0 ){alert('请输入0~360之间的数值！');value=0}"></el-input>
               <p>Y:</p>
-              <el-input v-model="y_y" size="mini"></el-input>
+              <el-input v-model="y_y" size="mini"type="number"
+                        onblur="if(value > 360 || value < 0 ){alert('请输入0~360之间的数值！');value=0}"></el-input>
             </div>
             <div style="border:1px dashed;border-left: none;border-right: none">
               <div>
                 <p>云台水平偏移量: </p>
-                <el-input v-model="yun_x" size="mini"></el-input>
+                <el-input v-model="yun_x" size="mini" type="number"
+                          onblur="if(value > 360 || value < 0 ){alert('请输入0~360之间的数值！');value=0}"
+                ></el-input>
                 <p>轮子直径: </p>
-                <el-input v-model="zhijing" size="mini" style="width:50px"></el-input>
+                <el-input v-model="zhijing" size="mini" style="width:50px"
+                          type="number"
+                          onblur="if(value > 25 || value < 15 ){alert('请输入15~25之间的数值！')};value=20"></el-input>
+                <span>cm</span>
               </div>
               <div>
                 <p>云台垂直偏移量: </p>
-                <el-input v-model="yun_y" size="mini"></el-input>
+                <el-input v-model="yun_y" size="mini"type="number"
+                          onblur="if(value > 360 || value < 0 ){alert('请输入0~360之间的数值！');value=0}"></el-input>
                 <p>轮子距中心距离: </p>
-                <el-input v-model="zhongxin" size="mini" style="width:50px"></el-input>
+                <el-input v-model="zhongxin" size="mini" style="width:50px" type="number"
+                          onblur="if(value > 30 || value < 20 ){alert('请输入20~30之间的数值！');value=25}"></el-input>
+                <span>cm</span>
               </div>
             </div>
             <div style="display: flex;justify-content: space-around;padding: 16px 10px;">
@@ -278,9 +295,9 @@
       init(){
         let _this = this
         _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
-          {irBaseRobotId:1,size:100,page:1,},
+          {irBaseRobotId:1,size:200,page:1,},
           true, function (res) {
-            console.log(res.data)
+            //console.log(res.data)
             let alarm_after = res.data.items.filter(item => {
               return item.name == 'alarm-after-execute'
             })
@@ -307,9 +324,9 @@
       init2(){
         let _this = this
         _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
-          {irBaseRobotId:1,size:100,page:1,},
+          {irBaseRobotId:1,size:200,page:1,},
           true, function (res) {
-            console.log(res.data)
+            //console.log(res.data)
             let x_x = res.data.items.filter(item => {
               return item.name == 'x-value'
             })
@@ -322,11 +339,19 @@
             let yun_y = res.data.items.filter(item => {
               return item.name == 'Vertical-offset'
             })
+            let zhijing = res.data.items.filter(item => {
+              return item.name == 'diameter'
+            })
+            let zhongxin = res.data.items.filter(item => {
+              return item.name == 'center-distance'
+            })
 
             _this.x_x = x_x[0].value
             _this.y_y = y_y[0].value
             _this.yun_x = yun_x[0].value
             _this.yun_y = yun_y[0].value
+            _this.zhijing = zhijing[0].value
+            _this.zhongxin = zhongxin[0].value
 
           })
       },
@@ -346,7 +371,7 @@
         let setData = {
           irBaseRobotId:1,
           robotParamRequests:[],
-          type: "1"
+          type: 2
         }
         setData.robotParamRequests.push({
           name:'alarm-after-execute',
@@ -373,6 +398,28 @@
           displayName: "电池容量报警",
           value: _this.battery_capacity
         })
+
+        setData.robotParamRequests.push({
+          name:'x-value',
+          displayName: "x",
+          value: _this.x_x
+        })
+        setData.robotParamRequests.push({
+          name:'y-value',
+          displayName: "y",
+          value: _this.y_y
+        })
+        setData.robotParamRequests.push({
+          name:'Horizonta-offset',
+          displayName: "云台水平偏移量",
+          value: _this.yun_x
+        })
+        setData.robotParamRequests.push({
+          name:'Vertical-offset',
+          displayName: "云台垂直偏移量",
+          value: _this.yun_y
+        })
+        //console.log(setData)
         _this.ajax_api('put',url_api + '/robot-param/batch',
           setData,
           true, function (res) {
@@ -394,7 +441,7 @@
         let setData = {
           irBaseRobotId:1,
           robotParamRequests:[],
-          type: "1"
+          type: '1'
         }
         setData.robotParamRequests.push({
           name:'x-value',
@@ -416,8 +463,17 @@
           displayName: "云台垂直偏移量",
           value: _this.yun_y
         })
-        _this.setOne()
 
+        setData.robotParamRequests.push({
+          name:'diameter',
+          displayName: "轮子直径",
+          value: _this.zhijing
+        })
+        setData.robotParamRequests.push({
+          name:'center-distance',
+          displayName: "轮子中心距离",
+          value: _this.zhongxin
+        })
         _this.ajax_api('put',url_api + '/robot-param/batch',
           setData,
           true, function (res) {
@@ -536,4 +592,11 @@
               height 16px
               width 16px
 
+  /deep/ input::-webkit-outer-spin-button,
+  /deep/ input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+  }
+  /deep/ input[type='number'] {
+    -moz-appearance: textfield;
+  }
 </style>

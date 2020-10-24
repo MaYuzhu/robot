@@ -58,9 +58,10 @@
         >
         </el-table-column>
         <el-table-column
-            prop="task.id" align="center"
-            label="任务id"
+            prop="id" align="center"
+            label="任务巡检id"
         >
+          <!--task.id-->
         </el-table-column>
         <el-table-column
           prop="" :formatter="taskStatusFun"
@@ -164,6 +165,9 @@
         total:1,
         ajaxTableData: {page:1, size:10},
         multipleSelection: [],
+
+        ajaxExportData:{},
+        taskHistoryId:'',
       }
     },
     components: {
@@ -172,8 +176,8 @@
       menuBottom
     },
     mounted(){
-      this.value_end = this.getDateTime()
-      this.value_start = this.convertToLateDate()
+      this.value_start = this.convertToLateDate() + ' 00:00:00'
+      this.value_end = this.getDateTime() + ' 23:59:59'
       this.getTableData()
     },
     methods:{
@@ -221,7 +225,7 @@
           {
             name: 'xiao',
             age: '18',
-            pic: 'https://gss2.bdstatic.com/9fo3dSag_xI4khGkpoWK1HF6hhy/baike/c0%3Dbaike150%2C5%2C5%2C150%2C50/sign=b30eadd0267f9e2f6438155a7e598241/21a4462309f790528aa758080df3d7ca7bcbd54f.jpg'
+            pic: 'http://localhost:8080/smcsp/file/1603259423144.jpg'
           },
           {
             name: 'jie',
@@ -272,7 +276,7 @@
         this.isIndeterminate = false
         this.getTableData()
       },
-      exportExcel(){
+      exportExcel_(){
       	let _this = this
         if(_this.multipleSelection.length<1){
           _this.$message({
@@ -408,6 +412,82 @@
       },
       index(val){
         return (this.ajaxTableData.page - 1)*this.ajaxTableData.size + val + 1
+      },
+
+      //导出
+      exportExcel(){
+        let _this = this
+        let url = ''
+        if(_this.multipleSelection.length<1){
+          _this.$message({
+            message: '请选择',
+          });
+          return
+        }
+        if(_this.multipleSelection.length==1){
+          url = url_api + '/file/downloadFile2';
+          _this.ajaxExportData.taskHistoryId = _this.multipleSelection[0].id.toString()
+          _this.ajaxExportData.taskHistoryIds = null
+          var nameExcel = '巡检报告'+_this.getDateTimeHhMmSs()+'.xlsx'
+        }else if(_this.multipleSelection.length>1){
+          let ids = []
+          url = url_api + '/file/downloadFile3';
+          for(let i in _this.multipleSelection){
+            ids.push(_this.multipleSelection[i].id)
+          }
+          _this.ajaxExportData.taskHistoryIds = ids.toString()
+          _this.ajaxExportData.taskHistoryId = null
+          var nameExcel = '巡检报告'+_this.getDateTimeHhMmSs()+'.zip'
+        }
+
+        _this.ajaxExportData.sheetName = '111'
+        //console.log(_this.ajaxExportData)
+
+        //var nameExcel = '巡检报告'+_this.getDateTimeHhMmSs()+'.xlsx'
+        //url = url_api + '/file/downloadFile2';
+        var xhr = new XMLHttpRequest();
+        xhr.open('post', url, true);    // 也可以使用POST方式，根据接口
+        xhr.setRequestHeader("Content-type", "application/json;charset=utf-8");
+        xhr.setRequestHeader("token",localStorage.getItem('token'));
+        xhr.send(JSON.stringify(_this.ajaxExportData))
+        xhr.responseType = "blob";  // 返回类型blob
+        // 定义请求完成的处理函数，请求前也可以增加加载框/禁用下载按钮逻辑
+        xhr.onload = function () {
+          // 请求完成
+          if (this.status === 200) {
+            // 返回200
+            var blob = this.response;
+            var reader = new FileReader();
+            reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
+            reader.onload = function (e) {
+              // 转换完成，创建一个a标签用于下载
+              var a = document.createElement('a');
+              a.download = nameExcel;
+              a.href = e.target.result;
+              $("body").append(a);  // 修复firefox中无法触发click
+              a.click();
+              $(a).remove();
+            }
+          }
+        };
+      },
+
+      getDateTimeHhMmSs(){ //文件名字
+        var Da = new Date();
+        //var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var ss = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
+        return y + "-" + m + "-" + d + "-" + H + "-" + mm + "-" + ss;
       },
 
     }

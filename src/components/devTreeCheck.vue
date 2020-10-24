@@ -16,10 +16,10 @@
           <!--<span style="width: 10px;height:10px;background: red;display: inline-block"></span>-->
           <span :title="node.data.name">
             <i :class="node.data.treeNode?'el-icon-s-cooperation':'el-icon-s-order'"></i>
-            <span class="color_alarm" style="width:13px;height:13px;display:inline-block"></span>
+            <span :class="'alarm'+node.data.alarmLevel" style="width:13px;height:13px;display:inline-block"></span>
             {{ node.data.name }}
           </span>
-          <span>{{node.data.id}}</span>
+          <!--<span>{{node.data.id}}</span>-->
         </span>
 
       </el-tree>
@@ -159,12 +159,18 @@
     padding-right: 8px;
   }
 
-  .color_alarm{
-    background :#329632;
-  }
-  .color_alarm1{
-    background :#ff0000;
-  }
+  .alarm0
+    background : #329632;
+  .alarm1
+    background : #447bff;
+  .alarm2
+    background : #fdff59;
+  .alarm3
+    background : #ffaf43;
+  .alarm4
+    background : #ff3d14;
+  .alarmundefined
+    background : #37b837;
 
   .span-ellipsis {
     width: calc(100% - 70px);

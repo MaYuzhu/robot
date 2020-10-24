@@ -30,12 +30,27 @@
               </el-upload>
               <span>*</span>
             </div>
+            <div>
+              <p>文件保存期限</p>
+              <el-input-number v-model="num_day" @change="handleChange" style="width: 200px"
+                               :min="10" :max="365" label="描述文字"></el-input-number>
+              <span style="color: #0c3a47">天</span>
+            </div>
+            <div>
+              <p>软件版本号</p>{{soft_version}}
+            </div>
+            <div>
+              <p>在线升级</p>
+              <input id="files_v" style="" type="file" @change="softVersionChange()">
+            </div>
+
             <el-button @click="setCompanyName" class="update_img" size="mini">保存</el-button>
+
           </div>
         </el-tab-pane>
         <el-tab-pane label="系统基本信息">
           <div class="items items_2">
-            <p>web版本: <span>0</span></p>
+            <p>web版本: <span>{{soft_version}}</span></p>
             <p>LER3000A版本: <span>0</span></p>
             <p>数据库模型版本: <span>0</span></p>
             <p>机器人下位机版本: <span>0</span></p>
@@ -133,12 +148,15 @@
         imageUrl: '',
         imageUrlUpload:'',
         DestroyIncomeStatistics:true,
-        pictureUpdate: url_api + '/file',
+        pictureUpdate: url_api + '/file/uploadImage',
         companyName: '',
         companyArea: '',
         importHeaders: {
           token: localStorage.getItem('token')
         },
+        num_day: 10,
+        soft_version: '',
+        soft_version_c: '',
       }
     },
     mounted(){
@@ -148,25 +166,31 @@
       handleAvatarSuccess(res, file) {
         this.imageUrl = URL.createObjectURL(file.raw);
         console.log(file.response)
+        if(file.response.code != 200){
+          this.$message.error('网络错误!');
+          return
+        }
         //action="https://jsonplaceholder.typicode.com/posts/" 37位//8b79b27e7d14cb6569400958ee474c56.jpg
         //console.log(file.response.data.localUrl)
         //console.log(file.response.data.localUrl.slice(-37))
         //本地测试
         //this.imageUrlUpload = 'http://localhost:8080/smcsp/file' + file.response.data.localUrl.slice(-37)
-        this.imageUrlUpload = url_img+'/smcsp/file' + file.response.data.localUrl.slice(-37)
+        //this.imageUrlUpload = url_img+'/smcsp/file' + file.response.data.localUrl.slice(-54)
+        this.imageUrlUpload = file.response.data.localUrl
       },
       beforeAvatarUpload(file) {
-        console.log(file)
+        //console.log(file)
         const isJPG = file.type === 'image/jpeg';
         const isLt2M = file.size / 1024 / 1024 < 2;
 
-        if (!isJPG) {
+        /*if (!isJPG) {
           this.$message.error('上传图片只能是 JPG 格式!');
-        }
+        }*/
         if (!isLt2M) {
           this.$message.error('上传图片大小不能超过 2MB!');
         }
-        return isJPG && isLt2M;
+        //return isJPG && isLt2M;
+        return isLt2M;
       },
 
       getCompanyName(){
@@ -176,7 +200,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              console.log(res.data)
+              //console.log(res.data)
               let items = res.data.items
               let company_name = items.filter(item =>{
               	return item.name == "company_name"
@@ -187,9 +211,18 @@
               let logo = items.filter(item=>{
                 return item.name == "logo"
               })
+              let soft_v = items.filter(item=>{
+                return item.name == "soft_version"
+              })
+              let storage_day = items.filter(item=>{
+                return item.name == "storage_day"
+              })
               _this.companyName = company_name[0].value
               _this.companyArea = company_area[0].value
               _this.imageUrl = logo[0].value
+
+              _this.num_day = storage_day[0].value
+              _this.soft_version = soft_v[0].value
 
             }
         })
@@ -227,6 +260,9 @@
           });
           return
         }*/
+        if(!_this.imageUrlUpload){
+          _this.imageUrlUpload = _this.imageUrl
+        }
         if(!_this.companyName){
           _this.$message({
             message: '请填写企业名称',
@@ -256,7 +292,17 @@
               name:"company_area",
               displayName:"企业区域",
               value:_this.companyArea
-            }
+            },
+            {
+              name:"soft_version",
+              displayName:"软件版本号",
+              value:_this.soft_version
+            },
+            {
+              name:"storage_day",
+              displayName:"保留天数",
+              value:_this.num_day
+            },
           ]
         }
         //console.log(setCompanyData)
@@ -264,7 +310,7 @@
           setCompanyData,
           true,
           function (res) {
-            console.log(res)
+            //console.log(res)
             if(res.code == 200){
               _this.$message({
                 message: '保存成功',
@@ -283,6 +329,19 @@
           })
 
       },
+
+      softVersionChange(){
+        //.substr(str.length-1,1)   date.substr(0,date.length-1);--去掉最后
+        let v = this.soft_version
+        let s = v.substr(0,v.length-1)
+        let w = v.substr(v.length-1,1)*1 + 1
+        this.soft_version = s + w
+        //console.log(this.soft_version)
+      },
+
+      handleChange(value) {
+        //console.log(value);
+      }
     },
     components: {
       HeaderTop,

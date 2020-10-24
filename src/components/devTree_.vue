@@ -1,19 +1,21 @@
 <template>
-  <div style="width:100%;height:100%;background: #fff">
-    <p v-if="isTitle" class="dev_tree_p" style="padding-left:5px;height:30px;
-    line-height:30px;background:linear-gradient(#e3f2ee,#cae7ee);">设备树</p>
-    <div style="height: calc(100% - 30px);max-height: calc(100% - 30px);overflow: auto">
+	<div style="width:100%;height:100%;border:1px solid #cae7ee;
+	      overflow-x: auto;background: #fff;box-sizing: border-box">
+    <!--<p>{{treeQuery}}</p>-->
+    <p class="dev_tree_p" style="padding-left:5px;height:30px;line-height:30px;background:linear-gradient(#e3f2ee,#cae7ee);">设备树</p>
+    <div style="max-height: calc(100% - 30px);overflow: auto">
       <el-tree
-        :data="dataTree" :default-expanded-keys="idArr"
-        @node-click="nodeClick()"
+        :data="dataTree"
+        show-checkbox :default-expanded-keys="idArr"
         :default-expand-all="false"
-        node-key="id"
-        ref="tree"
+        node-key="id" :default-checked-keys="checkedIdArr"
+        ref="tree" @check="checkedNode"
         highlight-current
         :props="defaultProps">
-        <span class="custom-tree-node span-ellipsis" slot-scope="{ node, data }">
-          <!--<span style="width: 10px;height:10px;background: red;display: inline-block"></span>-->
-          <span :title="node.data.name">
+        <span class="custom-tree-node" slot-scope="{ node, data }">
+
+          <!--<span style="width: 10px;height:10px;background: #329632;display: inline-block"></span>-->
+          <span>
             <i :class="node.data.treeNode?'el-icon-s-cooperation':'el-icon-s-order'"></i>
             <span :class="'alarm'+node.data.alarmLevel" style="width: 13px;height:13px;display: inline-block"></span>
             {{ node.data.name }}
@@ -33,16 +35,17 @@
     </div>
 
 
-  </div>
+	</div>
 </template>
 
 <script>
-  export default {
+	export default {
 
     data() {
       return {
-        dataTree: [{name: '加载中...',
-          /*id: 1,
+        dataTree: [{name:'加载中...'}
+        	/*{
+          id: 1,
           icon:"el-icon-menu",
           label: '变电站',
           children: [{
@@ -58,14 +61,15 @@
               label: '1103',
               icon: 'el-icon-document'
             }]
-          }]*/
-        }],
+          }]
+        }*/
+        ],
+        dataTreeAll:[],
+        treeQuery:'111',
         defaultProps: {
           children: 'treeNode',
           label: 'label'
         },
-        dataTreeAll:[],
-        treeQuery:'111',
         getTreeDataDev:{},
         idArr:[],
         checkedId:[],
@@ -73,32 +77,41 @@
         taskId:'',
       };
     },
-    props:{
-      isTitle:{
-        default:true
-      },
-      toTreeData:{
-
-      }
+    props:['toTreeData','toTreeCheckData'],
+    created() {
+      this.$root.eventHub.$on('eventName',(target) => {
+        if(target==''){
+          this.checkedIdArr = []
+        }
+        this.taskId = target
+        this.findNewTree(target)
+        //console.log(this.checkedIdArr)
+      });
+      this.$root.eventHub.$on('editTaskDbl',(target) => {
+        //console.log(target)
+        this.editTaskId(target)
+      });
     },
 
     mounted(){
-      let _this = this
+    	let _this = this
       _this.getAllDev()
       _this.ajax_api('get',url_api + '/point/tree',
         null,
         true,
         function (res) {
-        //console.log(res)
           if(res.code == 200){
             _this.dataTreeAll = res.data
+            //console.log(res.data)
           }
         })
+
     },
 
     methods: {
-      getAllDev(){
-        let _this = this
+    	getAllDev(){
+    		let _this = this
+        //console.log(_this.getTreeDataDev)
         _this.ajax_api('get',url_api + '/point/tree',
           _this.getTreeDataDev,
           true,
@@ -109,9 +122,7 @@
               _this.dataTree.forEach(m=>{
                 _this.idArr.push(m.id) //默认展开
               })
-              if(!_this.toTreeData){
-                return
-              }
+              //console.log(_this.idArr)
               if(_this.toTreeData.quyu.length>0){
                 let newDataQuyu = []
                 for(let i=0;i<_this.toTreeData.quyu.length;i++){
@@ -127,12 +138,11 @@
                 }
                 //console.log(newDataQuyu)
                 _this.dataTree = [{
-                  alarmLevel:_this.dataTreeAll[0].alarmLevel,
-                  id: _this.dataTreeAll[0].id,
-                  irBaseDeviceTypeId:_this.dataTreeAll[0].irBaseDeviceTypeId,
-                  modelLevel:_this.dataTreeAll[0].modelLevel,
-                  name: _this.dataTreeAll[0].name,
-                  parentId: _this.dataTreeAll[0].parentId,
+                  id: 4,
+                  name: "变电站",
+                  irBaseDeviceTypeId: 4,
+                  modelLevel: 1000,
+                  parentId: 3,
                   treeNode:newDataQuyu
                 }]
               }
@@ -146,24 +156,8 @@
           })
       },
 
-      //node-click节点点击事件
-      nodeClick(){
-        let _this = this
-
-        //console.log(this.$refs.tree.getCurrentNode().children!=undefined)
-        let isLeaf = this.$refs.tree.getCurrentNode().treeNode!=undefined
-        if(isLeaf && _this.toTreeData.checkLeaf==undefined){
-          return
-        }
-
-        this.$emit('childKey', {
-          id:this.$refs.tree.getCurrentKey(),
-          name:this.$refs.tree.getCurrentNode().name
-        })
-      },
-
       getCheckedNodes() {
-        console.log(this.$refs.tree.getCheckedNodes());
+        console.log(this.$refs.tree.getCheckedNodes(true));
       },
       getCheckedKeys() {
         console.log(this.$refs.tree.getCheckedKeys());
@@ -182,9 +176,50 @@
       },
       resetChecked() {
         this.$refs.tree.setCheckedKeys([]);
+      },
+      checkedNode(data,isCheck){
+        this.checkedId = this.$refs.tree.getCheckedKeys(true)
+        this.$emit('devTreeKey', this.checkedId)
+        /*this.checkedId = []
+        this.checkedId.push(isCheck.checkedKeys)
+        console.log(data,isCheck)
+        this.checkedId = distinct(this.checkedId)
+        this.$emit('devTreeKey', this.checkedId)
+        function distinct(arr) {
+          return Array.from(new Set(arr))
+        }*/
+      },
+      findNewTree(target) {
+        //console.log(target);
+        this.getTreeDataDev.devName = target
+        this.getAllDev()
+      },
+      editTaskId(target){
+        this.taskId = target
+        this.getAllDev()
+      },
+      showTaskPoint(){
+      	let _this = this //GET /ui/task/{id}/points
+        _this.ajax_api('get',url_api + '/task/'+_this.taskId+'/points',
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //_this.checkedIdArr = res.data
+              var newArr = []
+              for(var item in res.data) {
+                newArr.push(res.data[item].irProjPointId)
+              }
+              //console.log(newArr)
+              _this.checkedIdArr = newArr
+            }
+          })
       }
     },
     watch:{
+      /*toTreeData:function (val,old) {
+        console.log(val,old)
+      }*/
       toTreeData:{
         handler(n,o){
           //console.log(n)
@@ -249,6 +284,13 @@
         },
         //immediate: true,
         deep: true
+      },
+      toTreeCheckData:{
+        handler(n,o){
+          let _this = this
+          //console.log(n,o)
+          _this.$refs.tree.setCheckedKeys(n);
+        }
       }
     },
   }
@@ -279,17 +321,10 @@
   .alarmundefined
     background : #37b837;
 
-  .span-ellipsis {
-    width: calc(100% - 70px);
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    display: block;
-  }
-
-  /*div>>>.el-tree .el-tree-node__content
-          display flex!important
+  div>>>.el-tree .el-tree-node__content
+    display flex!important
   div>>>.el-tree .el-tree-node .el-tree-node__children
-          overflow visible!important*/
+    overflow visible!important
+
 
 </style>

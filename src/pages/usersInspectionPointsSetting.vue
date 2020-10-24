@@ -18,7 +18,7 @@
           <el-checkbox style="float: left" :indeterminate="isIndeterminateQuyu"
                        v-model="checkAllQuyu" @change="handleCheckAllChange">全部</el-checkbox>
           <el-checkbox-group v-model="checkedQuyu" @change="handleCheckedCitiesChange">
-            <el-checkbox v-for="(item,index) in citiesQuyu" :label="item"
+            <el-checkbox v-for="(item,index) in citiesQuyu" :label="item.id"
                          :key="item.id">{{item.name}}</el-checkbox>
           </el-checkbox-group>
         </div>
@@ -31,7 +31,7 @@
           <el-checkbox style="float: left" :indeterminate="isIndeterminateDevType" v-model="checkAllDevType"
                        @change="handleCheckAllChangeDevType">全部</el-checkbox>
           <el-checkbox-group v-model="checkedDevType" @change="handleCheckedCitiesChangeDevType">
-            <el-checkbox v-for="(item,index) in listDevType" :label="item" :key="item.id">{{item.displayName}}</el-checkbox>
+            <el-checkbox v-for="(item,index) in listDevType" :label="item.id" :key="item.id">{{item.displayName}}</el-checkbox>
           </el-checkbox-group>
         </div>
         <el-checkbox v-model="moreDevType" @change="moreDevTypeF">查看更多</el-checkbox>
@@ -43,7 +43,7 @@
           <el-checkbox style="float: left" :indeterminate="isIndeterminateReconType" v-model="checkAllReconType"
                        @change="handleCheckAllChangeReconType">全部</el-checkbox>
           <el-checkbox-group v-model="checkedReconType" @change="handleCheckedCitiesChangeReconType">
-            <el-checkbox v-for="(item,index) in listReconType" :label="item" :key="item.id">{{item.name}}</el-checkbox>
+            <el-checkbox v-for="(item,index) in listReconType" :label="item.id" :key="item.id">{{item.name}}</el-checkbox>
           </el-checkbox-group>
         </div>
         <el-checkbox v-model="moreReconType" @change="moreReconTypeF">查看更多</el-checkbox>
@@ -55,7 +55,7 @@
           <el-checkbox style="float: left" :indeterminate="isIndeterminateMeterType" v-model="checkAllMeterType"
                        @change="handleCheckAllChangeMeterType">全部</el-checkbox>
           <el-checkbox-group v-model="checkedMeterType" @change="handleCheckedCitiesChangeMeterType">
-            <el-checkbox v-for="(item,index) in listMeterType" :label="item" :key="item.id">{{item.name}}</el-checkbox>
+            <el-checkbox v-for="(item,index) in listMeterType" :label="item.id" :key="item.id">{{item.name}}</el-checkbox>
           </el-checkbox-group>
         </div>
         <el-checkbox v-model="moreMeterType" @change="moreMeterTypeF">查看更多</el-checkbox>
@@ -67,7 +67,7 @@
           <el-checkbox style="float: left" :indeterminate="isIndeterminateFaceType" v-model="checkAllFaceType"
                        @change="handleCheckAllChangeFaceType">全部</el-checkbox>
           <el-checkbox-group v-model="checkedFaceType" @change="handleCheckedCitiesChangeFaceType">
-            <el-checkbox v-for="(item,index) in listFaceType" :label="item" :key="item.id">{{item.name}}</el-checkbox>
+            <el-checkbox v-for="(item,index) in listFaceType" :label="item.id" :key="item.id">{{item.name}}</el-checkbox>
           </el-checkbox-group>
         </div>
         <el-checkbox v-model="moreFaceType" @change="moreFaceTypeF">查看更多</el-checkbox>
@@ -77,7 +77,7 @@
     <XunjianFindTool @xunjianFind="xunjianFind" :saveData="saveData" :savePutData="savePutData"></XunjianFindTool>
     <div class="content">
       <div class="left">
-        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTree>
+        <devTree @devTreeKey="treeCheck" :toTreeData="toTreeData" :toTreeCheckData="toTreeCheckData"></devTree>
       </div>
       <div class="right">
         <el-upload
@@ -103,6 +103,155 @@
         </div>
         <div @click="exportPoints" class="export_but">
           点位导出
+        </div>
+        <div class="add_but">
+          <el-button size="mini" @click="handleAdd()"
+                    style="border-color:#1D9A9A" type="primary">新增点位</el-button>
+        </div>
+        <div class="table_point_wrap">
+          <el-table size="mini" class="table_box" ref="mytable"
+                    :data="dataTableNew" v-if="hardReset"
+                    border
+                    style="width: 100%;">
+            <el-table-column
+                prop="date" align="center"
+                label="序号" type="index" :index="index"
+                width="50">
+            </el-table-column>
+
+            <el-table-column
+                prop="name" align="center" width="350"
+                label="点位名称"
+            >
+              <template slot-scope="scope">
+                <el-input
+                    v-if="scope.row.edit"
+                    size="small"
+                    v-model="scope.row['name']"
+                    :placeholder="'请输入'"
+                ></el-input>
+                <span v-if="!scope.row.edit">{{scope.row['name']}}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column
+                prop="unit" align="center"
+                label="单位" width="150"
+            >
+              <template slot-scope="scope">
+                <el-input
+                    v-if="scope.row.edit"
+                    size="small"
+                    v-model="scope.row['unit']"
+                    :placeholder="'请输入'"
+                ></el-input>
+                <span v-if="!scope.row.edit">{{scope.row['unit']}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+                prop="x" align="center"
+                label="x" width="100"
+            >
+              <template slot-scope="scope">
+                <el-input
+                    v-if="scope.row.edit"
+                    size="small"
+                    v-model="scope.row['x']"
+                    :placeholder="'请输入'"
+                ></el-input>
+                <span v-if="!scope.row.edit">{{scope.row['x']}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+                prop="y" align="center"
+                label="y" width="100"
+            >
+              <template slot-scope="scope">
+                <el-input
+                    v-if="scope.row.edit"
+                    size="small"
+                    v-model="scope.row['y']"
+                    :placeholder="'请输入'"
+                ></el-input>
+                <span v-if="!scope.row.edit">{{scope.row['y']}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+                prop="z" align="center"
+                label="z" width="100"
+            >
+              <template slot-scope="scope">
+                <el-input
+                    v-if="scope.row.edit"
+                    size="small"
+                    v-model="scope.row['z']"
+                    :placeholder="'请输入'"
+                ></el-input>
+                <span v-if="!scope.row.edit">{{scope.row['z']}}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+                prop="createTime" align="center"
+                label="创建时间"
+            >
+            </el-table-column>
+            <el-table-column
+                prop="abnormalPointNum" align="center"
+                label="操作" width="150"
+            >
+              <template slot-scope="scope">
+                <!-- 全局控制的编辑 -->
+                <div v-if="is_edit&&scope.row.add==undefined" style="display: inline-block;">
+                  <!-- 编辑 -->
+                  <el-button
+                      size="mini" style="border-color:#1D9A9A"
+                      v-if="!scope.row.edit"
+                      @click="handleEdit(scope.$index, scope.row)"
+                      type="primary"
+                  >编辑</el-button>
+                  <!-- 保存 -->
+                  <el-button
+                      size="mini"
+                      type="success"
+                      :plain="true"
+                      v-if="scope.row.edit"
+                      @click="handleSave(scope.$index, scope.row)"
+                  >保存</el-button>
+                </div>
+                <!-- 添加控制 -->
+                <div v-if="scope.row.add!=undefined&&scope.row.add" style="display: inline-block;">
+                  <!-- 保存 -->
+                  <el-button
+                      size="mini"
+                      type="success"
+                      :plain="true"
+                      v-if="scope.row.edit"
+                      @click="handleSaveF(scope.$index, scope.row)"
+                  >保存</el-button>
+                </div>
+                <!-- 全局控制删除 -->
+                <el-button
+                    size="mini"
+                    v-if="is_delete&&scope.row.add==undefined"
+                    :plain="true"
+                    type="danger"
+                    @click="handleDelete(scope.$index, scope.row)"
+                >删除</el-button>
+              </template>
+            </el-table-column>
+
+          </el-table>
+          <div class="page_box">
+            <el-pagination
+                @size-change="handleSizeChange"
+                @current-change="handleCurrentChange"
+                :current-page="currentPage"
+                :page-sizes="[10, 20, 50]"
+                :page-size="10"
+                layout="total, sizes, prev, pager, next, jumper"
+                :total="total">
+            </el-pagination>
+          </div>
         </div>
       </div>
     </div>
@@ -206,6 +355,27 @@
           token: localStorage.getItem('token')
         },
         pointsExcelUpdate: url_api + '/file/uploadExcel',  //POST /ui/file/uploadExcel
+
+        dataTable:[],
+        ajaxTableData: {page:1, size:10},
+        total:0,
+        dataTableNew:[],
+        is_edit: true, //是否可编辑
+        is_delete: true, //是否可删除
+        space_color: true, //隔行变色
+        hardReset: true,
+        new_date_json: {}, //数据结构新增
+
+
+        toTreeCheckData:[],  //默认选择的树节点
+        getTreeDataDev:{},
+        dataTreeAll:[],
+        checkedQuyuTreeIds:[],
+        checkedDevTypeTreeIds:[],
+        checkedReconTypeTreeIds:[],
+        checkedMeterTypeTreeIds:[],
+        checkedFaceTypeTreeIds:[],
+
       }
     },
     components: {
@@ -217,7 +387,10 @@
       menuBottom,
     },
     mounted(){
-      this.init()
+      let _this = this
+      _this.init()
+      _this.getAllTree()
+      _this.getPointList()
     },
     methods: {
       init(){
@@ -238,13 +411,6 @@
             return item.parentId == 4
           })
           _this.citiesQuyu = result
-          //_this.checkedQuyu = [result[1],result[3]]
-        })
-
-        _this.ajax_api('get',url_api + '/recon-type?size=30',null,true,function (res) {
-          //console.log(res.data)
-          let result = res.data.items
-          _this.listReconType = result
         })
 
         _this.ajax_api('get',url_api + '/device-type?size=100',null,true,function (res) {
@@ -254,6 +420,12 @@
             return item.name >2000
           })
           _this.listDevType = result
+        })
+
+        _this.ajax_api('get',url_api + '/recon-type?size=30',null,true,function (res) {
+          //console.log(res.data)
+          let result = res.data.items
+          _this.listReconType = result
         })
 
         _this.ajax_api('get',url_api + '/meter-type?size=100',null,true,function (res) {
@@ -270,16 +442,84 @@
         })
 
       },
-
-      handleSizeChange(val) {
-        //console.log(`每页 ${val} 条`);
+      getAllTree(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/point/tree',
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              _this.dataTreeAll = res.data
+            }
+          })
       },
-      handleCurrentChange(val) {
-        //console.log(`当前页: ${val}`);
+
+      getPointList(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/point/pointList',
+          _this.ajaxTableData,
+          true,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data)
+              _this.dataTable = res.data.items
+              _this.total = res.data.total
+              _this.initEditAttribute()
+            }
+          })
+      },
+
+      //勾选类型区域等 设备树同时勾选
+      updateTreeCheck(){
+        let _this = this
+        let arr = []
+        return new Promise(function(resolve) {
+          //console.log(_this.getTreeDataDev)
+          _this.ajax_api('get',url_api + '/point/tree',
+            _this.getTreeDataDev,  //{reconTypeIds:'5'},
+            true,
+            function (res) {
+              if(res.code == 200){
+                arr = _this.readNodes(res.data)
+                resolve(arr);
+              }
+            })
+        });
+
+        /*_this.ajax_api('get',url_api + '/point/tree',
+          _this.getTreeDataDev,  //{reconTypeIds:'5'},
+          true,
+          function (res) {
+            if(res.code == 200){
+              arr = _this.readNodes(res.data)
+              cb(arr)
+            }
+          })*/
+
+      },
+
+      readNodes (nodes = [], arr = []) {
+        let _this = this
+        for (let item of nodes) {
+          //arr.push(item.id)
+          if (item.treeNode && item.treeNode.length){
+            _this.readNodes(item.treeNode, arr)
+          }else {
+            arr.push(item.id)
+          }
+        }
+        return arr
       },
 
       handleCheckAllChange(val) {
-        this.checkedQuyu = val ? this.citiesQuyu : [];
+        let _this = this
+        let idArr = []
+        if(val){
+          for(let i=0;i<_this.citiesQuyu.length;i++){
+            idArr.push(_this.citiesQuyu[i].id)
+          }
+        }
+        this.checkedQuyu = idArr;
         this.isIndeterminateQuyu = false;
       },
       handleCheckedCitiesChange(value) {
@@ -296,8 +536,15 @@
       },
 
       handleCheckAllChangeDevType(val) {
-        this.checkedDevType = val ? this.listDevType : [];
-        this.isIndeterminateDevType = false;
+        let _this = this
+        let idArr = []
+        if(val){
+          for(let i=0;i<_this.listDevType.length;i++){
+            idArr.push(_this.listDevType[i].id)
+          }
+        }
+        _this.checkedDevType = idArr;
+        _this.isIndeterminateDevType = false;
       },
       handleCheckedCitiesChangeDevType(value) {
         let checkedCount = value.length;
@@ -313,7 +560,14 @@
       },
 
       handleCheckAllChangeReconType(val) {
-        this.checkedReconType = val ? this.listReconType : [];
+        let _this = this
+        let idArr = []
+        if(val){
+          for(let i=0;i<_this.listReconType.length;i++){
+            idArr.push(_this.listReconType[i].id)
+          }
+        }
+        this.checkedReconType = idArr;
         this.isIndeterminateReconType = false;
       },
       handleCheckedCitiesChangeReconType(value) {
@@ -330,8 +584,15 @@
       },
 
       handleCheckAllChangeMeterType(val) {
-        this.checkedMeterType = val ? this.listMeterType : [];
-        this.isIndeterminateMeterType = false;
+        let _this = this
+        let idArr = []
+        if(val){
+          for(let i=0;i<_this.listMeterType.length;i++){
+            idArr.push(_this.listMeterType[i].id)
+          }
+        }
+        _this.checkedMeterType = idArr;
+        _this.isIndeterminateMeterType = false;
       },
       handleCheckedCitiesChangeMeterType(value) {
         let checkedCount = value.length;
@@ -347,8 +608,15 @@
       },
 
       handleCheckAllChangeFaceType(val) {
-        this.checkedFaceType = val ? this.listFaceType : [];
-        this.isIndeterminateFaceType = false;
+        let _this = this
+        let idArr = []
+        if(val){
+          for(let i=0;i<_this.listFaceType.length;i++){
+            idArr.push(_this.listFaceType[i].id)
+          }
+        }
+        _this.checkedFaceType = idArr;
+        _this.isIndeterminateFaceType = false;
       },
       handleCheckedCitiesChangeFaceType(value) {
         let checkedCount = value.length;
@@ -361,6 +629,135 @@
         }else {
           $('.all_content_face_type').height('20px')
         }
+      },
+
+      //初始化编辑属性
+      initEditAttribute() {
+        var _this = this;
+
+        if (_this.dataTable.length > 0) {
+          _this.dataTableNew = []
+          //添加编辑事件
+          for (var index in _this.dataTable) {
+            _this.dataTable[index]["edit"] = false;
+            _this.dataTableNew.push(_this.dataTable[index]);
+          }
+          if (Object.keys(this.new_date_json).length === 0) {
+            //新增时，初始化数据结构
+            this.initAddDataJson(_this.dataTable[0]);
+          }
+
+        }
+        //console.log("tableData:", this.dataTableNew);
+      },
+      //编辑
+      handleEdit(index, row) {
+        //console.log(index, row);
+        row.edit = true;
+        this.hardReset= false
+        this.$nextTick(() => {
+          this.hardReset = true
+        });
+      },
+      //保存  PUT /ui/point/updPoint/{id}
+      handleSave(index, row) {
+        let _this = this
+        let updatePoint = {
+          name:row.name,
+          unit:row.unit
+        }
+        //console.log(index, row);
+        row.edit = false;
+        this.hardReset= false
+        this.$nextTick(() => {
+          this.hardReset = true
+        });
+        _this.ajax_api('put',url_api + '/point/updPoint/' + row.id,
+          updatePoint,
+          true, function (res) {
+            if(res.code == 200){
+              _this.$message({
+                message: '修改成功',
+                type: 'success',
+              });
+              //_this.getPointList()
+            }else {
+              _this.$message({
+                message: '操作失败，请重试',
+              });
+            }
+          })
+      },
+      tableRowClassName() {
+        //选取DOM节点
+        var trs = this.$refs.mytable.$el
+          .getElementsByTagName("tbody")[0]
+          .getElementsByTagName("tr");
+        for (var i in trs) {
+          if (i % 2 == 0) {
+            //当隔行变色未true时改变颜色
+            if (this.space_color) {
+              trs[i].style.backgroundColor = "#fff";
+            } else {
+              trs[i].style.backgroundColor = "";
+            }
+          }
+        }
+      },
+
+      handleSaveF(index, row) {
+        let _this = this
+        delete _this.dataTableNew[index].add;
+        //console.log(index, row);
+        row.createTime = _this.getDateTime()
+        row.edit = false;
+        this.hardReset= false
+        this.$nextTick(() => {
+          this.hardReset = true
+        });
+        _this.$message({
+          message: '保存成功',
+          type: 'success',
+        });
+      },
+      //新增
+      handleAdd() {
+        var addDataJson = {};
+        for (var key in this.new_date_json) {
+          if (key === "edit") {
+            delete addDataJson[key];
+          } else if (key === "add") {
+            delete addDataJson[key];
+          } else {
+            addDataJson[key] = "";
+          }
+        }
+        addDataJson.edit = true;
+        addDataJson.add = true;
+        this.dataTableNew.unshift(addDataJson);
+      },
+      initAddDataJson(dataArray) {
+        //新增时，初始化数据结构
+        var dataJson = dataArray;
+        var newDateJson = {};
+        for (var key in dataJson) {
+          if (key === "edit") {
+            newDateJson[key] = "true";
+          } else {
+            newDateJson[key] = "";
+          }
+        }
+        newDateJson["add"] = true;
+        this.new_date_json = newDateJson;
+      },
+      //删除
+      handleDelete(index, row) {
+        //console.log(index, row);
+        this.dataTableNew.splice(index, 1);
+        this.$message({
+          message: "删除成功！",
+          type: "success"
+        });
       },
 
       treeCheck(data){
@@ -423,7 +820,7 @@
         }
       },
       exportPoints(){
-        console.log(this.saveData.points) //POST /ui/file/download
+        //console.log(this.saveData.points) //POST /ui/file/download
         let _this = this
         let points = _this.saveData.points.toString()
         /*_this.ajax_api('post',url_api + '/file/downloadExcel',points,true,function (res) {
@@ -440,13 +837,17 @@
           console.log(res)
         })*/
         if(points){
-          console.log(points)
-          var url = url_api + '/file/downloadExcel';
+          //console.log(points)
+          var url = url_api + '/file/downloadExcel?_='+ +new Date();
           var xhr = new XMLHttpRequest();
           xhr.open('post', url, true);    // 也可以使用POST方式，根据接口
           xhr.setRequestHeader("Content-type", "application/json;charset=utf-8");
           xhr.setRequestHeader("token",localStorage.getItem('token'));
-          xhr.send(points+'')
+          var a = points+''
+          var b = points.toString()
+          var c = points
+          //console.log('a='+a+'|','b='+b,'c='+c,)
+          xhr.send(a)
           xhr.responseType = "blob";  // 返回类型blob
           // 定义请求完成的处理函数，请求前也可以增加加载框/禁用下载按钮逻辑
           xhr.onload = function () {
@@ -459,7 +860,7 @@
               reader.onload = function (e) {
                 // 转换完成，创建一个a标签用于下载
                 var a = document.createElement('a');
-                a.download = 'data.xlsx';
+                a.download = 'Points-data.xlsx';
                 a.href = e.target.result;
                 $("body").append(a);  // 修复firefox中无法触发click
                 a.click();
@@ -482,33 +883,203 @@
 
       },
 
+      index(val){
+        //(listQuery.page - 1) * listQuery.pageSize + scope.$index + 1
+        return (this.ajaxTableData.page - 1)*this.ajaxTableData.size + val + 1
+      },
+      handleSizeChange(val) {
+        //console.log(`每页 ${val} 条`);
+        this.ajaxTableData.size = val
+        this.getPointList()
+      },
+      handleCurrentChange(val) {
+        //console.log(`当前页: ${val}`);
+        this.ajaxTableData.page = val
+        this.getPointList()
+      },
+      getDateTime(){ //默认显示今天
+        var Da = new Date();
+        //var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
+        // var Da = new Date()
+        var y = Da.getFullYear();
+        var m = Da.getMonth() + 1;
+        var d = Da.getDate();
+        var H = Da.getHours();
+        var mm = Da.getMinutes();
+        var ss = Da.getSeconds();
+        m = m < 10 ? "0" + m : m;
+        d = d < 10 ? "0" + d : d;
+        H = H < 10 ? "0" + H : H;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
+        return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
+        //return y + "-" + m + "-" + d
+      },
+
     },
     watch:{
+      dataTableNew: function() {
+        //监听数据变化f
+        this.$nextTick(function() {
+          /////方法
+          this.tableRowClassName();
+        });
+      },
 
       checkedQuyu:function (newVal,oldVal) {
         let _this = this
         //console.log(newVal,oldVal)
-        _this.toTreeData.quyu = newVal
+        if(newVal.length<1){
+          _this.checkedQuyuTreeIds = []
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }else {
+          let quyuArr = []
+          for(let i=0;i<newVal.length;i++){
+            let li = _this.dataTreeAll[0].treeNode.filter(item => {
+              return item.id == newVal[i]
+            })
+            quyuArr.push.apply(quyuArr,_this.readNodes(li))
+          }
+          _this.checkedQuyuTreeIds = quyuArr
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }
       },
       checkedDevType:function (newVal,oldVal) {
         let _this = this
-        //console.log(newVal,oldVal)
-        _this.toTreeData.type = newVal
+        if(newVal.length<1){
+          _this.getTreeDataDev.typeIds = null
+          _this.checkedDevTypeTreeIds = []
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }else {
+          _this.getTreeDataDev.typeIds = newVal.toString()
+          //_this.toTreeData.recon = newVal
+          _this.updateTreeCheck().then(updateTreeArrAdd)
+          function updateTreeArrAdd(x) {
+            //console.log(x)
+            _this.checkedDevTypeTreeIds = x
+            _this.toTreeCheckData = []
+            _this.toTreeCheckData = _this.toTreeCheckData
+              .concat(_this.checkedQuyuTreeIds)
+              .concat(_this.checkedDevTypeTreeIds)
+              .concat(_this.checkedReconTypeTreeIds)
+              .concat(_this.checkedMeterTypeTreeIds)
+              .concat(_this.checkedFaceTypeTreeIds)
+          }
+        }
+
       },
       checkedReconType:function (newVal,oldVal) {
         let _this = this
-        //console.log(newVal,oldVal)
-        _this.toTreeData.recon = newVal
+        if(newVal.length<1){
+          _this.getTreeDataDev.reconTypeIds = null
+          _this.checkedReconTypeTreeIds = []
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }else {
+          _this.getTreeDataDev.reconTypeIds = newVal.toString()
+          _this.getTreeDataDev.faceTypeIds = null
+          _this.getTreeDataDev.meterTypeIds = null
+          _this.getTreeDataDev.typeIds = null
+          //_this.toTreeData.recon = newVal
+          //console.log(_this.getTreeDataDev.reconTypeIds)
+          _this.updateTreeCheck().then(updateTreeArrAdd)
+          function updateTreeArrAdd(x) {
+            _this.checkedReconTypeTreeIds = x
+            //console.log(x)
+            _this.toTreeCheckData = []
+            _this.toTreeCheckData = _this.toTreeCheckData
+              .concat(_this.checkedQuyuTreeIds)
+              .concat(_this.checkedDevTypeTreeIds)
+              .concat(_this.checkedReconTypeTreeIds)
+              .concat(_this.checkedMeterTypeTreeIds)
+              .concat(_this.checkedFaceTypeTreeIds)
+          }
+        }
       },
       checkedMeterType:function (newVal,oldVal) {
         let _this = this
-        //console.log(newVal,oldVal)
-        _this.toTreeData.meter = newVal
+        if(newVal.length<1){
+          _this.getTreeDataDev.meterTypeIds = null
+          _this.checkedMeterTypeTreeIds = []
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }else {
+          _this.getTreeDataDev.meterTypeIds = newVal.toString()
+          _this.getTreeDataDev.faceTypeIds = null
+          _this.getTreeDataDev.reconTypeIds = null
+          _this.getTreeDataDev.typeIds = null
+          _this.updateTreeCheck().then(updateTreeArrAdd)
+          function updateTreeArrAdd(x) {
+            //console.log(x)
+            _this.checkedMeterTypeTreeIds = x
+            _this.toTreeCheckData = []
+            _this.toTreeCheckData = _this.toTreeCheckData
+              .concat(_this.checkedQuyuTreeIds)
+              .concat(_this.checkedDevTypeTreeIds)
+              .concat(_this.checkedReconTypeTreeIds)
+              .concat(_this.checkedMeterTypeTreeIds)
+              .concat(_this.checkedFaceTypeTreeIds)
+          }
+        }
       },
       checkedFaceType:function (newVal,oldVal) {
         let _this = this
-        //console.log(newVal,oldVal)
-        _this.toTreeData.face = newVal
+        if(newVal.length<1){
+          _this.getTreeDataDev.faceTypeIds = null
+          _this.checkedFaceTypeTreeIds = []
+          _this.toTreeCheckData = []
+          _this.toTreeCheckData = _this.toTreeCheckData
+            .concat(_this.checkedQuyuTreeIds)
+            .concat(_this.checkedDevTypeTreeIds)
+            .concat(_this.checkedReconTypeTreeIds)
+            .concat(_this.checkedMeterTypeTreeIds)
+            .concat(_this.checkedFaceTypeTreeIds)
+        }else {
+          _this.getTreeDataDev.faceTypeIds = newVal.toString()
+          _this.getTreeDataDev.meterTypeIds = null
+          _this.getTreeDataDev.reconTypeIds = null
+          _this.getTreeDataDev.typeIds = null
+          _this.updateTreeCheck().then(updateTreeArrAdd)
+          function updateTreeArrAdd(x) {
+            //console.log(x)
+            _this.checkedFaceTypeTreeIds = x
+            _this.toTreeCheckData = []
+            _this.toTreeCheckData = _this.toTreeCheckData
+              .concat(_this.checkedQuyuTreeIds)
+              .concat(_this.checkedDevTypeTreeIds)
+              .concat(_this.checkedReconTypeTreeIds)
+              .concat(_this.checkedMeterTypeTreeIds)
+              .concat(_this.checkedFaceTypeTreeIds)
+          }
+        }
       },
 
       saveData:{
@@ -575,6 +1146,7 @@
         float left
         width calc(100% - 300px)
         height 100%
+        position relative
         .upload-demo
           width 300px
           margin 20px
@@ -597,7 +1169,27 @@
           line-height 32px
           cursor pointer
           color white
+        .export_but
+          margin -71px 0 40px 300px
+        .add_but
+          position absolute
+          top 50px
+          right 38px
+
         .export_but:hover
           background #21bbbb
+        .table_point_wrap
+          height calc(100% - 95px)
+          border-top 1px solid #21bbbb
+          .table_box
+            height calc(100% - 32px)
+            overflow-y auto
+          .table_box::before
+            height 0px
 
+
+        .el-button--primary
+          background #1D9A9A
+        .el-button--primary:hover
+          background #21bbbb
 </style>

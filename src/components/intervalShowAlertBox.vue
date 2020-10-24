@@ -42,7 +42,7 @@
           true,function (res) {
             //console.log(_this.title_dev_id)
             if(res.code == 200){
-              console.log(res.data)
+              //console.log(res.data)
               _this.items = res.data
             }
           })
