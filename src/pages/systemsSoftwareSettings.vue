@@ -175,8 +175,8 @@
         //console.log(file.response.data.localUrl.slice(-37))
         //本地测试
         //this.imageUrlUpload = 'http://localhost:8080/smcsp/file' + file.response.data.localUrl.slice(-37)
-        //this.imageUrlUpload = url_img+'/smcsp/file' + file.response.data.localUrl.slice(-54)
-        this.imageUrlUpload = file.response.data.localUrl
+        this.imageUrlUpload = url_img+'/smcsp/file' + file.response.data.localUrl.slice(32,file.response.data.localUrl.length)
+        //this.imageUrlUpload = file.response.data.localUrl
       },
       beforeAvatarUpload(file) {
         //console.log(file)

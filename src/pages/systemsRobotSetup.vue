@@ -291,6 +291,7 @@
       this.init()
       this.init2()
     },
+    inject:['reload'],
     methods:{
       init(){
         let _this = this
@@ -428,6 +429,7 @@
                 message: '设置成功',
                 type: 'success',
               });
+              _this.reload();
             }else {
               _this.$message({
                 message: '设置失败，请稍后重试',

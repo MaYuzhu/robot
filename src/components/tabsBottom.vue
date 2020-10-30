@@ -38,7 +38,8 @@
               label="识别结果"
             >
               <template slot-scope="scope">
-                <span v-if="scope.row">{{scope.row.valueDesc}}{{scope.row.point.unit}}</span>
+                <span v-if="scope.row">{{scope.row.valueDesc}}</span>
+                <span v-if="Math.abs(scope.row.value)<10000">{{scope.row.point.unit}}</span>
               </template>
             </el-table-column>
             <el-table-column
@@ -167,6 +168,8 @@
         <img :src="dialogImgUrl" width="100%" height="100%">
       </el-card>
     </el-dialog>
+    <div class="baojing"><audio id="audio" controls="controls" loop="loop"
+                                src="../../static/img/baojing.mp3"></audio></div>
 	</div>
 </template>
 
@@ -247,17 +250,17 @@
     },
     methods: {
       handleClick(tab, event) {
-        console.log(tab, event);
-        console.log('tab')
+        //console.log(tab, event);
         this.pointAlarmNow()
+        this.pointSysAlarmNow()
       },
       pointNow(){
           let _this = this
-          //console.log(_this.irDataTaskHistoryId)
-          /*if(!_this.irDataTaskHistoryId){
+          console.log(_this.irDataTaskHistoryId)
+          if(!_this.irDataTaskHistoryId){
             _this.tableDataPointNow = []
             return
-          }*/
+          }
           _this.ajaxTablePointNowData.irDataTaskHistoryId = _this.irDataTaskHistoryId
           _this.ajax_api('post',url_api + '/point-history',
               {page:1, size:10000,
@@ -288,9 +291,33 @@
                         //console.log('id为空')
                         return
                       }
+                      //找到 new 值，判断报警
+                      if(_this.tableDataPointNow.length==res.data.items.length){
+                        return
+                      }else {
+                        if(Math.abs(res.data.items[0].value)>=10000){
+                          //alert('设备'+res.data.items[0].point.id+res.data.items[0].valueDesc)
+                          let message = '设备'+res.data.items[0].point.id+res.data.items[0].valueDesc
+                          _this.playOrPaused()
+                          _this.$alert(message, '系统警报', {
+                            confirmButtonText: '确定',
+                            callback: action => {
+                              _this.playClose()
+                            }
+                          })
+                        }
+                        _this.tableDataPointNow = res.data.items
+                      }
                       //请求所有-倒序  reverse
-                      _this.tableDataPointNow = res.data.items
-
+                      //_this.tableDataPointNow = res.data.items
+                      /*if(Math.abs(res.data.items[0].value)>=10000){
+                        alert(res.data.items[0].point.id+res.data.items[0].valueDesc)
+                      }*/
+                      /*for(let i=0;i<res.data.items.length;i++){
+                        if(Math.abs(res.data.items[i].value)>10000){
+                          alert(res.data.items[i].point.id+res.data.items[i].valueDesc)
+                        }
+                      }*/
                       //原来一条一条加-start
                       /*if(_this.tableDataPointNow.length==0 && res.data.items.length>0){
                         console.log('+1')
@@ -447,6 +474,22 @@
         }
         return wbout
       },
+
+      //报警声音
+      playOrPaused(id,obj){
+        var audio = document.getElementById('audio');
+        if(audio.paused){
+          audio.play();
+          //obj.innerHTML='暂停';
+          return;
+        }
+        audio.pause();
+        //obj.innerHTML='播放';
+      },
+      playClose(id,obj){
+        var audio = document.getElementById('audio');
+        audio.pause();
+      },
     },
     destroyed(){
         let _this = this
@@ -509,4 +552,11 @@
       background #146363
       color white
       z-index 999
+    .baojing
+      position absolute
+      z-index 20000
+      background #3d8fff
+      top 50px
+      left -3000px
+      margin-left -1000px
 </style>

@@ -1442,7 +1442,7 @@
                 //清除计划的线  &  走过的线路
                 _this.planLinePointVector.getSource().clear()
                 _this.passRouteLayer.getSource().clear()
-                sessionStorage.setItem("planLine",'');
+                sessionStorage.setItem("planLine",'')
               }
             })
           }

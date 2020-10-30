@@ -42,6 +42,7 @@ import resultsAnalysisComparisonAnalysis from '@/pages/resultsAnalysisComparison
 import resultsAnalysisGenerateReports from '@/pages/resultsAnalysisGenerateReports'
 
 import usersThresholdSetting from '@/pages/usersThresholdSetting'
+import usersAlarmMessageSetting from '@/pages/usersAlarmMessageSetting'  //消息订阅
 import usersRightsManagement from '@/pages/usersRightsManagement'
 import usersInspectionPointsSetting from '@/pages/usersInspectionPointsSetting'
 import usersUserManagement from '@/pages/usersUserManagement'
@@ -323,6 +324,14 @@ const router = new Router({
       component: usersThresholdSetting,
       meta:{
         name:'告警阈值设置'
+      }
+    },
+    {
+      path: '/users/alarm-message-setting',
+      name: 'usersAlarmMessageSetting',
+      component: usersAlarmMessageSetting,
+      meta:{
+        name:'告警消息订阅设置'
       }
     },
     {

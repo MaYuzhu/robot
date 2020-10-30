@@ -26,14 +26,16 @@
     </div>
     <div style="display: flex;">
       <div style="width:60%;height:300px;background:white;float: left;">
-        <TabsBottom @isVideo="isVideo"  :irDataTaskHistoryId="irDataTaskHistoryId" class="tabs_wrap"></TabsBottom>
+        <TabsBottom @isVideo="isVideo"  :irDataTaskHistoryId="irDataTaskHistoryId" class="tabs_wrap" v-if="hardReset"></TabsBottom>
       </div>
       <div class="control_wrap">
         <div class="control_header">
           <div class="control_header_left">
             <p title="获取权限" class="button_control_header"><img src="../../static/images/control.png" alt=""></p>
             <p @click="clickCapturePic" title="抓图" class="button_control_header"><img src="../../static/images/pictures.png" alt=""></p>
-            <p @click="clickVoice" :title="voice_title" class="button_control_header"><img :src='voice_img' alt=""></p>
+            <p @click="clickVoice" :title="voice_title" class="button_control_header">
+              <span style="color:rgb(156, 179, 178)"></span><img :src='voice_img' alt="">
+            </p>
             <p @click="clickVideo" :title="video_title" class="button_control_header"><img :src="video_img" alt=""></p>
             <p @click="clickDuijiang" :title="duijiang_title" class="button_control_header duijiang">
               <img :src="duijiang_img" alt="">
@@ -242,6 +244,11 @@
         taskServer:null,
         playbackShow:false,
         irDataTaskHistoryId:'',
+        num:'',
+        yanshi: 0,
+        timeId: null,
+        setTimeIds: null,
+        hardReset: true,
       }
     },
 
@@ -303,11 +310,7 @@
         name : '/cloudplatform_control',
         serviceType : 'robotmsg/CloudPlatControl'
       });
-      _this.listener_sound = new ROSLIB.Topic({
-        ros : _this.ros,
-        name : '/record_sound',
-        messageType : 'robotmsg/record_sound'
-      });
+
 
       /*$(document).keydown(function(event){
 
@@ -700,6 +703,10 @@
       //语音对讲
       clickDuijiang(){
         let _this = this
+        if(_this.yanshi != 0){
+          console.log('等30s')
+          return
+        }
         if(_this.duijiang_title == '关闭语音'){
           _this.duijiang_title = '开启语音'
           _this.duijiang_img = "../../static/images/voice_close.png"
@@ -838,6 +845,10 @@
         _this.taskServer.callService(request, function(result) {
           console.log(result);
         });
+        _this.yanshi = 30
+        setTimeout(() => {
+          _this.yanshi = 0
+        },3000*10)
       },
       // 打开声音
       clickOpenSound() {
@@ -1006,7 +1017,7 @@
           $('.playbackdiv #video').attr('src',null)
           $('.playbackdiv .sound_wrap').empty()
           _this.ajax_api('get',url_api + '/file/fileList',null,true,function (res) {
-            console.log(res)
+            //console.log(res)
             if(res.data.length<1){
               _this.$message({ message: '暂无音频',});
               return
@@ -1092,6 +1103,16 @@
         //console.log(val)
         let _this = this
 
+        _this.listener_sound = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/record_sound',
+          messageType : 'robotmsg/record_sound'
+        });
+
+        //let timeId, setTimeIds
+        //clearTimeout(timeId)
+        //clearTimeout(setTimeIds)
+
         if(val == 'start'){
           console.log(val)
           let sound = new ROSLIB.Message({
@@ -1100,15 +1121,33 @@
           });
           _this.listener_sound.publish(sound);
 
-          setTimeout(() =>{
+          _this.num = 10
+          aa()
+          function aa(){
+            _this.num--
+            if(_this.num<=0) {
+              clearTimeout(_this.timeId);
+            }
+            else {
+              _this.timeId = setTimeout(function () {
+                aa()
+              }, 1000);
+            }
+          }
+
+          _this.setTimeIds = setTimeout(() =>{
             if(_this.voice_title == '停止录制'){
               _this.voice_title = '录制声音'
               _this.voice_img = "../../static/images/recordingvoice.png"
               _this.startOrEndMp3('end')
             }
-          },1000*30)
-        }else {
+          },1000*10)
+        }else if(val == 'end'){
           console.log(val)
+
+          clearTimeout(_this.timeId)
+          clearTimeout(_this.setTimeIds)
+
           let sound = new ROSLIB.Message({
             path: url_api + '/file/uploadImage',
             status: false
@@ -1181,6 +1220,7 @@
         垂直设置：
         id=0 action=1 type=1  value=度数×100，顺时针
       */
+      //云台旋转 new
       mouseDownPTZControlNew(n){  //6-s   1-w  3-a   4-d
         let _this = this
         //console.log(n)
@@ -1193,13 +1233,13 @@
         _this.listener_yun.subscribe(function (message) {
           //console.log(message)
           let arr = message.data.split('/')
-          //console.log(arr)
+          console.log(arr)
           if(n == 3){
             let left = arr[0]*1 - 10
             if(left<0){
               left = 360 + left
             }
-            //console.log(left)
+            console.log(left)
             var request = new ROSLIB.ServiceRequest({
               id:0, action:1, type:0, value:left*100
             });
@@ -1407,7 +1447,18 @@
           this.car_direction_mask = true
         }
         if(val == 1){
-          this.car_direction_mask = false
+          this.car_direction_mask = true
+          _this.taskServerClear = new ROSLIB.Service({
+            ros : _this.ros,
+            name : '/taskclear',
+            serviceType : 'robotmsg/TaskList'
+          });
+          _this.taskServerClear.callService({flag:0},function(result) {
+            _this.$message('任务终止');
+            //_this.planLinePointVector.getSource().clear()
+            _this.$router.push({path:'/tasks/custom-task'})
+            sessionStorage.setItem("planLine",'');
+          })
         }
         if(val == 2){
           this.car_direction_mask = false
@@ -1469,16 +1520,25 @@
 
     },
 
+    watch:{
+      irDataTaskHistoryId:function (n,o) {
+        console.log(n,o)
+        this.hardReset= false
+        this.$nextTick(() => {
+          this.hardReset = true
+        });
+      }
+    },
 
     destroyed(){
         let _this = this
         clearTimeout(_this.currentTaskInfoTimeId)
         _this.ros.close()
         _this.listener_v.unsubscribe()
+        console.log(_this.voice_title)
         if(_this.voice_title == '停止录制'){
           _this.startOrEndMp3('end')
         }
-
 
     },
     created() {
@@ -1494,7 +1554,6 @@
         console.log('连接已断开')
         this.listener.unsubscribe();
       }
-      this.clickVoice()
     },
     components: {
       HeaderTop,

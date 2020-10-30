@@ -316,7 +316,7 @@
                       <span>|</span>
                     </div>
                     <div>
-                      <router-link to="/users/threshold-setting">告警消息订阅设置</router-link>
+                      <router-link to="/users/alarm-message-setting">告警消息订阅设置</router-link>
                       <span>|</span>
                     </div>
                   </dd>
@@ -470,32 +470,84 @@
         logoUrl:'../../static/images/logo.jpg',
         url:robotUrl,
         ros:null,
+        rosWebsocket:null,
         listener:null,
+
+        listenerPower: null,
+        listenerJoy: null,
         listenerController:null,
-        timesListenerController:null,
-        listener_power:null,
+        listenerLocationStatus: null,
+        listenerWebsocket: null,
+        
         battery_capacity:'',
+        
         timesWebsocketAlarm: null,
+        timesWebsocketAlarm10s: null,
+        
+        times_s:1000*10,
+        timesPowerAlarm: null,
+        timesJoyAlarm: null,
+        timesListenerController:null,
+        timesListenerLocationStatus:null,
+        isWebsocket: true,
       }
 
     },
     mounted(){
       let _this = this
-    	this.getCompanyName()
-      this.countAlarmShow()
       _this.ros = new ROSLIB.Ros({
         url: _this.url
       });
       _this.ros.on('connection', function() {
         //console.log('all_alarm');
       });
+      _this.rosWebsocket = new ROSLIB.Ros({
+        url: _this.url
+      });
+      _this.getCompanyName()
+      _this.countAlarmShow()
+      _this.init()
+      //_this.allAlarm()      //红外  遥控0  计算单元  云台(检测设备)3 工控机
+      //_this.power_now()     //电量 1
+      //_this.controllerAlarm()      //驱动（按下急停触发） 2
+      //_this.websocketAlarm()
+      //_this.locationStatusAlarm()   //偏航4
 
-      this.allAlarm()
-      this.power_now()
-      //this.websocketAlarm()
     },
     props:['title'],
     methods: {
+      init(){
+        let _this = this
+
+        _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
+          {irBaseRobotId:1,size:200,page:1,},
+          true, function (res) {
+            let alarm_message = res.data.items.filter(item => {
+              return item.name == 'alarm-message-setting'
+            })
+            let alarm_arr = alarm_message[0].value.split(',')
+            //console.log(alarm_message[0].value)
+            for(let i=0;i<alarm_arr.length;i++){
+              if(alarm_arr[i]==0){
+                _this.allAlarm(0)
+              }
+              if(alarm_arr[i]==3){
+                _this.allAlarm(3)
+              }
+              if(alarm_arr[i]==1){
+                _this.power_now()
+              }
+              if(alarm_arr[i]==2){
+                _this.controllerAlarm()
+              }
+              if(alarm_arr[i]==4){
+                _this.locationStatusAlarm()
+              }
+
+            }
+
+          })
+      },
       //...mapMutations(['changeLogin']),
       // 移入
       mouseOver() {
@@ -576,64 +628,75 @@
       wordDetail(){
 
       },
-      //报警
-      allAlarm(){
+
+      //报警 遥控等
+      allAlarm(val){
         let _this = this
-        clearTimeout(_this.timesListenerController)
+        clearTimeout(_this.timesJoyAlarm)
         //接收任务是否完成-消息
-        _this.listener = new ROSLIB.Topic({
+        _this.listenerJoy = new ROSLIB.Topic({
           ros : _this.ros,
           name : '/self_check',
           messageType : 'robotmsg/connection_status'
         });
-        _this.listener.subscribe(function(message) {
+        _this.listenerJoy.subscribe(function(message) {
           //console.log(message)
-          if(!message.joy){
-            _this.open('遥控信号故障')
+          /*
+            camera: true
+            infrared_camera: true
+            ipc: true
+            joy: true
+            xavier: true
+          */
+          if(!message.joy&&val==0){
+            _this.openJoy('遥控信号故障（错误代码4001）')
             _this.playOrPaused()
-            _this.listener.unsubscribe();
-          }else if(!message.ipc){
-            _this.open('工控机信号故障')
-            _this.playOrPaused()
-            _this.listener.unsubscribe();
-          }else if(!message.xavier){
-            _this.open('计算单元信号故障')
-            _this.playOrPaused()
-            _this.listener.unsubscribe();
-          }else if(!message.infrared_camera){
-            _this.open('红外信号故障')
-            _this.playOrPaused()
-            _this.listener.unsubscribe();
+
           }
+          if(!message.ipc&&val==3){
+            _this.openAllJoy('工控机信号故障（错误代码4004）')
+            _this.playOrPaused()
 
+          }
+          if(!message.xavierval==3){
+            _this.openAllJoy('计算单元信号故障（错误代码4004）')
+            _this.playOrPaused()
+
+          }
+          if(!message.infrared_camera&&val==3){
+            _this.openAllJoy('红外信号故障（错误代码4004）')
+            _this.playOrPaused()
+
+          }
+          if(!message.camera&&val==3){
+            _this.openAllJoy('云台信号故障（错误代码4004）')
+            _this.playOrPaused()
+
+          }
         });
-
+      },
+      //驱动报警
+      controllerAlarm(){
+        //console.log('驱动')
+        let _this = this
         _this.listenerController = new ROSLIB.Topic({
           ros : _this.ros,
           name : '/controller_status',
           messageType : 'std_msgs/Bool'
         });
-
-        var bool_controller = true
         _this.listenerController.subscribe(function(message) {
-          //console.log(message.data)
-          bool_controller = message.data
-        })
-
-        listenerControllerTimeout()
-        function listenerControllerTimeout(){
-          if(!bool_controller) {
-            _this.open('驱动系统故障')
+          //console.log(message)
+          if(!message.data) {
+            _this.openController('驱动系统故障（错误代码4003）')
             _this.playOrPaused()
             _this.listenerController.unsubscribe();
           }
-        }
-
+        })
       },
       //电池电量报警
       power_now(){
         let _this = this
-        clearTimeout(_this.timesListenerController)
+        clearTimeout(_this.timesPowerAlarm)
         _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
           {irBaseRobotId:1,size:200,page:1,},
           true, function (res) {
@@ -642,40 +705,205 @@
             })
             _this.battery_capacity = battery_capacity[0].value*1
           })
-        _this.listener_power = new ROSLIB.Topic({
+        _this.listenerPower = new ROSLIB.Topic({
           ros : _this.ros,
           name : '/car_status_now',
           messageType : 'robotmsg/nrcar_status'
         });
-        _this.listener_power.subscribe(function(message) {
+        _this.listenerPower.subscribe(function(message) {
           //console.log(message.battery_info);
           if(message.battery_info<_this.battery_capacity){
-            _this.open(`电池电量低于${_this.battery_capacity}%，请及时充电`)
+            _this.openPower(`电池电量低于${_this.battery_capacity}%，请及时充电（错误代码4002）`)
             _this.playOrPaused()
           }
-          _this.listener_power.unsubscribe();
+          _this.listenerPower.unsubscribe();
         });
       },
       //网络中断
       websocketAlarm(){
+        //console.log('websocket~~~')
         let _this = this
-        _this.ros = new ROSLIB.Ros({
-          url: _this.url
-        });
-        _this.ros.on('error', function(error) {
-          //console.log('Error');
-          _this.open('网络信号故障')
+        let flag = true
+        let reconnect = false;
+        /*_this.rosWebsocket.on('connection', function() {
+          console.log('websocket===');
+        });*/
+        //console.log(_this.rosWebsocket)
+        _this.rosWebsocket.on('error', function(error) {
+          console.log('Error');
+          flag = false
+          _this.openWebsocket('网络信号故障')
           _this.playOrPaused()
           clearTimeout(_this.timesWebsocketAlarm)
         });
-        _this.timesWebsocketAlarm = setTimeout(() =>{
-          _this.websocketAlarm()
-        },3000)
+        _this.rosWebsocket.on('close', function(error) {
+          console.log('断开');
+        });
+
+      },
+      websocketAlarm__(){
+        let _this = this
+        clearTimeout(_this.timesWebsocketAlarm)
+        //接收任务是否完成-消息
+        _this.listenerWebsocket = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/computer_pose',
+          messageType : 'robotmsg/robot_pose'
+        });
+        _this.listenerWebsocket.subscribe(function(message) {
+          //console.log(message)
+          if(message){
+            _this.isWebsocket = true
+            //_this.openWebsocket('网络信号故障')
+            //_this.playOrPaused()
+          }else {
+            _this.isWebsocket = false
+          }
+        });
+        console.log(_this.isWebsocket)
+      },
+      websocketAlarm_(){
+        console.log('websocket~~~')
+        let _this = this
+        let flag = true
+        let rosWebsocket = new ROSLIB.Ros({
+          url: _this.url
+        });
+        rosWebsocket.on('connection', function() {
+          //console.log('all_alarm');
+        });
+        rosWebsocket.on('error', function(error) {
+          console.log('Error');
+          flag = false
+          _this.openWebsocket('网络信号故障')
+          _this.playOrPaused()
+          clearTimeout(_this.timesWebsocketAlarm)
+          //clearTimeout(_this.timesWebsocketAlarm10s)
+          rosWebsocket.close()
+          rosWebsocket = null
+        });
+
+        if ( flag ) {
+          _this.timesWebsocketAlarm = setTimeout(() =>{
+            _this.websocketAlarm()
+            rosWebsocket.close()
+            rosWebsocket = null
+          },2000)
+        }else {
+          clearTimeout(_this.timesWebsocketAlarm)
+        }
+      },
+      //偏航报警
+      locationStatusAlarm(){
+        let _this = this
+        //console.log('偏航')
+        _this.listenerLocationStatus = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/location_status',
+          messageType : 'std_msgs/Int16'
+        });
+        _this.listenerLocationStatus.subscribe(function(message) {
+          //console.log(message)  // 0 -正常   1-偏航
+          if(message.data==1) {
+            _this.openLocation('定位失败或偏离行驶线路（错误代码4005）')
+            _this.playOrPaused()
+            _this.listenerLocationStatus.unsubscribe();
+          }
+        })
       },
 
-      open(message) {
+      /*websocketAlarm() {
         let _this = this
-        this.$alert(`${message}`, '系统警报', {
+        let ip = '192.168.1.10'
+        //let ip = robotUrl.substr(5,12)
+        var img = new Image();
+        var start = new Date().getTime();
+        var flag = false;
+        var isCloseWifi = true;
+        var hasFinish = false;
+        img.onload = function() {
+          if ( !hasFinish ) {
+            flag = true;
+            hasFinish = true;
+            img.src = 'X:\\';
+            console.log('Ping ' + ip + ' success1. ');
+          }
+        };
+        img.onerror = function() {
+          if ( !hasFinish ) {
+            if ( !isCloseWifi ) {
+              flag = true;
+              img.src = 'X:\\';
+              console.log('Ping ' + ip + ' success2. ');
+            } else {
+              console.log('network is not working!');
+            }
+            hasFinish = true;
+          }
+        };
+        setTimeout(function(){
+          isCloseWifi = false;
+          console.log('network is working, start ping...');
+        },2);
+        img.src = 'http://' + ip + '/' + start;
+        _this.timesWebsocketAlarm = setTimeout(function() {
+          if ( !flag ) {
+            hasFinish = true;
+            img.src = 'X://';
+            flag = false ;
+            console.log('Ping ' + ip + ' fail. ');
+            _this.openWebsocket('网络信号故障')
+            _this.playOrPaused()
+            clearTimeout(_this.timesWebsocketAlarm)
+          }
+        }, 3000);
+      },*/
+      /*ping(ip){
+        var img = new Image();
+        var start = new Date().getTime();
+        var flag = false;
+        var isCloseWifi = true;
+        var hasFinish = false;
+        img.onload = function() {
+          if ( !hasFinish ) {
+            flag = true;
+            hasFinish = true;
+            console.log('Ping ' + ip + ' success. ');
+            alert("成功"+ip);
+          }
+        };
+        img.onerror = function() {
+          if ( !hasFinish ) {
+            if ( !isCloseWifi ) {
+              flag = true;
+              console.log('Ping ' + ip + ' success. ');
+              alert("成功"+ip);
+            } else {
+              console.log('network is not working!');
+            }
+            hasFinish = true;
+          }
+        };
+        setTimeout(function(){
+          isCloseWifi = false;
+          console.log('network is working, start ping...');
+          alert("开始测试"+ip);
+        },2);
+        img.src = 'http://' + ip + '/' + start;
+        var timer = setTimeout(function() {
+          if ( !flag ) {
+            hasFinish = true;
+            flag = false ;
+            console.log('Ping ' + ip + ' fail. ');
+            alert("失败"+ip);
+          }
+        }, 3000);
+      },*/
+
+      /*open(message) {
+        let _this = this
+        clearTimeout(_this.timesListenerController)
+        _this.$alert(`${message}`, '系统警报', {
           confirmButtonText: '确定',
           callback: action => {
             //console.log(_this.ros)
@@ -683,24 +911,107 @@
             _this.timesListenerController = setTimeout(() => {
               _this.allAlarm()
               _this.power_now()
-              _this.websocketAlarm()
-            },1000*60*5)  //1000*60*5
-            /*this.$message({
+              _this.controllerAlarm()
+            },_this.times_s)  //1000*60*5
+            /!*this.$message({
               type: 'info',
               message: `action: ${ action }`
-            });*/
+            });*!/
+          }
+        })
+      },*/
+      openWebsocket(message) {
+        let _this = this
+        //clearTimeout(_this.timesWebsocketAlarm)
+        clearTimeout(_this.timesWebsocketAlarm10s)
+        _this.$alert(`${message}`, '系统警报', {
+          confirmButtonText: '确定',
+          callback: action => {
+            _this.playClose()
+            _this.timesWebsocketAlarm10s = setTimeout(() => {
+              _this.websocketAlarm()
+            },_this.times_s)  //1000*60*5
             clearTimeout(_this.timesWebsocketAlarm)
           }
         })
       },
+      openPower(message) {
+        let _this = this
+        clearTimeout(_this.timesPowerAlarm)
+        _this.$alert(`${message}`, '系统警报', {
+          confirmButtonText: '确定',
+          callback: action => {
+            _this.playClose()
+            _this.timesPowerAlarm = setTimeout(() => {
+              _this.power_now()
+            },_this.times_s)
+          }
+        })
+      },
+      openJoy(message) {
+        let _this = this
+        clearTimeout(_this.timesJoyAlarm)
+        _this.listenerJoy.unsubscribe()
+        _this.$alert(`${message}`, '系统警报', {
+          confirmButtonText: '确定',
+          callback: action => {
+            _this.playClose()
+            _this.timesJoyAlarm = setTimeout(() => {
+              _this.allAlarm(0)
+            },_this.times_s)
+          }
+        })
+      },
+      openAllJoy(message) {
+        let _this = this
+        clearTimeout(_this.timesJoyAlarm)
+        _this.listenerJoy.unsubscribe()
+        _this.$alert(`${message}`, '系统警报', {
+          confirmButtonText: '确定',
+          callback: action => {
+            _this.playClose()
+            _this.timesJoyAlarm = setTimeout(() => {
+              _this.allAlarm(3)
+            },_this.times_s)
+          }
+        })
+      },
+      openController(message) {
+        let _this = this
+        clearTimeout(_this.timesListenerController)
+        _this.$alert(`${message}`, '系统警报', {
+          confirmButtonText: '确定',
+          callback: action => {
+            _this.playClose()
+            _this.timesListenerController = setTimeout(() => {
+              _this.controllerAlarm()
+            },_this.times_s)
+          }
+        })
+      },
+      openLocation(message) {
+        let _this = this
+        clearTimeout(_this.timesListenerLocationStatus)
+        _this.$alert(`${message}`, '系统警报', {
+          confirmButtonText: '确定',
+          callback: action => {
+            _this.playClose()
+            _this.timesListenerLocationStatus = setTimeout(() => {
+              _this.locationStatusAlarm()
+            },_this.times_s)
+          }
+        })
+      },
+
       playOrPaused(id,obj){
         var audio = document.getElementById('audio');
         if(audio.paused){
           audio.play();
           //obj.innerHTML='暂停';
-          return;
+          console.log('在播放')
+          //return;
         }
-        audio.pause();
+        //audio.pause();
         //obj.innerHTML='播放';
       },
       playClose(id,obj){

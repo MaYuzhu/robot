@@ -38,7 +38,7 @@
     </div>
 
     <div class="tabs_bottom">
-      <TabsBottom @isVideo="isVideo" :irDataTaskHistoryId="irDataTaskHistoryId"></TabsBottom>
+      <TabsBottom @isVideo="isVideo" :irDataTaskHistoryId="irDataTaskHistoryId" v-if="hardReset"></TabsBottom>
     </div>
 
     <menuBottom></menuBottom>
@@ -76,6 +76,7 @@
         time:3000,
         ros:null,
         irDataTaskHistoryId:'',
+        hardReset: true,
       }
     },
     mounted() {
@@ -536,6 +537,15 @@
         clearTimeout(_this.currentTaskInfoTimeId)
       });
 
+    },
+    watch:{
+      irDataTaskHistoryId:function (n,o) {
+        console.log(n,o)
+        this.hardReset= false
+        this.$nextTick(() => {
+          this.hardReset = true
+        });
+      }
     },
 
 
