@@ -145,7 +145,7 @@
           </div>
           <div>
             <p>避障功能：</p>
-            <el-switch
+            <el-switch @change="bizhang()"
               v-model="value_switch4"
               active-text="开"
               inactive-text="关">
@@ -285,11 +285,21 @@
         yun_y:'',
         zhijing:'',
         zhongxin:'',
+
+        url:robotUrl,
+        ros:null,
+        listener_radar:null,
+        listener_sensor:null,
       }
     },
     mounted(){
-      this.init()
-      this.init2()
+      let _this = this
+      _this.ros = new ROSLIB.Ros({
+        url : _this.url
+      });
+      _this.init()
+      _this.init2()
+      _this.sensor()
     },
     inject:['reload'],
     methods:{
@@ -492,10 +502,53 @@
             //console.log(res.data)
           })
       },
+      bizhang(){
+        let _this = this
+        _this.listener_radar = new ROSLIB.Topic({
+          ros : _this.ros,
+          name : '/sensor_obstacle_able',  //_status
+          messageType : 'std_msgs/Int16'
+        });
+        if(_this.value_switch4){
+          console.log(_this.value_switch4)
+          let sound = new ROSLIB.Message({
+            data: 1
+          });
+          _this.listener_radar.publish(sound);
+        }else {
+          console.log(_this.value_switch4)
+          let sound = new ROSLIB.Message({
+            data: 0
+          });
+          _this.listener_radar.publish(sound);
+        }
+      },
+      sensor(){
+        let _this = this
+        _this.listener_sensor = new ROSLIB.Topic({//subscribe
+          ros : _this.ros,
+          name : '/sensor_obstacle_able_status',
+          messageType : 'std_msgs/Int16'
+        });
+        console.log(777777)
+        _this.listener_sensor.subscribe(function (msg) {
+          console.log(msg)  //0-关闭   1-开启
+          if(msg.data == 1){
+            _this.value_switch4 = true
+          }else {
+            _this.value_switch4 = false
+          }
+          _this.listener_sensor.unsubscribe()
+        })
+      },
     },
     components: {
       HeaderTop,
       menuBottom
+    },
+    destroyed(){
+      let _this = this
+      _this.ros.close()
     },
   }
 </script>

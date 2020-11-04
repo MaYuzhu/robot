@@ -270,7 +270,7 @@
   export default {
     data(){
       return{
-        title:'点位设置 > 巡检点位设置',
+        title:'点位设置 > 典型点位库维护',
         currentPage: 1,
 
         radio: 1,

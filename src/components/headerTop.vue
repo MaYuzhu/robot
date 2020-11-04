@@ -340,7 +340,7 @@
                       <span>|</span>
                     </div>
                     <div>
-                      <router-link to="/users/inspection-points-setting">典型巡检点位库维护</router-link>
+                      <router-link to="/users/inspection-points-setting-wh">典型巡检点位库维护</router-link>
                       <span>|</span>
                     </div>
                   </dd>
@@ -1051,6 +1051,7 @@
     },
     destroyed(){
       let _this = this
+      //console.log('销毁')
       _this.ros.close()
     },
   }

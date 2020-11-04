@@ -13,13 +13,13 @@
       </el-select>
       <p>开始时间：</p>
       <el-date-picker size="mini" style="width: 160px;float: left"
-                      v-model="value1"
+                      v-model="value_start"
                       type="date" value-format="yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd"
                       placeholder="选择日期">
       </el-date-picker>
       <p>结束时间：</p>
       <el-date-picker size="mini" style="width: 160px;float: left"
-                      v-model="value2"
+                      v-model="value_end"
                       type="date" value-format="yyyy-MM-dd HH:mm:ss" format="yyyy-MM-dd"
                       placeholder="选择日期">
       </el-date-picker>
@@ -65,7 +65,7 @@
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
           :current-page="currentPage"
-          :page-sizes="[5, 10, 20, 50]"
+          :page-sizes="[10, 20, 50]"
           :page-size="10"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total">
@@ -84,8 +84,8 @@
     data(){
       return{
         title:'系统设置 > 日志管理',
-        value1:'',
-        value2:'',
+        value_start:'',
+        value_end:'',
         options: [
         	{
           value: 0,
@@ -128,18 +128,26 @@
     },
     mounted(){
       let _this = this
-      _this.value1 = _this.convertToLateDate()
-      _this.value2 = _this.nowTime()
+      this.value_end = this.getDateTime() + ' 23:59:59'
+      this.value_start = this.convertToLateDate() + ' 00:00:00'
       _this.getLogList()
     },
     methods:{
     	getLogList(){
     		let _this = this
-        _this.logData.startTime = _this.value1
-        _this.logData.endTime = _this.value2
         _this.logData.type = _this.value
+        if(_this.value_start.length<19){
+          _this.logData.startTime = _this.value_start + ' 00:00:00'
+        }else {
+          _this.logData.startTime = _this.value_start
+        }
+        if(_this.value_end.length<19){
+          _this.logData.endTime = _this.value_end + ' 23:59:59'
+        }else {
+          _this.logData.endTime = _this.value_end
+        }
         _this.ajax_api('get',url_api + '/operation-log/logList',_this.logData,true,function (res) {
-          console.log(res)
+          //console.log(res)
           if(res.code!==200){
             return
           }
@@ -180,31 +188,32 @@
         var d = Da.getDate();
         var H = Da.getHours();
         var mm = Da.getMinutes();
-        var s = Da.getSeconds();
+        var ss = Da.getSeconds();
         m = m < 10 ? "0" + m : m;
         d = d < 10 ? "0" + d : d;
         H = H < 10 ? "0" + H : H;
-        s = s < 10 ? "0" + s : s;
-        return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + s;
-
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
+        //return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
+        return y + "-" + m + "-" + d
       },
-      nowTime(){
+      getDateTime(){ //默认显示今天
         var Da = new Date();
-        // 以上两行代码为关键代码，若想要返回一天后的时间，则可以将第二行代码更换为下面代码
-        // var Da = new Date(data.getTime() + 24 * 60 * 60 * 1000);
-        // 若是想要返回值为当前时间，则上面两行代码可以直接修改为下面代码即可。
+        //var Da = new Date(data.getTime() - 24 * 60 * 60 * 1000 * 31);
         // var Da = new Date()
         var y = Da.getFullYear();
         var m = Da.getMonth() + 1;
         var d = Da.getDate();
         var H = Da.getHours();
         var mm = Da.getMinutes();
-        var s = Da.getSeconds();
+        var ss = Da.getSeconds();
         m = m < 10 ? "0" + m : m;
         d = d < 10 ? "0" + d : d;
         H = H < 10 ? "0" + H : H;
-        s = s < 10 ? "0" + s : s;
-        return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + s;
+        mm = mm < 10 ? "0" + mm : mm;
+        ss = ss < 10 ? "0" + ss : ss;
+        //return y + "-" + m + "-" + d + " " + H + ":" + mm + ":" + ss;
+        return y + "-" + m + "-" + d
       },
     },
   }

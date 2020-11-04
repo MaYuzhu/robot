@@ -56,7 +56,7 @@
             >
             </el-table-column>
             <el-table-column
-              prop="point.deviceName" align="center"
+              prop="point.name" align="center"
               label="点位名称" width="200"
             >
             </el-table-column>
@@ -88,7 +88,8 @@
               label="采集信息"
             >
               <template slot-scope="scope">
-                <p style="cursor:pointer;text-decoration:underline;color:blue" @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic)">图片信息</p>
+                <p style="cursor:pointer;text-decoration:underline;color:blue" @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:
+                scope.row.flirPic?imgUrlBefore+scope.row.flirPic:'../../static/img/no404.jpg')">图片信息</p>
               </template>
             </el-table-column>
 
@@ -110,7 +111,8 @@
             <li v-for="(item, index) in imgDataResults" style="width:33.3333%;height:50%;float:left;
                   box-sizing:border-box;border:1px solid #90e8c6">
               <el-image class="li_img"  v-if="item.point"
-                   :preview-src-list="srcList" style="width:100%;" :src="item.cameraPic?imgUrlBefore+item.cameraPic:imgUrlBefore+item.flirPic" alt="">
+                   :preview-src-list="srcList" style="width:100%;" :src="item.cameraPic?imgUrlBefore+item.cameraPic:
+                   item.flirPic?imgUrlBefore+item.flirPic:'../../static/img/no404.jpg'" alt="">
               </el-image>
               <p v-if="item.point" style="background: #D9ECEA;height: 22px;line-height: 22px">{{item.point.name}}</p>
             </li>
@@ -685,7 +687,6 @@
         }
 
         _this.ajaxExportData.sheetName = '111'
-        //console.log(_this.ajaxExportData)
 
         var nameExcel = '巡检结果'+_this.getDateTimeHhMmSs()+'.xlsx'
         var url = url_api + '/file/downloadFile1';
@@ -700,6 +701,14 @@
           // 请求完成
           if (this.status === 200) {
             // 返回200
+            /* var a = document.createElement('a');
+                var file=e.target.result;
+                a.download = fileName;
+               var blobExel = self.baseExel(e.target.result); //把base64位文件转化为exel文件
+               a.setAttribute('href',URL.createObjectURL(blobExel));
+                $("body").append(a);    // 修复firefox中无法触发click
+                a.click();
+                $(a).remove();*/
             var blob = this.response;
             var reader = new FileReader();
             reader.readAsDataURL(blob);  // 转换为base64，可以直接放入a表情href
@@ -707,14 +716,15 @@
               // 转换完成，创建一个a标签用于下载
               var a = document.createElement('a');
               a.download = nameExcel;
-              a.href = e.target.result;
+              //a.href = e.target.result;
+              var blobExel = _this.baseExel(e.target.result); //把base64位文件转化为exel文件
+              a.setAttribute('href',URL.createObjectURL(blobExel));
               $("body").append(a);  // 修复firefox中无法触发click
               a.click();
               $(a).remove();
             }
           }
         };
-
       },
       prevData(){
         let _this = this
@@ -961,6 +971,38 @@
         mm = mm < 10 ? "0" + mm : mm;
         ss = ss < 10 ? "0" + ss : ss;
         return y + "-" + m + "-" + d + "-" + H + "-" + mm + "-" + ss;
+      },
+
+      baseExel(base64) {
+        /*处理后端返回的base64位文件变成exel文件进行下载
+        * 不要直接把base64位的exel文件直接给a标签的href，
+        * 文件过大时base64位长度过长；chrome浏览器对a标签的href长度有限制；导致下载失败；
+        * 建议用以下方法处理成本地文件再下载
+        * */
+        function getContentType(base64) {
+          return /data:([^;]*);/i.exec(base64)[1];
+        };
+        function getData(base64) {
+          return base64.substr(base64.indexOf("base64,") + 7, base64.length);
+        };
+        function b64toBlob(b64Data, contentType, sliceSize) {
+          contentType = contentType || '';
+          sliceSize = sliceSize || 512;
+          var byteCharacters = atob(b64Data);
+          var byteArrays = [];
+          for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+            var slice = byteCharacters.slice(offset, offset + sliceSize);
+            var byteNumbers = new Array(slice.length);
+            for (var i = 0; i < slice.length; i++) {
+              byteNumbers[i] = slice.charCodeAt(i);
+            }
+            var byteArray = new Uint8Array(byteNumbers);
+            byteArrays.push(byteArray);
+          }
+          var blob = new Blob(byteArrays, { type: contentType });
+          return blob;
+        };
+        return b64toBlob(getData(base64), getContentType(base64));
       },
     },
   }

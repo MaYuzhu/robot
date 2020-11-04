@@ -807,6 +807,7 @@
         _this.$root.eventHub.$emit('planLine', lineArr);*/
         //  /ui/task/{id}/execute
         // 查看可否执行  /ui/task/{id}/execut-status
+        console.log('开始'+ +new Date())
         console.log(this.irProjTaskId)
         /*_this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId+'/execut-status',
             null,true,function (res) {
@@ -827,6 +828,7 @@
                 _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
                     {},true,function (res) {
                         console.log(res)
+                        console.log('返回'+ +new Date())
                         //console.log(res.data.path)
                         //取到计划线路的点
                         if(!res.data.path){
@@ -853,7 +855,8 @@
                             serviceType : 'robotmsg/TaskList'
                         });
                         _this.taskServerClear.callService({flag:0},function(result) {
-                            console.log('Clear');
+                            //console.log('Clear');
+                            console.log('清除'+ +new Date())
                             if(result){
                               var request = new ROSLIB.ServiceRequest({
                                 plan : res.data.path,
@@ -868,6 +871,7 @@
                                     message: '任务发送成功',
                                   });
                                   _this.$root.eventHub.$emit('taskSuccess', '1111');
+                                  console.log('任务成功'+ +new Date())
                                   _this.$router.push({path:'/'})
                                 }
                               });
@@ -913,7 +917,8 @@
                           lineArr.push(point)
                         }
                         planLinePointArr = lineArr
-                        console.log(planLinePointArr)
+                        //console.log(planLinePointArr)
+                        console.log('画线'+ +new Date())
                         sessionStorage.setItem("planLine",lineArr);
                         //地图显示路径 end
                     })

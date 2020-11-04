@@ -133,14 +133,18 @@
             label="识别类型" width="100">
           </el-table-column>
           <el-table-column
-            prop="point.deviceName"
+            prop="point.name"
             label="点位名称" align="center"
             width="320">
           </el-table-column>
           <el-table-column
-            prop="pointHistory.value"
+            prop="value"
             label="识别结果" align="center"
-            width="100">
+            width="130">
+            <template slot-scope="scope">
+              <span v-if="scope.row">{{scope.row.valueDesc}}</span>
+              <span v-if="scope.row.valueDesc*1">{{scope.row.point.unit}}</span>
+            </template>
           </el-table-column>
           <el-table-column
             prop="alarmLevel" :formatter="alarmLevelShow"
@@ -162,7 +166,9 @@
             label="采集信息" align="center"
             >
             <template slot-scope="scope">
-              <p style="background:transparent;cursor:pointer;text-decoration:underline;color:blue" @click="openImg(imgUrlBefore+scope.row.pointHistory.cameraPic)">图片信息</p>
+              <p style="background:transparent;cursor:pointer;text-decoration:underline;color:blue" @click="openImg(scope.row.pointHistory.cameraPic?imgUrlBefore+scope.row.pointHistory.cameraPic:
+                           scope.row.pointHistory.flirPic?imgUrlBefore+scope.row.pointHistory.flirPic:
+                           '../../static/img/no404.jpg')">图片信息</p>
             </template>
           </el-table-column>
 
@@ -463,8 +469,8 @@
     },
     mounted(){
     	this.init()
-      this.value_end = this.getDateTime()
-      this.value_start = this.convertToLateDate()
+      this.value_start = this.convertToLateDate() + ' 00:00:00'
+      this.value_end = this.getDateTime() + ' 23:59:59'
       this.getTableData()
     },
     methods:{
@@ -528,8 +534,16 @@
 
       getTableData(){
         let _this = this
-        _this.ajaxTableData.startTime = _this.value_start
-        _this.ajaxTableData.endTime = _this.value_end
+        if(_this.value_start.length<19){
+          _this.ajaxTableData.startTime = _this.value_start + ' 00:00:00'
+        }else {
+          _this.ajaxTableData.startTime = _this.value_start
+        }
+        if(_this.value_end.length<19){
+          _this.ajaxTableData.endTime = _this.value_end + ' 23:59:59'
+        }else {
+          _this.ajaxTableData.endTime = _this.value_end
+        }
         _this.ajaxTableData.checkStatus = _this.radio*1
         //console.log(_this.checkedAlarm)
         if(_this.checkedAlarm.length<1){
@@ -932,8 +946,8 @@
         this.moreAlarm = false
 
         this.radio = '0'
-        this.value_end = this.getDateTime()
-        this.value_start = this.convertToLateDate()
+        this.value_start = this.convertToLateDate() + ' 00:00:00'
+        this.value_end = this.getDateTime() + ' 23:59:59'
         this.getTableData()
       },
       handleSelectionChangeTable(val){

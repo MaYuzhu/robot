@@ -250,8 +250,16 @@
           }
           irBaseInspectTypeId = ids.toString()
         }
-        //_this.ajaxTableData.startTime = _this.value_start
-        //_this.ajaxTableData.endTime = _this.value_end
+        if(_this.value_start.length<19){
+          _this.ajaxTableData.startTime = _this.value_start + ' 00:00:00'
+        }else {
+          _this.ajaxTableData.startTime = _this.value_start
+        }
+        if(_this.value_end.length<19){
+          _this.ajaxTableData.endTime = _this.value_end + ' 23:59:59'
+        }else {
+          _this.ajaxTableData.endTime = _this.value_end
+        }
         _this.ajaxTableData.irBaseInspectTypeId = irBaseInspectTypeId
         _this.ajax_api('get',url_api + '/task-history',
           _this.ajaxTableData,
@@ -270,8 +278,8 @@
         _this.getTableData()
       },
       resetData(){
-        this.value_start = this.convertToLateDate()
-        this.value_end = this.getDateTime()
+        this.value_end = this.getDateTime() + ' 23:59:59'
+        this.value_start = this.convertToLateDate() + ' 00:00:00'
         this.checkedCities = []
         this.isIndeterminate = false
         this.getTableData()

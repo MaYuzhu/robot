@@ -7,7 +7,7 @@
           <XunjianContent :taskInfo="taskInfo"></XunjianContent>
         </div>
         <div class="taskControl_wrap">
-          <taskControl @isVideo="isVideo" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
+          <taskControl @isVideo="isVideo" :irDataTaskHistoryId="irDataTaskHistoryId" v-if="hardReset"></taskControl>
         </div>
 
       </div>

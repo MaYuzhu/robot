@@ -249,7 +249,7 @@
             //projection: 'EPSG:4326',
             url: '../../static/geojson/route.geojson',
             //url: '../../static/geojson/route_yu_new.geojson',
-            format:new ol.format.GeoJSON()
+            format:new ol.format.GeoJSON(),
           }),
           style: function (feature, resolution) {
             return new ol.style.Style({
@@ -269,7 +269,7 @@
             //projection: 'EPSG:4326',
             url: '../../static/geojson/stops.geojson',
             //url: '../../static/geojson/stops_yu_new.geojson',
-            format:new ol.format.GeoJSON()
+            format:new ol.format.GeoJSON(),
           }),
           style: function (feature, resolution) {
             return new ol.style.Style({
@@ -312,7 +312,7 @@
             url: '../../static/geojson/stops_yu_new.geojson',
             //url: '../../static/geojson/stops3.geojson',
             //url: '../../static/geojson/stops.geojson',
-            format:new ol.format.GeoJSON()
+            format:new ol.format.GeoJSON(),
           }),
           style: function (feature, resolution) {
             return new ol.style.Style({
@@ -333,7 +333,8 @@
                 //projection: 'EPSG:4326',
                 //url: '../../static/geojson/targets_yu_new.geojson',
                 url: '../../static/geojson/targets.geojson',
-                format:new ol.format.GeoJSON()
+                format:new ol.format.GeoJSON(),
+
             }),
             style: function (feature, resolution) {
                 //console.log(feature)
@@ -392,9 +393,10 @@
           view: new ol.View({
             center: m_center,
             zoom: zoom,
-            rotation: Math.PI/180 * mapRotate      //楼顶
+            rotation: Math.PI/180 * mapRotate,      //楼顶
             //rotation: Math.PI/180 * 4.5    //三楼
             //rotation: Math.PI/180 * -2.4   //玉贤
+            minZoom: 3,
           }),
           //controls: ol.control.defaults().extend([new ol.control.FullScreen()]),
           controls: ol.control.defaults().extend([
@@ -1118,12 +1120,106 @@
           addFenceData,
           true,function (res) {
               if(res.code == 200){
+                console.log(res)
                 _this.$message({
                   message: '挂牌成功',
                   type: 'success',
                 });
                 _this.dialogVisiblePlate = false
                 _this.plateShow()
+                //挂牌成功后重新下达任务
+                if(res.data.rePlan==1){
+                  _this.ajax_api('get',url_api + '/task/'+ res.data.taskHistoryId +'/path',
+                    {},true,function (res) {
+                      console.log(res)
+                      console.log('返回'+ +new Date())
+                      //console.log(res.data.path)
+                      //取到计划线路的点
+                      if(!res.data.path){
+                        _this.$message({
+                          message: '未获取到有效路径',
+                        });
+                        return
+                      }
+                      _this.taskServer = new ROSLIB.Service({
+                        ros : _this.ros,
+                        name : '/tasklist',
+                        serviceType : 'robotmsg/TaskList'
+                      });
+                      _this.taskServerClear = new ROSLIB.Service({
+                        ros : _this.ros,
+                        name : '/taskclear',
+                        serviceType : 'robotmsg/TaskList'
+                      });
+                      _this.taskServerClear.callService({flag:0},function(result) {
+                        //console.log('Clear');
+                        console.log('清除'+ +new Date())
+                        if(result){
+                          var request = new ROSLIB.ServiceRequest({
+                            plan : res.data.path,
+                            //plan : JSON.stringify(aa),
+                          });
+                          console.log(res.data.path);
+                          _this.taskServer.callService(request, function(result) {
+                            //console.log('返回'+result);
+                            if(result){
+                              _this.$message({
+                                type: 'success',
+                                message: '任务发送成功',
+                              });
+                              _this.$root.eventHub.$emit('taskSuccess', '1111');
+                              console.log('任务成功'+ +new Date())
+                              _this.$router.push({path:'/'})
+                            }
+                          });
+                        }else {
+                          _this.taskServerClear.callService({flag:0},function(result) {
+                            if(result){
+                              var request = new ROSLIB.ServiceRequest({
+                                plan : res.data.path,
+                                //plan : JSON.stringify(aa),
+                              });
+                              _this.taskServer.callService(request, function(result) {
+                                console.log(result);
+                                _this.$message({
+                                  type: 'success',
+                                  message: '任务发送成功',
+                                });
+                                _this.$root.eventHub.$emit('taskSuccess', '1111');
+                              });
+                            }else{
+                              _this.$message({
+                                type: 'success',
+                                message: '任务发送失败',
+                              });
+                            }
+                          })
+                        }
+                      });
+                      //地图显示路径 start
+                      var linePlanObj = JSON.parse(res.data.path)
+                      //三楼var aa = '{"InspectId":"1041","Tasks":[{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"27.0;24.181;9.928","TLocType":"start","TLocWidth":5},{"Align":"middle","Id":"23","IsAnterograde":false,"Status":"0","TLoc":"25.25;24.18;9.77","TLocType":"back","TLocWidth":5,"TurnAngle":"180"},{"Align":"middle","Id":"22","IsAnterograde":false,"Status":"0","TLoc":"25.15;24.18;9.76","TLocType":"turn","TLocWidth":5,"TurnAngle":"95"},{"Align":"middle","Id":"21","IsAnterograde":false,"Status":"0","TLoc":"25.12;24.15;13.15","TLocType":"turn","TLocWidth":5,"TurnAngle":"-93"},{"Align":"middle","CameraPose":"23:1/10.339,17.74,25.558,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;24:1/10.578,17.738,25.522,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.8/1/1041;25:1/10.757,17.768,25.543,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.73/1/1041;32:1/10.295,17.707,25.167,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;33:1/10.54,17.749,25.2,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,2.4/1/1041;34:1/10.74,17.771,25.189,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,2.1/1/1041;41:1/10.22,17.705,24.818,100.0,100.0,1,8,down,-0.1,330.0,-0.1,3.0,0,0.0/1/1041;42:1/10.468,17.74,24.847,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.42/1/1041;43:1/10.695,17.752,24.795,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.58/1/1041","Id":"1015","IsAnterograde":false,"Status":"0","TLoc":"11.066;24.356;11.859","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"20:1/9.601,17.636,25.517,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,3.5/1/1041;21:1/9.852,17.685,25.528,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;22:1/10.14,17.696,25.487,100.0,100.0,2,3,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;29:1/9.494,17.626,25.167,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.58/1/1041;30:1/9.783,17.673,25.186,150.0,150.0,1,8,down,-0.1,330.0,-0.1,3.0,0,0.0/1/1041;31:1/10.023,17.704,25.177,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,2.35/1/1041;38:1/9.418,17.626,24.846,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.03/1/1041;39:1/9.693,17.654,24.823,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.295/1/1041;40:1/9.932,17.675,24.795,100.0,100.0,2,3,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041","Id":"1014","IsAnterograde":false,"Status":"0","TLoc":"10.26;24.359;11.775","TLocType":"transfer","TLocWidth":5},{"Align":"middle","CameraPose":"17:1/8.975,17.587,25.474,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.124/1/1041;18:1/9.146,17.612,25.538,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,17.9/1/1041;19:1/9.335,17.622,25.505,150.0,150.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;26:1/8.955,17.594,25.199,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.89/1/1041;27:1/9.096,17.611,25.182,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.0/1/1041;28:1/9.281,17.62,25.217,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.35/1/1041;35:1/8.939,17.576,24.857,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.58/1/1041;36:1/9.047,17.6,24.846,60.0,60.0,1,7,down,-0.1,330.0,-0.1,0.9,0,1.5/1/1041;37:1/9.178,17.61,24.836,100.0,100.0,1,7,down,-0.1,330.0,-0.1,0.9,0,0.3/1/1041","Id":"1013","IsAnterograde":false,"Status":"0","TLoc":"9.656;24.361;11.712","TLocType":"transfer","TLocWidth":5},{"Align":"middle","Id":"2","IsAnterograde":false,"Status":"0","TLoc":"8.85;23.714;11.628","TLocType":"turn","TLocWidth":5,"TurnAngle":"180"},{"Align":"middle","Id":"21","IsAnterograde":false,"Status":"0","TLoc":"25.12;24.15;13.15","TLocType":"turn","TLocWidth":5,"TurnAngle":"93"},{"Align":"middle","Id":"22","IsAnterograde":false,"Status":"0","TLoc":"25.15;24.18;9.76","TLocType":"turn","TLocWidth":5,"TurnAngle":"-95"},{"Align":"middle","IsAnterograde":false,"Status":"0","TLoc":"25.25;24.18;9.77","TLocType":"end","TLocWidth":5}]}'
+                      //var linePlanObj = JSON.parse(aa)
+                      //console.log(linePlanObj)
+                      var lineArr = []
+                      if(lineArr.length>0){
+                        lineArr = []
+                      }
+                      for(var i=0;i<linePlanObj.Tasks.length;i++){
+                        /*if(linePlanObj.Tasks[i].CameraPose){
+                          return;
+                        }*/
+                        var pointArr = linePlanObj.Tasks[i].TLoc.split(";")
+                        var point = projRobotXY(pointArr[0]*1,pointArr[2]*1)
+                        lineArr.push(point)
+                      }
+                      planLinePointArr = lineArr
+                      //console.log(planLinePointArr)
+                      console.log('画线'+ +new Date())
+                      sessionStorage.setItem("planLine",lineArr);
+                      //地图显示路径 end
+                    })
+                }
               }else {
                 _this.$message({
                   message: res.message,
@@ -1440,9 +1536,9 @@
               callback: action => {
                 _this.$root.eventHub.$emit('taskEnd', true);
                 //清除计划的线  &  走过的线路
+                sessionStorage.setItem("planLine",'')
                 _this.planLinePointVector.getSource().clear()
                 _this.passRouteLayer.getSource().clear()
-                sessionStorage.setItem("planLine",'')
               }
             })
           }

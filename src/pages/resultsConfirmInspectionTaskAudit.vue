@@ -155,16 +155,24 @@
       }
     },
     mounted(){
-      this.value_start = this.convertToLateDate()
-      this.value_end = this.getDateTime()
+      this.value_start = this.convertToLateDate() + ' 00:00:00'
+      this.value_end = this.getDateTime() + ' 23:59:59'
       this.value_now = this.getDateTime()
       this.getTableData()
     },
     methods:{
       getTableData(){
       	let _this = this
-        //_this.ajaxTableData.startTime = _this.value_start
-        //_this.ajaxTableData.endTime = _this.value_end
+        if(_this.value_start.length<19){
+          _this.ajaxTableData.startTime = _this.value_start + ' 00:00:00'
+        }else {
+          _this.ajaxTableData.startTime = _this.value_start
+        }
+        if(_this.value_end.length<19){
+          _this.ajaxTableData.endTime = _this.value_end + ' 23:59:59'
+        }else {
+          _this.ajaxTableData.endTime = _this.value_end
+        }
         let checkStatus
         if(_this.checked1 && _this.checked2){
           checkStatus = null
@@ -238,8 +246,8 @@
         _this.getTableData()
       },
       resetData(){
-        this.value_start = this.convertToLateDate()
-        this.value_end = this.getDateTime()
+        this.value_start = this.convertToLateDate() + ' 00:00:00'
+        this.value_end = this.getDateTime() + ' 23:59:59'
         this.checked1 = true
         this.checked2 = false
         this.getTableData()

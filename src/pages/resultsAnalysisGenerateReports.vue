@@ -137,7 +137,8 @@
             label="识别结果" v-if="tableVisibleObj['1']"
           >
             <template slot-scope="scope">
-              <span>{{scope.row.valueDesc}}{{scope.row.point.unit}}</span>
+              <span v-if="scope.row">{{scope.row.valueDesc}}</span>
+              <span v-if="Math.abs(scope.row.value)<10000">{{scope.row.point.unit}}</span>
             </template>
           </el-table-column>
           <el-table-column align="center"
@@ -146,7 +147,7 @@
           >
           </el-table-column>
           <el-table-column align="center"
-            prop="point.deviceName" width="150"
+            prop="point.name" width="150"
             label="点位名称" v-if="tableVisibleObj['3']"
           >
           </el-table-column>
@@ -252,7 +253,7 @@
             @size-change="handleSizeChange"
             @current-change="handleCurrentChange"
             :current-page="currentPage"
-            :page-sizes="[10, 50, 200, 500, 5000, 10000]"
+            :page-sizes="[10, 50, 200, 500, 1000]"
             :page-size="200"
             layout="total, sizes, prev, pager, next, jumper"
             :total="total">
@@ -763,8 +764,16 @@
 
       getTableData(){
         let _this = this
-        _this.ajaxTableData.startTime = _this.value_start+' 00:00:00'
-        _this.ajaxTableData.endTime = _this.value_end+' 23:59:59'
+        if(_this.value_start.length<19){
+          _this.ajaxTableData.startTime = _this.value_start + ' 00:00:00'
+        }else {
+          _this.ajaxTableData.startTime = _this.value_start
+        }
+        if(_this.value_end.length<19){
+          _this.ajaxTableData.endTime = _this.value_end + ' 23:59:59'
+        }else {
+          _this.ajaxTableData.endTime = _this.value_end
+        }
         //_this.ajaxTableData.pointIds = ''
         //console.log(_this.ajaxTableData)
         _this.ajax_api('post',url_api + '/point-history',
@@ -772,7 +781,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              console.log(res.data.items)
+              //console.log(res.data.items)
               _this.tableDataResults = res.data.items
               _this.total = res.data.total
               //自己得到表格显示的内容
@@ -839,8 +848,8 @@
         var xhr = new XMLHttpRequest();
         var data = {
           dataSet: [
-            { taskName:"12", deviceRegion:"13"},
-            { taskName:"12", deviceRegion:"13"}
+            { taskName:"10", deviceRegion:"99999"},
+            { taskName:"11", deviceRegion:"http://192.168.1.56:8080/smcsp/camera_pic/qb-c10,11,12/20201103101839/3.jpg"}
           ],
           heads: {taskName:"任务名称", deviceRegion:"设备区域", },
           sheetName: "test"

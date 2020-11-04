@@ -69,7 +69,7 @@
               >
               </el-table-column>
               <el-table-column
-                prop="point.deviceName" align="center"
+                prop="point.name" align="center"
                 label="点位名称"
               >
               </el-table-column>
@@ -79,7 +79,7 @@
               >
               </el-table-column>
               <el-table-column
-                prop="value" align="center"
+                prop="valueDesc" align="center"
                 label="识别结果"
               >
               </el-table-column>
@@ -88,7 +88,10 @@
                 label="采集信息"
               >
                 <template slot-scope="scope">
-                  <p style="cursor:pointer;text-decoration:underline;color:blue" @click="openImg(imgUrlBefore+scope.row.cameraPic)">图片信息</p>
+                  <p style="cursor:pointer;text-decoration:underline;color:blue"
+                     @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:
+                           scope.row.flirPic?imgUrlBefore+scope.row.flirPic:
+                           '../../static/img/no404.jpg')">图片信息</p>
                 </template>
               </el-table-column>
             </el-table>
@@ -118,7 +121,9 @@
           <div class="right_content">
             <ul>
               <li :class="'r'+radio_n" v-for="(item, index) in imgDataResults" :key="index">
-                <el-image v-if="item.cameraPic" :src="imgUrlBefore+item.cameraPic"
+                <el-image v-if="item" :src="item.cameraPic?imgUrlBefore+item.cameraPic:
+                           item.flirPic?imgUrlBefore+item.flirPic:
+                           '../../static/img/no404.jpg'"
                           :preview-src-list="srcList" style="width:100%;"></el-image>
                 <p v-if="item.point" style="background: #D9ECEA;height: 22px;line-height: 22px">{{item.point.name}}</p>
               </li>
@@ -252,8 +257,16 @@
     methods: {
       getTableData(){
           let _this = this
-          _this.ajaxTableData.startTime = _this.value_start
-          _this.ajaxTableData.endTime = _this.value_end
+          if(_this.value_start.length<19){
+            _this.ajaxTableData.startTime = _this.value_start + ' 00:00:00'
+          }else {
+            _this.ajaxTableData.startTime = _this.value_start
+          }
+          if(_this.value_end.length<19){
+            _this.ajaxTableData.endTime = _this.value_end + ' 23:59:59'
+          }else {
+            _this.ajaxTableData.endTime = _this.value_end
+          }
           //console.log(_this.ajaxTableData)
           //_this.ajaxTableData.checkStatus = _this.radio*1
           _this.ajax_api('post',url_api + '/point-history',
@@ -270,8 +283,18 @@
       },
       getImgData(){
           let _this = this
-          _this.ajaxTableImgData.startTime = _this.value_start
-          _this.ajaxTableImgData.endTime = _this.value_end
+
+          if(_this.value_start.length<19){
+            _this.ajaxTableImgData.startTime = _this.value_start + ' 00:00:00'
+          }else {
+            _this.ajaxTableImgData.startTime = _this.value_start
+          }
+          if(_this.value_end.length<19){
+            _this.ajaxTableImgData.endTime = _this.value_end + ' 23:59:59'
+          }else {
+            _this.ajaxTableImgData.endTime = _this.value_end
+          }
+          //console.log(_this.ajaxTableImgData)
           //_this.ajaxTableImgData.checkStatus = _this.radio*1
 
           _this.ajax_api('post',url_api + '/point-history',
@@ -284,8 +307,15 @@
                       _this.imgDataResults = res.data.items
                       _this.srcList = []
                       for(let i=0;i<res.data.items.length;i++){
-                          _this.srcList.push(_this.imgUrlBefore + res.data.items[i].cameraPic)
+                        /*scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:
+                           scope.row.flirPic?imgUrlBefore+scope.row.flirPic:
+                           '../../static/img/no404.jpg'*/ //res.data.items[i].cameraPic
+                        _this.srcList.push(res.data.items[i].cameraPic?
+                          _this.imgUrlBefore+res.data.items[i].cameraPic:
+                          res.data.items[i].flirPic?_this.imgUrlBefore+res.data.items[i].flirPic:
+                            url_img+'/static/img/no404.jpg')
                       }
+                      //console.log(_this.srcList)
                       if(_this.radio_n==1){
                           let r_w = $('.right_content').width()/2
                           setTimeout(()=>{$('.right_content li>div').height(r_w*0.7)},10)
@@ -388,7 +418,7 @@
         _this.myChart.clear()
         // 绘制图表
         _this.myChart.setOption({
-          backgroundColor: '#fff', // saveAsImage背景透明
+          backgroundColor: 'rgb(255,255,255)', // saveAsImage背景透明
           title: { text: ''},
           legend: {
             //data: ['开关压力表112','开关压力表114','开关压力表117'],
@@ -454,9 +484,8 @@
       },
       resetList(){
         let _this = this
-        _this.value_start = _this.convertToLateDate()
-        _this.value_end = _this.getDateTime()
-        //_this.ajaxTableData.checkStatus = _this.radio*1
+        _this.value_end = this.getDateTime() + ' 23:59:59'
+        _this.value_start = this.convertToLateDate() + ' 00:00:00'
         _this.pointIds = '0'
         _this.ajaxTableData.pointIds = ''
         _this.ajaxTableImgData.pointIds = ''
@@ -553,7 +582,7 @@
             {pointIds:pointIdsArr[i],
               startTime:_this.value_start,
               endTime:_this.value_end,
-              size:100},
+              size:30},
             true,
             function (res) {
               if(res.code == 200){
@@ -568,10 +597,10 @@
                 dataYData = []
                   for(let j=0;j<dataList.length;j++){
                     dateX.push(dataList[j].createTime)
-                    dataYData.push(dataList[j].value)
+                    dataYData.push(dataList[j].valueDesc)
                     dataY = {
                       time: dataList[j].createTime,
-                      name: dataList[j].point.deviceName,
+                      name: dataList[j].point.name,
                       //stack: '总量',
                       type: 'line',
                       data: dataYData

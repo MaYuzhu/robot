@@ -203,6 +203,7 @@
         kongzhiImgSrc:'signal_no',
         webVideoCtrl:null,
         chongdian:'',
+        listener_sensor:null,
       }
     },
     mounted(){
@@ -212,10 +213,10 @@
           url : _this.url
       });
       _this.ros.on('connection', function() {
-          console.log('ros.');
+          //console.log('ros.');
       });
       _this.ros.on('close', function() {
-          console.log('Connection to websocket server closed.');
+          //console.log('Connection to websocket server closed.');
       });
 
       this.init()
@@ -225,6 +226,7 @@
       this.yun_xy_now()
       this.isRed()
       this.isVideo()
+      this.sensor()
     },
     methods:{
     	init(){
@@ -347,6 +349,7 @@
       isRed(){
 
       },
+      //可见光 红外 控制系统
       isVideo(){
         let _this = this
         _this.listener = new ROSLIB.Topic({
@@ -379,6 +382,25 @@
         });
 
       },
+      //避障
+      sensor(){
+        let _this = this
+        _this.listener_sensor = new ROSLIB.Topic({//subscribe
+          ros : _this.ros,
+          name : '/sensor_obstacle_able_status',
+          messageType : 'std_msgs/Int16'
+        });
+        console.log(11001100)
+        _this.listener_sensor.subscribe(function (msg) {
+          console.log(msg)  //0-关闭   1-开启
+          if(msg.data == 1){
+            _this.value_switch4 = true
+          }else {
+            _this.value_switch4 = false
+          }
+          _this.listener_sensor.unsubscribe()
+        })
+      },
 
     },
     components: {
@@ -389,7 +411,7 @@
     	let _this = this
       next()
       if(_this.listener){
-        console.log('连接已断开')
+        //console.log('连接已断开')
         _this.listener.unsubscribe();
       }
     },

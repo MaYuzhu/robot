@@ -53,10 +53,23 @@
               label="采集信息"
               >
               <template slot-scope="scope" height="10px" v-if="scope.row">
-                <img :src="scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic"
+                <img :src="scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:
+                           scope.row.flirPic?imgUrlBefore+scope.row.flirPic:
+                           '../../static/img/no404.jpg'"
                      style="display:block;width:80px;height:32px;margin:0 auto;"
-                     @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:imgUrlBefore+scope.row.flirPic)">
+                     @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:
+                           scope.row.flirPic?imgUrlBefore+scope.row.flirPic:
+                           '../../static/img/no404.jpg')">
               </template>
+              <!--<template slot-scope="scope" height="10px" v-if="scope.row">
+                <img :src="scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:
+                      imgUrlBefore+scope.row.flirPic?'../../static/img/no404.jpg':imgUrlBefore+scope.row.flirPic
+                      "
+                     style="display:block;width:80px;height:32px;margin:0 auto;"
+                     @click="openImg(scope.row.cameraPic?imgUrlBefore+scope.row.cameraPic:
+                      imgUrlBefore+scope.row.flirPic!='undefined'?imgUrlBefore+scope.row.flirPic:
+                      '../../static/img/no404.jpg')">
+              </template>-->
             </el-table-column>
           </el-table>
         </div>
@@ -83,12 +96,17 @@
             >
             </el-table-column>
             <el-table-column align="center"
+                             prop="point.id"
+                             label="ID"
+            >
+            </el-table-column>
+            <el-table-column align="center"
               prop="createTime" width="260"
               label="识别时间"
             >
             </el-table-column>
             <el-table-column align="center"
-                             prop="pointHistory.value"
+                             prop="valueDesc"
                              label="识别结果"
             >
             </el-table-column>
@@ -111,7 +129,7 @@
             >
             </el-table-column>-->
             <el-table-column align="center"
-              prop="address"
+              prop="alarmType.name"
               label="告警类型"
             >
             </el-table-column>
@@ -197,6 +215,10 @@
           imgUrlBefore: url_img + '/smcsp/',
           ros:null,
           url:robotUrl,
+          sanxiang:false,
+          requexian:false,
+          yuexian:false,
+          youwei:false,
       };
     },
     props: ['irDataTaskHistoryId'],
@@ -242,9 +264,32 @@
             _this.pointSysAlarmNow()
           }
         });
-        this.pointNow()
-        this.pointAlarmNow()
-        this.pointSysAlarmNow()
+        _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
+          {irBaseRobotId:1,size:200,page:1,},
+          true, function (res) {
+            let alarm_message = res.data.items.filter(item => {
+              return item.name == 'alarm-message-setting'
+            })
+            let alarm_arr = alarm_message[0].value.split(',')
+            //console.log(alarm_message[0].value)
+            for(let i=0;i<alarm_arr.length;i++){
+              if(alarm_arr[i]==6){
+                _this.sanxiang = true
+              }
+              if(alarm_arr[i]==7){
+                _this.requexian = true
+              }
+              if(alarm_arr[i]==8){
+                _this.yuexian = true
+              }
+              if(alarm_arr[i]==9){
+                _this.youwei = true
+              }
+            }
+          })
+        _this.pointNow()
+        _this.pointAlarmNow()
+        _this.pointSysAlarmNow()
         let box_height = $('#tabs').height() - 31
         $('.box_height').height(box_height+'px')
     },
@@ -295,7 +340,7 @@
                       if(_this.tableDataPointNow.length==res.data.items.length){
                         return
                       }else {
-                        if(Math.abs(res.data.items[0].value)>=10000){
+                        /*if(Math.abs(res.data.items[0].value)>=10000){
                           //alert('设备'+res.data.items[0].point.id+res.data.items[0].valueDesc)
                           let message = '设备'+res.data.items[0].point.id+res.data.items[0].valueDesc
                           _this.playOrPaused()
@@ -305,19 +350,11 @@
                               _this.playClose()
                             }
                           })
-                        }
+                        }*/
                         _this.tableDataPointNow = res.data.items
                       }
-                      //请求所有-倒序  reverse
                       //_this.tableDataPointNow = res.data.items
-                      /*if(Math.abs(res.data.items[0].value)>=10000){
-                        alert(res.data.items[0].point.id+res.data.items[0].valueDesc)
-                      }*/
-                      /*for(let i=0;i<res.data.items.length;i++){
-                        if(Math.abs(res.data.items[i].value)>10000){
-                          alert(res.data.items[i].point.id+res.data.items[i].valueDesc)
-                        }
-                      }*/
+
                       //原来一条一条加-start
                       /*if(_this.tableDataPointNow.length==0 && res.data.items.length>0){
                         console.log('+1')
@@ -353,7 +390,7 @@
               return
             }
             if(res.code == 200){
-                //console.log(res.data.items)
+                console.log(res.data.items)
                 _this.tableDataPointAlarmNow = res.data.items
                 pointAlarmNowTime()
             }
@@ -367,7 +404,61 @@
                   true,
                   function (res) {
                       if(res.code == 200){
-                        _this.tableDataPointAlarmNow = res.data.items
+                        //console.log(res.data.items)
+                        //找到 new 值，判断报警
+                        if(_this.tableDataPointAlarmNow.length==res.data.items.length){
+                          return
+                        }else {
+                          if(!res.data.items[0].alarmType){
+                            return
+                          }
+                          if(res.data.items[0].alarmType.id == 1 && _this.sanxiang){
+                            //alert('设备'+res.data.items[0].point.id+res.data.items[0].valueDesc)
+                            let message = res.data.items[0].point.name+'-'+res.data.items[0].alarmType.name
+                            _this.playOrPaused()
+                            _this.$alert(message, '系统警报', {
+                              confirmButtonText: '确定',
+                              callback: action => {
+                                _this.playClose()
+                              }
+                            })
+                          }
+                          if(res.data.items[0].alarmType.id == 4 && _this.requexian){
+                            //alert('设备'+res.data.items[0].point.id+res.data.items[0].valueDesc)
+                            let message = res.data.items[0].point.name+'-'+res.data.items[0].alarmType.name
+                            _this.playOrPaused()
+                            _this.$alert(message, '系统警报', {
+                              confirmButtonText: '确定',
+                              callback: action => {
+                                _this.playClose()
+                              }
+                            })
+                          }
+                          if(res.data.items[0].alarmType.id == 5 && _this.yuexian){
+                            //alert('设备'+res.data.items[0].point.id+res.data.items[0].valueDesc)
+                            let message = res.data.items[0].point.name+'-'+res.data.items[0].alarmType.name
+                            _this.playOrPaused()
+                            _this.$alert(message, '系统警报', {
+                              confirmButtonText: '确定',
+                              callback: action => {
+                                _this.playClose()
+                              }
+                            })
+                          }
+                          if(res.data.items[0].alarmType.id == 6 && _this.youwei){
+                            //alert('设备'+res.data.items[0].point.id+res.data.items[0].valueDesc)
+                            let message = res.data.items[0].point.name+'-'+res.data.items[0].alarmType.name
+                            _this.playOrPaused()
+                            _this.$alert(message, '系统警报', {
+                              confirmButtonText: '确定',
+                              callback: action => {
+                                _this.playClose()
+                              }
+                            })
+                          }
+                          _this.tableDataPointAlarmNow = res.data.items
+                        }
+                        //_this.tableDataPointAlarmNow = res.data.items
                       }
                   })
               _this.pointAlarmNowTimeId = setTimeout(pointAlarmNowTime,_this.time)

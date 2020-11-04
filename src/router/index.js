@@ -45,6 +45,7 @@ import usersThresholdSetting from '@/pages/usersThresholdSetting'
 import usersAlarmMessageSetting from '@/pages/usersAlarmMessageSetting'  //消息订阅
 import usersRightsManagement from '@/pages/usersRightsManagement'
 import usersInspectionPointsSetting from '@/pages/usersInspectionPointsSetting'
+import usersInspectionPointsSettingWh from '@/pages/usersInspectionPointsSettingWh'
 import usersUserManagement from '@/pages/usersUserManagement'
 import usersOrganizationalStructure from '@/pages/usersOrganizationalStructure'
 import usersLogManagement from '@/pages/usersLogManagement'
@@ -348,6 +349,14 @@ const router = new Router({
       component: usersInspectionPointsSetting,
       meta:{
         name:'巡检点位设置'
+      }
+    },
+    {
+      path: '/users/inspection-points-setting-wh',
+      name: 'usersInspectionPointsSettingWh',
+      component: usersInspectionPointsSettingWh,
+      meta:{
+        name:'典型巡检点位库维护'
       }
     },
     {
