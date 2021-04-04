@@ -40,7 +40,7 @@
               <p>软件版本号</p>{{soft_version}}
             </div>
             <div>
-              <p>在线升级</p>
+              <p>远程升级</p>
               <input id="files_v" style="" type="file" @change="softVersionChange()">
             </div>
 
@@ -200,7 +200,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res.data)
+              console.log(res.data)
               let items = res.data.items
               let company_name = items.filter(item =>{
               	return item.name == "company_name"

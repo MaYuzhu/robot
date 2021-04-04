@@ -27,18 +27,18 @@
       //http://58.57.83.230:8090/dist
       // /home/soft/apache-tomcat-8.5.15/webapps/ROOT  192.168.1.120
 
-      /*var url_api = 'http://192.168.1.120:8080/ir_proj/ui'
-      var url_img = 'http://192.168.1.120:8080'*/
+      //var url_api = 'http://192.168.1.120:8081/ir_proj/ui'
+      //var url_img = 'http://192.168.1.120:8081'
       /*var url_api = 'http://192.168.1.157:8098/ui'
       var url_img = 'http://192.168.1.157:8098'*/
 
-      //var url_api = 'http://58.57.83.230:8098/ui'
-      //var url_api = 'http://localhost:8098/ui'
+      var url_api = 'http://192.168.1.110:8098/ui'
+      var url_img = 'http://192.168.1.110:8090'
 
-      /*var url_api = 'http://localhost:8080/ir_proj/ui'
-      var url_img = 'http://localhost:8080'*/
-      var url_api = 'http://192.168.1.56:8080/ir_proj/ui'
-      var url_img = 'http://192.168.1.56:8080'
+      //var url_api = 'http://localhost:8080/ir_proj/ui'
+      //var url_img = 'http://localhost:8080'
+      /*var url_api = 'http://47.111.183.158:8095/ir_proj/ui'
+      var url_img = 'http://192.168.1.120:8080'*/
 
       //设置录像等保存路径
       var video_save_url = 'C:\\tomcat\\apache-tomcat-8.5.57\\webapps\\video_a'
@@ -47,9 +47,9 @@
       var routersArr = []
       var robotIdCurrent = ''
 
-      var mapCenter = [10, 9]            //10,9三楼  //28, 20玉贤   //-0.5, 0.75楼顶
-      var mapRotate = 4.5              //4.5三楼   //-2.4玉贤     //-11.5楼顶
-      var zoom = 5                      //5 三楼，玉贤     //9 楼顶
+      var mapCenter = [-0.5, 0]            //10,9三楼  //28, 20玉贤   //-0.5, 0.75楼顶
+      var mapRotate = -4.5  //11.5              //4.5三楼   //-2.4玉贤     //-11.5楼顶
+      var zoom = 6                     //5 三楼，玉贤     //9 楼顶
 
       //刷新保存计划线路
       var planLinePointArr = sessionStorage.getItem("planLine") ? sessionStorage.getItem("planLine") : '';
@@ -65,7 +65,7 @@
       var hKUrl = '192.168.1.13'
 
       var projRobotXY = function (x,y) {
-        var point = 1           //三楼-1    楼顶-10
+        var point = 1           //三楼-1    楼顶-1
         return [x/point,y/point]
       }
 

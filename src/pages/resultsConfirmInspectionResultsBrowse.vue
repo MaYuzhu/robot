@@ -466,7 +466,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res.data.items)
+              console.log(res.data.items)
               _this.tableDataResults = res.data.items
               _this.total1 = res.data.total
             }
@@ -499,8 +499,8 @@
                       _this.srcList = []
 
                       for(let i=0;i<res.data.items.length;i++){
-                        let url_img = res.data.items[i].cameraPic?res.data.items[i].cameraPic:res.data.items[i].flirPic
-                        _this.srcList.push(_this.imgUrlBefore + url_img)
+                        let url_img_ = res.data.items[i].cameraPic?res.data.items[i].cameraPic:res.data.items[i].flirPic
+                        _this.srcList.push(_this.imgUrlBefore + url_img_)
                       }
 
                   }
@@ -607,11 +607,28 @@
         _this.input_value_wrong = ''
         _this.textarea = ''
         _this.imageArr = []
-        let url_img = row.cameraPic?row.cameraPic:row.flirPic
+        if(row.cameraPic){
+          console.log(123)
+          _this.imageArr.push({
+            title:row.point.name,
+            url:_this.imgUrlBefore + row.cameraPic
+          })
+        }else {
+          console.log(987)
+          for(let i=0;i<row.flirPicList.length;i++){
+            _this.imageArr.push({
+              title:row.flirPicList[i].sound,
+              url:_this.imgUrlBefore + row.flirPicList[i].flirPic
+            })
+            console.log(_this.imgUrlBefore + row.flirPicList[i].flirPic)
+          }
+        }
+
+        /*let url_img = row.cameraPic?row.cameraPic:row.flirPic
         _this.imageArr.push({
             title:row.point.name,
             url:_this.imgUrlBefore + url_img
-        })
+        })*/
         //console.log(_this.imageArr)
         _this.ajax_api('get',url_api + '/point-history/info/' + row.id,
           null,
@@ -741,14 +758,28 @@
         _this.textarea=''
         _this.point_info = _this.tableDataResults[_this.rowIndex].point.name
         _this.imageArr = []
-        let url_img = _this.tableDataResults[_this.rowIndex].cameraPic?
+        if(_this.tableDataResults[_this.rowIndex].cameraPic){
+          //console.log(123)
+          _this.imageArr.push({
+            title:_this.tableDataResults[_this.rowIndex].point.name,
+            url:_this.imgUrlBefore + _this.tableDataResults[_this.rowIndex].cameraPic
+          })
+        }else {
+          for(let i=0;i<_this.tableDataResults[_this.rowIndex].flirPicList.length;i++){
+            _this.imageArr.push({
+              title:_this.tableDataResults[_this.rowIndex].flirPicList[i].sound,
+              url:_this.imgUrlBefore + _this.tableDataResults[_this.rowIndex].flirPicList[i].flirPic
+            })
+          }
+        }
+        /*let url_img_ = _this.tableDataResults[_this.rowIndex].cameraPic?
           _this.tableDataResults[_this.rowIndex].cameraPic:_this.tableDataResults[_this.rowIndex].flirPic
         _this.imageArr.push({
             title: _this.tableDataResults[_this.rowIndex].point.name,
-            url: _this.imgUrlBefore + url_img
+            url: _this.imgUrlBefore + url_img_
 
           //_this.imgUrlBefore + row.cameraPic
-        })
+        })*/
         let id = _this.tableDataResults[_this.rowIndex].id
         _this.checkId = id
         //console.log(id,'index'+_this.rowIndex)
@@ -796,12 +827,26 @@
         _this.textarea=''
         _this.point_info = _this.tableDataResults[_this.rowIndex].point.name
         _this.imageArr = []
-        let url_img = _this.tableDataResults[_this.rowIndex].cameraPic?
+        if(_this.tableDataResults[_this.rowIndex].cameraPic){
+          //console.log(123)
+          _this.imageArr.push({
+            title:_this.tableDataResults[_this.rowIndex].point.name,
+            url:_this.imgUrlBefore + _this.tableDataResults[_this.rowIndex].cameraPic
+          })
+        }else {
+          for(let i=0;i<_this.tableDataResults[_this.rowIndex].flirPicList.length;i++){
+            _this.imageArr.push({
+              title:_this.tableDataResults[_this.rowIndex].flirPicList[i].sound,
+              url:_this.imgUrlBefore + _this.tableDataResults[_this.rowIndex].flirPicList[i].flirPic
+            })
+          }
+        }
+        /*let url_img_ = _this.tableDataResults[_this.rowIndex].cameraPic?
           _this.tableDataResults[_this.rowIndex].cameraPic:_this.tableDataResults[_this.rowIndex].flirPic
         _this.imageArr.push({
             title: _this.tableDataResults[_this.rowIndex].point.name,
-            url: _this.imgUrlBefore + url_img
-        })
+            url: _this.imgUrlBefore + url_img_
+        })*/
         let id = _this.tableDataResults[_this.rowIndex].id
         _this.checkId = id
         //console.log(id,'index'+_this.rowIndex)

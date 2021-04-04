@@ -371,6 +371,10 @@
                       <router-link to="/users/log-management">日志管理</router-link>
                       <span>|</span>
                     </div>
+                    <div>
+                      <p><a href="/static/test.docx" target="_blank">系统帮助</a></p>
+                      <span>|</span>
+                    </div>
                   </dd>
                 </dl>
               </div>
@@ -526,7 +530,7 @@
               return item.name == 'alarm-message-setting'
             })
             let alarm_arr = alarm_message[0].value.split(',')
-            //console.log(alarm_message[0].value)
+            console.log(alarm_message[0].value)
             for(let i=0;i<alarm_arr.length;i++){
               if(alarm_arr[i]==0){
                 _this.allAlarm(0)
@@ -633,7 +637,7 @@
       allAlarm(val){
         let _this = this
         clearTimeout(_this.timesJoyAlarm)
-        //接收任务是否完成-消息
+        //接收-消息
         _this.listenerJoy = new ROSLIB.Topic({
           ros : _this.ros,
           name : '/self_check',
@@ -958,6 +962,7 @@
             _this.playClose()
             _this.timesJoyAlarm = setTimeout(() => {
               _this.allAlarm(0)
+              //console.log(987789)
             },_this.times_s)
           }
         })

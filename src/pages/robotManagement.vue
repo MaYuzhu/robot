@@ -17,7 +17,7 @@
       <div style="background:lavender;clear: both">
         <XunjianContent :taskInfo="taskInfo"></XunjianContent>
       </div>
-      <taskControl @isVideo="isVideo" class="task_map" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
+      <taskControl @isVideo="isVideo" :robotId="robotId" class="task_map" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
     </div>
 <div v-if="false">
   <iframe src="../../static/hkVedio/hkvedio.html" width="500" height="300" frameborder="0"></iframe>
@@ -362,6 +362,7 @@
         _this.ajax_api('get',url_api + '/robot',
           {page:1,size:100},
           true,function (res) {
+            //console.log(res)
             if(res.code == 200){
               _this.options = res.data.items
               //已选中的机器人
@@ -384,10 +385,13 @@
         _this.ajax_api('get',url_api + '/task-history/findCurrentTask/'+ _this.robotId,
           null,
           true,function (res) {
-            //console.log(res)   //taskStatus: 1 正在执行
-            if(res.data.taskStatus!=0){
-              _this.getTaskInfo()
+            console.log(res)   //taskStatus: 1 正在执行
+            if(res.code==200){
+              if(res.data.taskStatus!=0){
+                _this.getTaskInfo()
+              }
             }
+
           })
       },
       getTaskInfo(){

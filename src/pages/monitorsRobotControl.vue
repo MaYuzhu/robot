@@ -5,7 +5,8 @@
       <div style="width: 60%;float: left">
         <XunjianContent :taskInfo="taskInfo"></XunjianContent>
 
-        <taskControl @isVideo="isVideo" class="task_control_wrap1" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
+        <taskControl @isVideo="isVideo" class="task_control_wrap1"
+                     :robotId="robotId" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
 
       </div>
       <select style="display: none" id="ip" class="sel" onchange=""></select>
@@ -420,7 +421,7 @@
         _this.ajax_api('get',url_api + '/task-history/findCurrentTask/'+ _this.robotId ,
           null,
           true,function (res) {
-            //console.log(res)   //taskStatus: 1 正在执行 返回数据不存在40403
+            console.log(res)   //taskStatus: 1 正在执行 返回数据不存在40403
             if(res.data.taskStatus!=0){
               _this.getTaskInfo()
             }
@@ -1086,7 +1087,11 @@
         //获取年月日
         var date = new Date();
         var year = date.getFullYear(); //获取完整的年份(4位)
-        var month = date.getMonth()+1; //获取当前月份(0-11,0代表1月)
+        var mm = date.getMonth()+1;
+        if(mm<10){
+          mm = '0' + mm
+        }
+        var month = mm; //获取当前月份(0-11,0代表1月)
         var data = date.getDate(); //获取当前日(1-31)
 
         if (name) {

@@ -736,10 +736,20 @@
         _this.input_value_wrong = ''
         _this.textarea=''
         _this.imgArr = []
-        _this.imgArr.push({
-          title:row.point.name,
-          url:_this.imgUrlBefore + row.pointHistory.cameraPic
-        })
+        for(let i=0;i<row.pointHistoryList.length;i++){
+          if(row.pointHistoryList[i].flirPic){
+            _this.imgArr.push({
+              title:row.pointHistoryList[i].sound,
+              url:_this.imgUrlBefore + row.pointHistoryList[i].flirPic
+            })
+          }else if(row.pointHistoryList[i].cameraPic){
+            _this.imgArr.push({
+              title:row.pointHistoryList[i].sound,
+              url:_this.imgUrlBefore + row.pointHistoryList[i].cameraPic
+            })
+          }
+        }
+
         _this.ajax_api('get',url_api + '/point-alarm-history/info/'+row.id,
           null,
           true,
@@ -783,10 +793,23 @@
         _this.textarea=''
         _this.point_info = _this.tableDataAlarm[_this.rowIndex].point.deviceName
         _this.imgArr = []
-        _this.imgArr.push({
+        for(let i=0;i<_this.tableDataAlarm[_this.rowIndex].pointHistoryList.length;i++){
+          if(_this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].flirPic){
+            _this.imgArr.push({
+              title:_this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].sound,
+              url:_this.imgUrlBefore + _this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].flirPic
+            })
+          }else if(_this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].cameraPic){
+            _this.imgArr.push({
+              title:_this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].sound,
+              url:_this.imgUrlBefore + _this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].cameraPic
+            })
+          }
+        }
+        /*_this.imgArr.push({
           title: _this.tableDataAlarm[_this.rowIndex].point.name,
           url: _this.imgUrlBefore +_this.tableDataAlarm[_this.rowIndex].pointHistory.cameraPic//_this.imgUrlBefore + row.cameraPic
-        })
+        })*/
         let id = _this.tableDataAlarm[_this.rowIndex].id
         _this.checkId = id
         //console.log(id,'index'+_this.rowIndex)
@@ -832,10 +855,23 @@
         _this.textarea=''
         _this.point_info = _this.tableDataAlarm[_this.rowIndex].point.deviceName
         _this.imgArr = []
-        _this.imgArr.push({
+        for(let i=0;i<_this.tableDataAlarm[_this.rowIndex].pointHistoryList.length;i++){
+          if(_this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].flirPic){
+            _this.imgArr.push({
+              title:_this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].sound,
+              url:_this.imgUrlBefore + _this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].flirPic
+            })
+          }else if(_this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].cameraPic){
+            _this.imgArr.push({
+              title:_this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].sound,
+              url:_this.imgUrlBefore + _this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].cameraPic
+            })
+          }
+        }
+        /*_this.imgArr.push({
           title: _this.tableDataAlarm[_this.rowIndex].point.name,
           url: _this.imgUrlBefore +_this.tableDataAlarm[_this.rowIndex].pointHistory.cameraPic//_this.imgUrlBefore + row.cameraPic
-        })
+        })*/
         let id = _this.tableDataAlarm[_this.rowIndex].id
         _this.checkId = id
         //console.log(id,'index'+_this.rowIndex)

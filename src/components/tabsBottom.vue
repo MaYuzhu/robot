@@ -245,33 +245,16 @@
           url : _this.url
         });
         _this.ros.on('connection', function() {
+        });
 
-        });
-        _this.listener = new ROSLIB.Topic({
-          ros : _this.ros,
-          name : '/task_execute_status',
-          messageType : 'robotmsg/TaskExecuteStatus'
-        });
-        _this.listener.subscribe(function(message) {
-          //console.log(message.task_status)
-          if(message.task_status==0){
-            clearTimeout(_this.pointNowTimeId)
-            clearTimeout(_this.pointAlarmNowTimeId)
-            clearTimeout(_this.SysAlarmNowTimeId)
-          }else if(message.task_status==1){
-            _this.pointNow()
-            _this.pointAlarmNow()
-            _this.pointSysAlarmNow()
-          }
-        });
         _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
           {irBaseRobotId:1,size:200,page:1,},
           true, function (res) {
+            //console.log(res)
             let alarm_message = res.data.items.filter(item => {
               return item.name == 'alarm-message-setting'
             })
             let alarm_arr = alarm_message[0].value.split(',')
-            //console.log(alarm_message[0].value)
             for(let i=0;i<alarm_arr.length;i++){
               if(alarm_arr[i]==6){
                 _this.sanxiang = true
@@ -308,7 +291,7 @@
           }
           _this.ajaxTablePointNowData.irDataTaskHistoryId = _this.irDataTaskHistoryId
           _this.ajax_api('post',url_api + '/point-history',
-              {page:1, size:10000,
+              {page:1, size:500,
                 irDataTaskHistoryId:_this.irDataTaskHistoryId
               },
               true,
@@ -326,7 +309,7 @@
           function pointNowTime(){
               //console.log(_this.irDataTaskHistoryId)
               _this.ajax_api('post',url_api + '/point-history',
-                  {page:1, size:10000,
+                  {page:1, size:500,
                     irDataTaskHistoryId:_this.irDataTaskHistoryId
                   },
                   true,
@@ -379,7 +362,7 @@
       pointAlarmNow(){
         let _this = this
         _this.ajax_api('post',url_api + '/point-alarm-history',
-          {page:1, size:10000,
+          {page:1, size:500,
             irDataTaskHistoryId:_this.irDataTaskHistoryId
           },
           true,
@@ -398,7 +381,7 @@
 
           function pointAlarmNowTime(){
                 _this.ajax_api('post',url_api + '/point-alarm-history',
-                  {page:1, size:10000,
+                  {page:1, size:500,
                     irDataTaskHistoryId:_this.irDataTaskHistoryId
                   },
                   true,
@@ -489,7 +472,7 @@
       pointSysAlarmNow(){
           let _this = this
           _this.ajax_api('get',url_api + '/sys-point-alarm-history',
-            {page:1, size:10000,
+            {page:1, size:500,
               irDataTaskHistoryId:_this.irDataTaskHistoryId
             },
             true,
@@ -503,7 +486,7 @@
 
           function pointSysAlarmNowTime(){
               _this.ajax_api('get',url_api + '/sys-point-alarm-history',
-                {page:1, size:10000,
+                {page:1, size:500,
                   irDataTaskHistoryId:_this.irDataTaskHistoryId
                 },
                 true,
