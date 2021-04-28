@@ -38,7 +38,7 @@
             <el-dropdown-menu slot="dropdown">
 
               <el-dropdown-item>
-                <el-checkbox v-model="checked1" @change="change11('geoJsonLayerPoint',checked1)">停靠点</el-checkbox>
+                <el-checkbox v-model="checked1" @change="change11('geoJsonLayerPoint3',checked1)">停靠点</el-checkbox>
               </el-dropdown-item>
               <el-dropdown-item>
                 <el-checkbox v-model="checked2" @change="change11('geoJsonLayerPointTargets3',checked2)">检测点</el-checkbox>
@@ -321,6 +321,7 @@
             format:new ol.format.GeoJSON(),
           }),
           style: function (feature, resolution) {
+            //console.log(feature)
             return new ol.style.Style({
               image: new ol.style.Circle({
                 radius: 5,
@@ -337,9 +338,9 @@
             title: 'add Layer Point',
             source: new ol.source.Vector({
                 projection: 'EPSG:3857',
-                //url: '../../static/geojson/targets_yu_new.geojson',
+                //url: '../../static/geojson/targets_yu_new.geojson',  //{featureProjection: 'EPSG:3857'}
                 url: '../../static/geojson/targets.geojson',
-                format:new ol.format.GeoJSON({featureProjection: 'EPSG:3857'}),
+                format:new ol.format.GeoJSON(),
 
             }),
             style: function (feature, resolution) {
@@ -467,6 +468,7 @@
         }
 
         if(_this.choosePointText=='地图选点'){
+          _this.$message('请按住ctrl键+拖动选择');
           _this.choosePointText = '停止'
           _this.isShowStopPoint = true
           _this.pointmove = new ol.interaction.Select({
@@ -778,10 +780,10 @@
         if(!_this.robotId){
           return
         }
-        _this.ajax_api('get',url_api + '/task-history/findCurrentTask/1'  , //+ _this.robotId,
+        _this.ajax_api('get',url_api + '/task-history/findCurrentTask/' + _this.robotId,
           null,
           true,function (res) {
-            console.log(res)   //taskStatus: 1 正在执行, 0 完成，2暂停 ,3，继续，4清除
+            console.log(res)   //taskStatus: 1 正在执行, 0 完成, 2 暂停 , 3 继续, 4 清除
             if(res.code==200){
                 if(res.data.taskStatus==1 || res.data.taskStatus==3){
                   _this.taskIsIng = true
@@ -801,6 +803,7 @@
       //一键返航
       backStartPoint(){
         let _this = this
+        //_this.$emit("robotBack","back");
         this.$confirm('该操作将终止当前任务返回充电房, 是否继续?', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
@@ -810,6 +813,14 @@
             _this.ajax_api('get',url_api + '/robot/' + robotIdCurrent + '/turn-back',
                 null,true,function (res) {
                     console.log(res)
+                    if(res.data == 'valtage'){
+                      _this.$message({message: '电池电量低，不能执行任务'});
+                      return
+                    }
+                    if(res.data == 'path'){
+                      _this.$message({message: '路网中断，不能执行任务'});
+                      return
+                    }
                     if(res.data=='null'){
                         console.log('没有data')
                         _this.$message({
@@ -847,6 +858,7 @@
                     ros.on('connection', function() {
                         console.log('准备返回.');
                     });*/
+                    _this.$emit("robotBack","back");
 
                     _this.taskServer = new ROSLIB.Service({
                         ros : _this.ros,
@@ -859,7 +871,7 @@
                         serviceType : 'robotmsg/TaskList'
                     });
                     _this.taskServerClear.callService({flag:0},function(result) {
-                      console.log('Clear'+result);
+                      //console.log('Clear'+result);
                       if(result){
                         var request = new ROSLIB.ServiceRequest({
                           plan : res.data,
@@ -1051,6 +1063,7 @@
         var source = new ol.source.Vector({wrapX:false})
 
         if(_this.addPlateText == '挂牌'){
+          _this.$message('请按住ctrl键+拖动选择');
           _this.addPlateText = '退出挂牌'
 
           _this.addPlateVector = new ol.layer.Vector({
@@ -1130,14 +1143,14 @@
         let polygon_d = '';
       	let fence_shp = ''
         plateCoordinate[0].forEach((v, k) => {
-          var ol_ep =  ol.proj.transform([v[0],v[1]], 'EPSG:3857', 'EPSG:4326')
-          //var ol_ep =  [v[0],v[1]]
+          //var ol_ep =  ol.proj.transform([v[0],v[1]], 'EPSG:4326', 'EPSG:3857')  //'EPSG:3857', 'EPSG:4326
+          var ol_ep =  [v[0].toFixed(6),v[1].toFixed(6)]
           polygon_d += ol_ep[0] + " " + ol_ep[1];
           if (plateCoordinate[0].length != k + 1) {
             polygon_d += ", ";
           }
           fence_shp = 'POLYGON((' + polygon_d + '))'
-          //console.log(polygon_d)
+          console.log(polygon_d)
         });
         //console.log(fence_shp)
         let addFenceData = {
@@ -1300,7 +1313,7 @@
         _this.ajax_api('get',url_api + '/fence',
           {page:1,size:1000},
           true,function (res) {
-            //console.log(res)
+            console.log(res)
             if(res.code == 200){
             	let fence_items = res.data.items
               let features = []
@@ -1308,9 +1321,14 @@
             		let wkt = fence_items[i].fenceAngle
                 let format = new ol.format.WKT();
                 let feature = format.readFeature(wkt,{
+                  //dataProjection: 'EPSG:3857',
+                  //featureProjection: 'EPSG:4326'
+                });
+                /*
+                * let feature = format.readFeature(wkt,{
                   dataProjection: 'EPSG:4326',
                   featureProjection: 'EPSG:3857'
-                });
+                });*/
                 let idProperties = {
                 	id:fence_items[i].id,
                   startTime:fence_items[i].startTime,
@@ -1503,7 +1521,7 @@
           });
           var routeArr = [],
               routeArrPoint = []
-          _this.listener.subscribe(function(message) {
+              _this.listener.subscribe(function(message) {
               //console.log(message);
               /*var routeArr = [],
                   routeArrPoint = []*/
@@ -1581,6 +1599,18 @@
               type: 'success',
               message: '任务完成',
             });*/
+            //先发给后台
+            console.log(_this.irDataTaskHistoryId)
+            //{irDataTaskHistoryId:_this.irDataTaskHistoryId,irBaseRobotId:robotIdCurrent},
+            _this.ajax_api('post',url_api + '/task-history/updTaskHistoryStatus',
+              {
+                irDataTaskHistoryId: _this.irDataTaskHistoryId,
+                taskStatus: 0
+              },
+              true,function (res) {
+                //console.log(res)
+              })
+
             _this.$alert('任务完成', '提示', {
               confirmButtonText: '确定',
               callback: action => {

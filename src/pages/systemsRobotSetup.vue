@@ -85,7 +85,7 @@
                 <p>轮子直径: </p>
                 <el-input v-model="zhijing" size="mini" style="width:50px"
                           type="number"
-                          onblur="if(value > 25 || value < 15 ){alert('请输入15~25之间的数值！')};value=20"></el-input>
+                          onblur="if(value > 25 || value < 15 ){alert('请输入15~25之间的数值！');value=20}"></el-input>
                 <span>cm</span>
               </div>
               <div>
@@ -308,7 +308,7 @@
         _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
           {irBaseRobotId:1,size:200,page:1,},
           true, function (res) {
-            //console.log(res.data)
+            console.log(res.data)
             let alarm_after = res.data.items.filter(item => {
               return item.name == 'alarm-after-execute'
             })
@@ -410,7 +410,7 @@
           value: _this.battery_capacity
         })
 
-        setData.robotParamRequests.push({
+        /*setData.robotParamRequests.push({
           name:'x-value',
           displayName: "x",
           value: _this.x_x
@@ -429,7 +429,7 @@
           name:'Vertical-offset',
           displayName: "云台垂直偏移量",
           value: _this.yun_y
-        })
+        })*/
         //console.log(setData)
         _this.ajax_api('put',url_api + '/robot-param/batch',
           setData,

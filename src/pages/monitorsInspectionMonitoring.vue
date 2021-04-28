@@ -7,7 +7,8 @@
           <XunjianContent :taskInfo="taskInfo"></XunjianContent>
         </div>
         <div class="taskControl_wrap">
-          <taskControl @isVideo="isVideo" :robotId="robotId" :irDataTaskHistoryId="irDataTaskHistoryId" v-if="hardReset"></taskControl>
+          <taskControl @isVideo="isVideo" :robotId="robotId" v-on:robotBack="robotBack"
+                       :irDataTaskHistoryId="irDataTaskHistoryId" v-if="hardReset"></taskControl>
         </div>
 
       </div>
@@ -173,11 +174,12 @@
             }
           })
         function currentTaskInfo() {
+          clearTimeout(_this.currentTaskInfoTimeId)
           _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
             null,
             true,function (res) {
               if(res.code == 200){
-                //console.log(res)
+                console.log(res)
                 _this.irDataTaskHistoryId = res.data.irDataTaskHistoryId
                 _this.taskInfo = {
                   name:res.data.taskName,
@@ -360,6 +362,41 @@
           //console.log(margin)
           $('.play_video').css({'margin':margin})
       },
+
+      //一键返航
+      robotBack(e){
+        let _this = this
+        console.log(e)
+        if(e == 'back'){
+          window.clearTimeout(_this.currentTaskInfoTimeId)
+          setTimeout(function () {
+            _this.taskInfo = {
+              name: '一键返航',
+              taskStatus:'',
+              abnormalPointNum:'',
+              pointTotal:'',
+              currentPoint:'',
+              passPointNum:'',
+              totalRunTime:'',
+              cumulativeRunTime:'',
+            }
+          },1000)
+        }else if(e == 'no_task'){
+          window.clearTimeout(_this.currentTaskInfoTimeId)
+          setTimeout(function () {
+            _this.taskInfo = {
+              name: '',
+              taskStatus:'',
+              abnormalPointNum:'',
+              pointTotal:'',
+              currentPoint:'',
+              passPointNum:'',
+              totalRunTime:'',
+              cumulativeRunTime:'',
+            }
+          },1000)
+        }
+      }
     },
     destroyed(){
         let _this = this
@@ -369,8 +406,41 @@
     created() {
       let _this = this
       _this.$root.eventHub.$on('taskEnd',(target) => {
-        console.log(target)
+        //console.log(target)
         clearTimeout(_this.currentTaskInfoTimeId)
+      });
+      _this.$root.eventHub.$on('robotBack',(e) => {
+        //console.log(target)
+        if(e == 'back'){
+          clearTimeout(_this.currentTaskInfoTimeId)
+          window.setTimeout(function () {
+            _this.taskInfo = {
+              name: '一键返航',
+              taskStatus:'',
+              abnormalPointNum:'',
+              pointTotal:'',
+              currentPoint:'',
+              passPointNum:'',
+              totalRunTime:'',
+              cumulativeRunTime:'',
+            }
+          },1000)
+        }else if(e == 'no_task'){
+          console.log('000000')
+          window.clearTimeout(_this.currentTaskInfoTimeId)
+          setTimeout(function () {
+            _this.taskInfo = {
+              name: '111',
+              taskStatus:'',
+              abnormalPointNum:'',
+              pointTotal:'',
+              currentPoint:'',
+              passPointNum:'',
+              totalRunTime:'',
+              cumulativeRunTime:'',
+            }
+          },1000)
+        }
       });
     },
     watch:{

@@ -5,7 +5,7 @@
       <div style="width: 60%;float: left">
         <XunjianContent :taskInfo="taskInfo"></XunjianContent>
 
-        <taskControl @isVideo="isVideo" class="task_control_wrap1"
+        <taskControl @isVideo="isVideo" class="task_control_wrap1" v-on:robotBack="robotBack"
                      :robotId="robotId" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
 
       </div>
@@ -20,7 +20,7 @@
           <div id="divPlugin" style="width: 100%;height: 100%;background:#343434"></div>
         </div>
         <div class="right_bottom" style="border:1px solid;height: 50%">
-          <!--<Button class="red_pic_but" @click="red_pic">红外</Button>-->
+          <Button class="red_pic_but" @click="red_pic">红外</Button>
           <img id="chatterMessage" :src="src" style="width: 100%;height: 100%" alt="">
         </div>
       </div>
@@ -231,7 +231,7 @@
         duijiang_title: '开启语音',
         duijiang_img:'../../static/images/voice_close.png',
         g_bPTZAuto : false,
-        taskInfo:{},
+        taskInfo:{name:''},
         robotId:'',
         g_iWndIndex:null,
         url:robotUrl,
@@ -434,7 +434,7 @@
           null,
           true,function (res) {
             if(res.code == 200){
-              //console.log(res.data)
+              console.log(res.data)
               _this.taskInfo = {
                 name:res.data.taskName,
                 taskStatus:res.data.taskStatus,
@@ -450,6 +450,7 @@
             }
           })
         function currentTaskInfo() {
+          clearTimeout(_this.currentTaskInfoTimeId)
           _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
             null,
             true,function (res) {
@@ -630,10 +631,10 @@
         var _this = this
         var oWndInfo = WebVideoCtrl.I_GetWindowStatus(_this.g_iWndIndex),
         szInfo = "";
-        this.$message({
+        /*this.$message({
           duration: 6000,
           message: '请选择手持遥控模式'
-        });
+        });*/
         if (oWndInfo != null) {
           var szChannelID = $("#channels").val(),
             szPicName = oWndInfo.szIP + "_" + szChannelID + "_" + new Date().getTime(),
@@ -1023,6 +1024,7 @@
               _this.$message({ message: '暂无音频',});
               return
             }else {
+              let resData = res.data.reverse()
               for(let  i=0;i<res.data.length;i++){
                 $('.playbackdiv .sound_wrap').append(`
                     <audio class="audio_" src='${url_img}/smcsp/file/${res.data[i]}' controls="controls" style="margin: 8px 0 0 33px">
@@ -1093,13 +1095,17 @@
         }
         var month = mm; //获取当前月份(0-11,0代表1月)
         var data = date.getDate(); //获取当前日(1-31)
+        if(data<10){
+          data = '0' + data
+        }
 
         if (name) {
           //document.getElementById("pic").src = url_img + '/pic_a/2020-10-14/' + name + "";
           $('#pic').attr('src',`${url_img}/pic_a/${year}-${month}-${data}/${name}`)
+          $('.picbackdiv').show()
         }
         _this.isVideo(false)
-        $('.picbackdiv').show()
+
 
       },
 
@@ -1126,7 +1132,7 @@
           });
           _this.listener_sound.publish(sound);
 
-          _this.num = 10
+          _this.num = 30
           aa()
           function aa(){
             _this.num--
@@ -1146,7 +1152,7 @@
               _this.voice_img = "../../static/images/recordingvoice.png"
               _this.startOrEndMp3('end')
             }
-          },1000*10)
+          },1000*30)
         }else if(val == 'end'){
           console.log(val)
 
@@ -1479,17 +1485,66 @@
           })
         }
         if(val == 3){
-          this.car_direction_mask = true
+          clearTimeout(_this.currentTaskInfoTimeId)
+          _this.car_direction_mask = true
           _this.taskServerClear = new ROSLIB.Service({
             ros : _this.ros,
             name : '/taskclear',
             serviceType : 'robotmsg/TaskList'
           });
           _this.taskServerClear.callService({flag:0},function(result) {
-            _this.$message('任务终止');
+            _this.$message('当前任务终止,开始手持遥控模式');
             //_this.planLinePointVector.getSource().clear()
+            setTimeout(function () {
+              _this.taskInfo = {
+                name: '人工遥控巡检',
+                taskStatus:'',
+                abnormalPointNum:'',
+                pointTotal:'',
+                currentPoint:'',
+                passPointNum:'',
+                totalRunTime:'',
+                cumulativeRunTime:'',
+              }
+
+            },1000)
             sessionStorage.setItem("planLine",'');
           })
+        }
+      },
+
+      //一键返航
+      robotBack(e){
+        let _this = this
+        console.log(e)
+        if(e == 'back'){
+          clearTimeout(_this.currentTaskInfoTimeId)
+          setTimeout(function () {
+            _this.taskInfo = {
+              name: '一键返航',
+              taskStatus:'',
+              abnormalPointNum:'',
+              pointTotal:'',
+              currentPoint:'',
+              passPointNum:'',
+              totalRunTime:'',
+              cumulativeRunTime:'',
+            }
+          },1000)
+        }else if(e == 'no_task'){
+          clearTimeout(_this.currentTaskInfoTimeId)
+          setTimeout(function () {
+            _this.taskInfo = {
+              name: '',
+              taskStatus:'',
+              abnormalPointNum:'',
+              pointTotal:'',
+              currentPoint:'',
+              passPointNum:'',
+              totalRunTime:'',
+              cumulativeRunTime:'',
+            }
+          },1000)
         }
       },
 

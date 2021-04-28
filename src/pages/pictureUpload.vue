@@ -5,11 +5,12 @@
       <p>请上传需要识别的图片</p>
       <div>
         <el-upload
-            :action="pictureUpdate" :headers="importHeaders"
+            action="" :headers="importHeaders"
             list-type="picture-card"
-            :on-success="handleAvatarSuccess"
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove">
+            :on-change="getFile"
+            :auto-upload="false"
+            :on-preview="handlePictureCardPreview">
+
           <i class="el-icon-plus"></i>
         </el-upload>
         <el-dialog :visible.sync="dialogVisible">
@@ -17,11 +18,18 @@
         </el-dialog>
       </div>
       <p>识别结果</p>
-      <el-button type="primary" @click="subPic">获取结果</el-button>
-      <div style="width: 200px;margin-top: 20px">
+      <el-button v-if="true" type="primary" @click="subPic(1)">获取结果1</el-button>
+      <el-button v-if="true" type="primary" @click="subPic(2)">获取结果2</el-button>
+      <!--<div style="width: 200px;margin-top: 20px">
         <img id="pic" :src='src' alt="">
       </div>
-      <p>{{msg}}</p>
+      <p>{{msg}}</p>-->
+      <div class="image_ul_yiwu">
+        <div v-for="(item, index) in resultList" :key="index">
+          <img :src="imgUrlBefore+item.picResult" alt="">
+          <p>{{item.reconResult}}</p>
+        </div>
+      </div>
     </div>
     <menuBottom></menuBottom>
   </div>
@@ -48,6 +56,8 @@
         url:robotUrl,
         src:null,
         msg:'',
+        resultList:[],
+        imgUrlBefore: url_img + '/smcsp/',
       }
     },
     methods: {
@@ -62,9 +72,65 @@
         //this.imageUrl = URL.createObjectURL(file.raw);
         console.log(file.response)
       },
-      subPic(){
+
+      getBase64(file) {
+        return new Promise(function(resolve, reject) {
+          let reader = new FileReader();
+          let imgResult = "";
+          reader.readAsDataURL(file);
+          reader.onload = function() {
+            imgResult = reader.result;
+          };
+          reader.onerror = function(error) {
+            reject(error);
+          };
+          reader.onloadend = function() {
+            resolve(imgResult);
+          };
+        });
+      },
+      getFile(file, fileList) {
         let _this = this
-        _this.ros = new ROSLIB.Ros({
+        this.getBase64(file.raw).then(res => {
+          //console.log(res.substring(res.indexOf(",")+1))
+          let picSource = res.substring(res.indexOf(",")+1)
+          _this.ajax_api('post',url_api + '/foreign/save' + '?&_t=' + new Date().getTime(),
+            { irBaseRobotId: "1",
+              reconMethod: "1",
+              picSource: picSource
+            },
+            true, function (res) {
+              console.log(res)
+              if(res.code==200){
+                //_this.subPic()
+              }else {
+                _this.message('请检查网络')
+              }
+
+            })
+        });
+      },
+
+      subPic(type){
+        let _this = this
+        /*_this.resultList = [
+          {name:'999',src:'https://img2.baidu.com/it/u=2646545122,2660381078&fm=26&fmt=auto&gp=0.jpg'},
+          {name:'999',src:'../static/img/no404.jpg'},
+          {name:'999',src:'000'}
+        ]*/
+        _this.resultList = []
+        _this.ajax_api('post',url_api + '/foreign/findList' + '?&_t=' + new Date().getTime(),
+          {
+            irBaseRobotId:"1",
+            reconMethod:type,
+            reconResult:"",
+            resultStatus:""
+          },
+          true, function (res) {
+            console.log(res)
+            _this.resultList = res.data.items
+          })
+        /*_this.ros = new ROSLIB.Ros({
             url : _this.url
         });
         _this.ros.on('connection', function() {
@@ -85,7 +151,7 @@
           },1000)
           _this.msg = '550kV油位表异常'
           _this.listener.unsubscribe();
-        });
+        });*/
       },
     },
     components: {
@@ -106,7 +172,20 @@
 
       p
         font-size 18px
-        margin 12px 0
+        margin 5px 0 20px
+      .image_ul_yiwu
+        height 480px
+        overflow-y auto
+        margin-top 20px
+        border 1px solid
+        display flex
+        flex-wrap wrap
+        div
+          /*width 180px*/
+          margin 0 10px
+          display flex
+          flex-direction column
+
 
 
 

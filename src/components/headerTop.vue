@@ -7,7 +7,7 @@
           <span>首页</span>
         </div>
         <div>
-          <a href="/static/test.docx" target="_blank">
+          <a href="/static/用户操作手册.docx" target="_blank">
             <i class="head_i bangzhu"></i>
             <span style="color:#000">帮助</span>
           </a>
@@ -49,7 +49,7 @@
                 </dl>
               </div>
             </li>
-            <li @mouseover="mouseOverLi(2)"
+            <li @mouseover="mouseOverLi(2)" v-show="userRole==3?false:true"
                 @mouseleave="mouseLeaveLi(2)">
               <div class="but_item">
                 <img src="../../static/images/taskManagement.png" alt="">
@@ -107,6 +107,10 @@
                     </div>
                     <div>
                       <router-link to="/tasks/tasks-picture-upload">异物缺陷识别</router-link>
+                      <span>|</span>
+                    </div>
+                    <div>
+                      <router-link to="/tasks/foreign-body-identification">异物缺陷识别任务</router-link>
                       <span>|</span>
                     </div>
                   </dd>
@@ -206,11 +210,11 @@
                   </dd>
                 </dl>
                 <dl>
-                  <dt>机器人遥控</dt>
+                  <dt>机器人控制</dt>
                   <span>|</span>
                   <dd>
                     <div>
-                      <router-link to="/monitors/robot-control">机器人遥控</router-link>
+                      <router-link to="/monitors/robot-control">机器人控制</router-link>
                       <span>|</span>
                     </div>
                   </dd>
@@ -299,7 +303,7 @@
                 </dl>
               </div>
             </li>
-            <li @mouseover="mouseOverLi(6)"
+            <li @mouseover="mouseOverLi(6)" v-show="userRole==2?false:userRole==3?false:true"
                 @mouseleave="mouseLeaveLi(6)">
               <div class="but_item">
                 <img src="../../static/images/userSet.png" alt="">
@@ -372,7 +376,7 @@
                       <span>|</span>
                     </div>
                     <div>
-                      <p><a href="/static/test.docx" target="_blank">系统帮助</a></p>
+                      <p><a href="/static/用户操作手册.docx" target="_blank">系统帮助</a></p>
                       <span>|</span>
                     </div>
                   </dd>
@@ -380,7 +384,7 @@
               </div>
 
             </li>
-            <li @mouseover="mouseOverLi(7)"
+            <li @mouseover="mouseOverLi(7)" v-show="userRole==2?false:userRole==3?false:true"
                 @mouseleave="mouseLeaveLi(7)">
               <div class="but_item">
                 <img src="../../static/images/systemSet.png" alt="">
@@ -494,6 +498,8 @@
         timesListenerController:null,
         timesListenerLocationStatus:null,
         isWebsocket: true,
+        alarm_arr:[],
+        userRole:1
       }
 
     },
@@ -517,6 +523,9 @@
       //_this.websocketAlarm()
       //_this.locationStatusAlarm()   //偏航4
 
+      //获取用户的 1 2 3
+      _this.getCurrUser()
+
     },
     props:['title'],
     methods: {
@@ -529,22 +538,23 @@
             let alarm_message = res.data.items.filter(item => {
               return item.name == 'alarm-message-setting'
             })
-            let alarm_arr = alarm_message[0].value.split(',')
-            console.log(alarm_message[0].value)
-            for(let i=0;i<alarm_arr.length;i++){
-              if(alarm_arr[i]==0){
+            _this.alarm_arr = alarm_message[0].value.split(',')
+            //console.log(res)
+            console.log(_this.alarm_arr)
+            for(let i=0;i<_this.alarm_arr.length;i++){
+              if(_this.alarm_arr[i]==0){
                 _this.allAlarm(0)
               }
-              if(alarm_arr[i]==3){
+              if(_this.alarm_arr[i]==3){
                 _this.allAlarm(3)
               }
-              if(alarm_arr[i]==1){
+              if(_this.alarm_arr[i]==1){
                 _this.power_now()
               }
-              if(alarm_arr[i]==2){
+              if(_this.alarm_arr[i]==2){
                 _this.controllerAlarm()
               }
-              if(alarm_arr[i]==4){
+              if(_this.alarm_arr[i]==4){
                 _this.locationStatusAlarm()
               }
 
@@ -606,7 +616,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res.data.items)
+              console.log(res.data.items)
               let items = res.data.items
               let company_name = items.filter(item =>{
                 return item.name == "company_name"
@@ -637,6 +647,7 @@
       allAlarm(val){
         let _this = this
         clearTimeout(_this.timesJoyAlarm)
+        //console.log(123)
         //接收-消息
         _this.listenerJoy = new ROSLIB.Topic({
           ros : _this.ros,
@@ -678,6 +689,9 @@
 
           }
         });
+        /*_this.timesJoyAlarm = setTimeout(() => {
+          _this.allAlarm(0)
+        },_this.times_s)*/
       },
       //驱动报警
       controllerAlarm(){
@@ -704,6 +718,7 @@
         _this.ajax_api('get',url_api + '/robot-param' + '?&_t=' + new Date().getTime(),
           {irBaseRobotId:1,size:200,page:1,},
           true, function (res) {
+            //console.log(res)
             let battery_capacity = res.data.items.filter(item => {
               return item.name == 'battery_capacity'
             })
@@ -716,12 +731,16 @@
         });
         _this.listenerPower.subscribe(function(message) {
           //console.log(message.battery_info);
-          if(message.battery_info<_this.battery_capacity){
-            _this.openPower(`电池电量低于${_this.battery_capacity}%，请及时充电（错误代码4002）`)
+          //console.log(_this.battery_capacity);
+          if(message.battery_info<=_this.battery_capacity){
+            _this.openPower(`电池电量低于${_this.battery_capacity}%，机器人将自动返航。（错误代码4002）`)
             _this.playOrPaused()
           }
           _this.listenerPower.unsubscribe();
         });
+        _this.timesPowerAlarm = setTimeout(() => {
+          _this.power_now()
+        },_this.times_s)
       },
       //网络中断
       websocketAlarm(){
@@ -1052,6 +1071,32 @@
           message: '请选择手持遥控模式'
         });
       },
+
+      //获取用户 1 2 3
+      getCurrUser(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/user/userList' + '?&_t=' + new Date().getTime(),
+          {account:_this.username},
+          true, function (res) {
+            //console.log(res)
+            let user_roles = res.data.items[0].roles
+            let user_roles_id_arr = []
+            for(let i=0;i<user_roles.length;i++){
+              user_roles_id_arr.push(user_roles[i].id)
+            }
+            console.log(user_roles_id_arr)
+            if(user_roles_id_arr.indexOf(1) !== -1){
+              console.log(1)
+              _this.userRole = 1
+            }else if(user_roles_id_arr.indexOf(2) !== -1){
+              console.log(2)
+              _this.userRole = 2
+            }else if(user_roles_id_arr.indexOf(3) !== -1){
+              console.log(3)
+              _this.userRole = 3
+            }
+          })
+      } //GET /ui/user/info
 
     },
     destroyed(){

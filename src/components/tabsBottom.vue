@@ -153,22 +153,22 @@
               width="50">
             </el-table-column>
             <el-table-column
-              prop="address" align="center"
+              prop="sysPoint.displayName" align="center"
               label="报警类型"
             >
             </el-table-column>
             <el-table-column
-              prop="address" align="center"
+              prop="address" align="center" :formatter="alarmLevel"
               label="报警级别"
             >
             </el-table-column>
             <el-table-column
-              prop="address" align="center"
+              prop="sysPoint.description" align="center"
               label="报警内容"
             >
             </el-table-column>
             <el-table-column
-              prop="address" align="center"
+              prop="reconTime" align="center"
               label="报警时间"
             >
             </el-table-column>
@@ -284,7 +284,7 @@
       },
       pointNow(){
           let _this = this
-          console.log(_this.irDataTaskHistoryId)
+          //console.log(_this.irDataTaskHistoryId)
           if(!_this.irDataTaskHistoryId){
             _this.tableDataPointNow = []
             return
@@ -308,11 +308,31 @@
 
           function pointNowTime(){
               //console.log(_this.irDataTaskHistoryId)
+              clearTimeout(_this.pointNowTimeId)
+              //加一个异物识别的结果
+              let foreignArr = []
+              _this.ajax_api('post',url_api + '/foreign/foreignList',
+                {
+                  irBaseRobotId:"1",
+                  reconMethod:"2",
+                  irDataTaskHistoryId: _this.irDataTaskHistoryId,
+                  //reconResult:"aaaa",
+                  resultStatus: true
+                },
+                false,
+                function (res) {
+                  //console.log(res)
+                  if(! _this.irDataTaskHistoryId){
+                    //console.log('id为空')
+                    return
+                  }
+                  foreignArr = res.data
+                })
               _this.ajax_api('post',url_api + '/point-history',
                   {page:1, size:500,
                     irDataTaskHistoryId:_this.irDataTaskHistoryId
                   },
-                  true,
+                  false,
                   function (res) {
                       //console.log(res.data.items)
                       if(! _this.irDataTaskHistoryId){
@@ -320,7 +340,7 @@
                         return
                       }
                       //找到 new 值，判断报警
-                      if(_this.tableDataPointNow.length==res.data.items.length){
+                      if(_this.tableDataPointNow.length == res.data.items.length){
                         return
                       }else {
                         /*if(Math.abs(res.data.items[0].value)>=10000){
@@ -352,6 +372,9 @@
                       }*/
                       //原来一条一条加-end
                   })
+
+              _this.tableDataPointNow = [...foreignArr, ..._this.tableDataPointNow]
+              //console.log(_this.tableDataPointNow)
               _this.pointNowTimeId = setTimeout(pointNowTime,_this.time)
           }
       },
@@ -380,6 +403,7 @@
           })
 
           function pointAlarmNowTime(){
+                clearTimeout(_this.pointAlarmNowTimeId)
                 _this.ajax_api('post',url_api + '/point-alarm-history',
                   {page:1, size:500,
                     irDataTaskHistoryId:_this.irDataTaskHistoryId
@@ -472,7 +496,7 @@
       pointSysAlarmNow(){
           let _this = this
           _this.ajax_api('get',url_api + '/sys-point-alarm-history',
-            {page:1, size:500,
+            {page:1, size:30,
               irDataTaskHistoryId:_this.irDataTaskHistoryId
             },
             true,
@@ -485,8 +509,9 @@
             })
 
           function pointSysAlarmNowTime(){
+            clearTimeout(_this.SysAlarmNowTimeId)
               _this.ajax_api('get',url_api + '/sys-point-alarm-history',
-                {page:1, size:500,
+                {page:1, size:30,
                   irDataTaskHistoryId:_this.irDataTaskHistoryId
                 },
                 true,
@@ -519,7 +544,27 @@
           }
           return result
       },
-
+      alarmLevel(row, column){
+        let result
+        switch (row.alarmLevel){
+          case 0:
+            result = "正常";
+            break;
+          case 1:
+            result = "预警";
+            break;
+          case 2:
+            result = "一般告警";
+            break;
+          case 3:
+            result = "严重告警";
+            break;
+          case 4:
+            result = "危机告警";
+            break;
+        }
+        return result
+      },
       openImg(url) {
           let _this = this
           if (url) {

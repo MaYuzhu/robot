@@ -143,6 +143,9 @@
               <span>点位信息：</span>
               <span style="border: 1px solid #90e8c6;border-radius:3px;
                 padding: 2px 8px">{{point_info}}</span>
+              <span style="margin-left: 10px">识别结果：</span>
+              <span style="border: 1px solid #90e8c6;border-radius:3px;
+                padding: 2px 8px">{{point_value}}</span>
             </div>
             <div style="height: 400px;overflow-y: auto">
               <ul>
@@ -154,20 +157,20 @@
               </ul>
             </div>
             <div>
-              <p style="background: #D9ECEA;height: 26px;line-height: 26px;padding-left: 10px">音频文件</p>
-              <div>124</div>
+              <p v-show="false" style="background: #D9ECEA;height: 26px;line-height: 26px;padding-left: 10px">音频文件</p>
+              <div></div>
             </div>
             <div>
               <p style="background: #D9ECEA;height: 26px;line-height: 26px;padding-left: 10px">阈值信息</p>
               <p style="padding: 6px 3px">
                 <span>环境信息</span>
-                <span>环境温度0摄氏度</span>
+                <span>环境温度 -- 摄氏度</span>
               </p>
               <ul style="padding: 6px 3px">
                 <span v-if="tableDataDuiOld[0]" >{{tableDataDuiOld[0].alarmType.name}}
                   :&nbsp;</span>
                 <span v-for="(item, index) in tableDataDuiOld">
-                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
                   {{item.limitValue}}
                   <span v-if="tableDataDuiOld.length!==index+1"> | </span>
                 </span>
@@ -176,7 +179,7 @@
                 <span v-if="tableDataChaOld[0]" >{{tableDataChaOld[0].alarmType.name}}
                   :&nbsp;</span>
                 <span v-for="(item, index) in tableDataChaOld">
-                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
                   {{item.limitValue}}
                   <span v-if="tableDataChaOld.length!==index+1"> | </span>
                 </span>
@@ -185,7 +188,7 @@
                 <span v-if="tableDataWenOld[0]" >{{tableDataWenOld[0].alarmType.name}}
                   :&nbsp;</span>
                 <span v-for="(item, index) in tableDataWenOld">
-                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
                   {{item.limitValue}}
                   <span v-if="tableDataWenOld.length!==index+1"> | </span>
                 </span>
@@ -194,9 +197,46 @@
                 <span v-if="tableDataChaoOld[0]" >{{tableDataChaoOld[0].alarmType.name}}
                   :&nbsp;</span>
                 <span v-for="(item, index) in tableDataChaoOld">
-                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
                   {{item.limitValue}}
                   <span v-if="tableDataChaoOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataYuexianOld[0]" >{{tableDataYuexianOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataYuexianOld">
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataYuexianOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataYouweiOld[0]" >{{tableDataYouweiOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataYouweiOld">
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataYouweiOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataShibaiOld[0]" >{{tableDataShibaiOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataShibaiOld">
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataShibaiOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataYuzhiOld[0]" >{{tableDataYuzhiOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataYuzhiOld">
+                  {{alarmLevel(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataYuzhiOld.length!==index+1"> | </span>
                 </span>
               </ul>
             </div>
@@ -211,7 +251,7 @@
               <p><el-radio @change="radioResultChange" v-model="radio_result" label="0">正常</el-radio></p>
               <div style="height: 120px;">
                 <el-radio @change="radioResultChange" v-model="radio_result" label="1" style="margin: 0">异常：</el-radio>
-                <el-select size="mini" v-model="value_type" multiple
+                <el-select size="mini" v-model="value_type" multiple :disabled="disabled_option_one"
                            placeholder="请选择" style="width: 220px">
                   <el-option
                     v-for="item in alarm_type_option"
@@ -323,6 +363,7 @@
         srcList: [],
         dialogVisibleAlarm:false,
         point_info:'点位信息',
+        point_value: '结果值',
         imgArr:[
           {
             title:'A相可见光',
@@ -353,7 +394,7 @@
             url:'../../static/abc.jpg'
           },
         ],
-        radio_result:'1',
+        radio_result:'0',
         value_type:'',
         alarm_type_option:[
           {value:1,label:'超温报警'},
@@ -361,19 +402,28 @@
           {value:3,label:'三相对比报警'},
           {value:4,label:'三相温差报警'},
           {value:5,label:'越限报警'},
+          {value:6,label:'油位计异常'},
+          {value:7,label:'识别失败'},
+          {value:8,label:'阈值预警'}
+          /*{value:1,label:'超温报警'},
+          {value:2,label:'温升报警'},
+          {value:3,label:'三相对比报警'},
+          {value:4,label:'三相温差报警'},
+          {value:5,label:'越限报警'},*/
         ],
         disabled_option:true,
         value_level:'',
         alarm_level_option:[
-          {value:1,label:'正常'},
-          {value:2,label:'预警'},
-          {value:3,label:'一般缺陷'},
-          {value:4,label:'严重缺陷'},
-          {value:5,label:'危险缺陷'},
+          {value:0,label:'正常'},
+          {value:1,label:'预警'},
+          {value:2,label:'一般缺陷'},
+          {value:3,label:'严重缺陷'},
+          {value:4,label:'危险缺陷'},
         ],
         radio_value:'1',
         input_value_wrong:'',
         disabled_input_value:true,
+        disabled_option_one: false,
         textarea:'',
         ajaxTableData:{page:1, size:6},
         ajaxTableImgData:{page:1, size:6},
@@ -387,7 +437,7 @@
           face:[]
         },
         alarmData:{
-          pageSize:1000
+          size:1000
         },
 
         imgVisible: false,
@@ -403,6 +453,19 @@
         tableDataWenOld:[],
         tableDataDuiOld:[],
         tableDataChaOld:[],
+
+        tableDataYuexianOld:[],
+        tableDataYouweiOld:[],
+        tableDataShibaiOld:[],
+        tableDataYuzhiOld:[],
+        /*1 超温报警
+          2 温升报警
+          3 三相对比报警
+          4 三相温差报警
+          5 越限报警
+          6 油位计异常
+          7 识别失败
+          8 阈值预警*/
 
         ajaxExportData:{},
       }
@@ -597,24 +660,25 @@
       },
       dblBoxShow(row){
       	let _this = this
-      	//console.log(row.id)
+      	console.log(row)
         _this.rowIndex = row.index
         _this.checkId = row.id
         //console.log(row.index)
-        //console.log(row.id) GET /ui/point-alarm-history/info/{id}
+        //console.log(row.id)   //GET /ui/point-alarm-history/info/{id}
         _this.dialogVisibleAlarm = true
         _this.point_info = row.point.name
+        _this.point_value = row.valueDesc
         _this.input_value_wrong = ''
         _this.textarea = ''
         _this.imageArr = []
         if(row.cameraPic){
-          console.log(123)
+          console.log('可见光')
           _this.imageArr.push({
             title:row.point.name,
             url:_this.imgUrlBefore + row.cameraPic
           })
         }else {
-          console.log(987)
+          console.log('红外三项测温')
           for(let i=0;i<row.flirPicList.length;i++){
             _this.imageArr.push({
               title:row.flirPicList[i].sound,
@@ -630,12 +694,20 @@
             url:_this.imgUrlBefore + url_img
         })*/
         //console.log(_this.imageArr)
+        //识别正确 或 错误
         _this.ajax_api('get',url_api + '/point-history/info/' + row.id,
           null,
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res.data)
+              console.log(res.data)
+              //正常0 异常1
+              /*if(res.data.reconStatus==0){
+                _this.radio_result = '0'
+              }else {
+                _this.radio_result = '1'
+              }*/
+
               //报警等级
               /*if(res.data.resultStatus==0){
                 _this.radio_result = '0'
@@ -645,25 +717,67 @@
                 _this.radio_result = '1'
                 _this.value_level = res.data.alarmLevel*1
                 _this.disabled_option = false
-              }
+              }*/
               //识别状态
-              if(res.data.errorFlag==0){
+              if(res.data.reconStatus==0){
                 _this.radio_value = '0'
                 _this.disabled_input_value = true
               }else {
                 _this.radio_value = '1'
                 _this.disabled_input_value = false
-              }*/
+              }
               _this.input_value_wrong = res.data.modifyValue
             }
           })
-        _this.getAlarmDataOld(row.id)
+        _this.getAlarmDataOld(row.point.id)
+        //正常 或 异常
+        _this.ajax_api('post',url_api + '/point-alarm-history',
+          {
+            irDataTaskHistoryId:row.taskHistory.id,
+            irBaseRobotId: 1,
+            pointIds: row.point.id
+          },
+          true,
+          function (res) {
+            //console.log(res.data)
+            if(res.code == 200){
+              //返回数组为空-正常  有值-异常
+              if(res.data.items.length>0){
+                _this.radio_result = '1'
+                _this.disabled_option_one = false
+                //选中报警内容
+                let id_alarm = res.data.items[0].alarmType.id
+                _this.value_type = [id_alarm]
+                //报警等级
+                _this.disabled_option = false
+                _this.value_level = res.data.items[0].alarmLevel*1
+              }else {
+                _this.radio_result = '0'
+                _this.disabled_option_one = true
+                _this.value_type = []
+                _this.disabled_option = true
+                _this.value_level = ''
+              }
+              //报警等级
+              /*if(res.data.resultStatus==0){
+                _this.radio_result = '0'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = true
+              }else {
+                _this.radio_result = '1'
+                _this.value_level = res.data.alarmLevel*1
+                _this.disabled_option = false
+              }*/
+            }
+          })
       },
       radioResultChange(val){
         if(val==1){
           this.disabled_option = false
+          this.disabled_option_one = false
         }else {
           this.disabled_option = true
+          this.disabled_option_one = true
         }
       },
       radioValueChange(val){
@@ -757,6 +871,7 @@
         _this.input_value_wrong = ''
         _this.textarea=''
         _this.point_info = _this.tableDataResults[_this.rowIndex].point.name
+        _this.point_value = _this.tableDataResults[_this.rowIndex].valueDesc
         _this.imageArr = []
         if(_this.tableDataResults[_this.rowIndex].cameraPic){
           //console.log(123)
@@ -781,36 +896,69 @@
           //_this.imgUrlBefore + row.cameraPic
         })*/
         let id = _this.tableDataResults[_this.rowIndex].id
+        let point_id = _this.tableDataResults[_this.rowIndex].point.id
+        let task_history_id = _this.tableDataResults[_this.rowIndex].taskHistory.id
         _this.checkId = id
         //console.log(id,'index'+_this.rowIndex)
-        _this.ajax_api('get',url_api + '/point-history/info/'+id,
+        /*_this.ajax_api('get',url_api + '/point-history/info/'+id,
           null,
           true,
           function (res) {
             if(res.code == 200){
               //console.log(res.data)
-              //报警等级
-              /*if(res.data.resultStatus==0){
-                _this.radio_result = '0'
-                _this.value_level = res.data.alarmLevel*1
-                _this.disabled_option = true
-              }else {
-                _this.radio_result = '1'
-                _this.value_level = res.data.alarmLevel*1
-                _this.disabled_option = false
-              }
+
+              _this.input_value_wrong = res.data.modifyValue
+            }
+          })*/
+        _this.getAlarmDataOld(point_id)
+        //识别正确 或 错误
+        _this.ajax_api('get',url_api + '/point-history/info/' + id,
+          null,
+          true,
+          function (res) {
+            if(res.code == 200){
+              console.log(res.data)
               //识别状态
-              if(res.data.errorFlag==0){
+              if(res.data.reconStatus==0){
                 _this.radio_value = '0'
                 _this.disabled_input_value = true
               }else {
                 _this.radio_value = '1'
                 _this.disabled_input_value = false
-              }*/
+              }
               _this.input_value_wrong = res.data.modifyValue
             }
           })
-        _this.getAlarmDataOld(id)
+        //正常 或 异常
+        _this.ajax_api('post',url_api + '/point-alarm-history',
+          {
+            irDataTaskHistoryId:task_history_id,
+            irBaseRobotId: 1,
+            pointIds: point_id
+          },
+          true,
+          function (res) {
+            //console.log(res.data)
+            if(res.code == 200){
+              //返回数组为空-正常  有值-异常
+              if(res.data.items.length>0){
+                _this.radio_result = '1'
+                _this.disabled_option_one = false
+                //选中报警内容
+                let id_alarm = res.data.items[0].alarmType.id
+                _this.value_type = [id_alarm]
+                //报警等级
+                _this.disabled_option = false
+                _this.value_level = res.data.items[0].alarmLevel*1
+              }else {
+                _this.radio_result = '0'
+                _this.disabled_option_one = true
+                _this.value_type = []
+                _this.disabled_option = true
+                _this.value_level = ''
+              }
+            }
+          })
 
       },
       nextData(){
@@ -826,6 +974,7 @@
         _this.input_value_wrong = ''
         _this.textarea=''
         _this.point_info = _this.tableDataResults[_this.rowIndex].point.name
+        _this.point_value = _this.tableDataResults[_this.rowIndex].valueDesc
         _this.imageArr = []
         if(_this.tableDataResults[_this.rowIndex].cameraPic){
           //console.log(123)
@@ -848,36 +997,58 @@
             url: _this.imgUrlBefore + url_img_
         })*/
         let id = _this.tableDataResults[_this.rowIndex].id
+        let point_id = _this.tableDataResults[_this.rowIndex].point.id
+        let task_history_id = _this.tableDataResults[_this.rowIndex].taskHistory.id
         _this.checkId = id
-        //console.log(id,'index'+_this.rowIndex)
-        _this.ajax_api('get',url_api + '/point-history/info/'+id,
+        _this.getAlarmDataOld(point_id)
+        //识别正确 或 错误
+        _this.ajax_api('get',url_api + '/point-history/info/' + id,
           null,
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res.data)
-              //报警等级
-              /*if(res.data.resultStatus==0){
-                _this.radio_result = '0'
-                _this.value_level = res.data.alarmLevel*1
-                _this.disabled_option = true
-              }else {
-                _this.radio_result = '1'
-                _this.value_level = res.data.alarmLevel*1
-                _this.disabled_option = false
-              }
+              console.log(res.data)
               //识别状态
-              if(res.data.errorFlag==0){
+              if(res.data.reconStatus==0){
                 _this.radio_value = '0'
                 _this.disabled_input_value = true
               }else {
                 _this.radio_value = '1'
                 _this.disabled_input_value = false
-              }*/
+              }
               _this.input_value_wrong = res.data.modifyValue
             }
           })
-        _this.getAlarmDataOld(id)
+        //正常 或 异常
+        _this.ajax_api('post',url_api + '/point-alarm-history',
+          {
+            irDataTaskHistoryId:task_history_id,
+            irBaseRobotId: 1,
+            pointIds: point_id
+          },
+          true,
+          function (res) {
+            //console.log(res.data)
+            if(res.code == 200){
+              //返回数组为空-正常  有值-异常
+              if(res.data.items.length>0){
+                _this.radio_result = '1'
+                _this.disabled_option_one = false
+                //选中报警内容
+                let id_alarm = res.data.items[0].alarmType.id
+                _this.value_type = [id_alarm]
+                //报警等级
+                _this.disabled_option = false
+                _this.value_level = res.data.items[0].alarmLevel*1
+              }else {
+                _this.radio_result = '0'
+                _this.disabled_option_one = true
+                _this.value_type = []
+                _this.disabled_option = true
+                _this.value_level = ''
+              }
+            }
+          })
       },
       checkConfirm(){
       	/*"cameraPic": "string",
@@ -946,9 +1117,11 @@
       },
       getAlarmDataOld(irProjPointId){
         let _this = this
-        _this.alarmData.irProjPointId = irProjPointId
+        _this.alarmData.irProjPointId = irProjPointId  //irProjPointId
+        //_this.alarmData.size = 1000
         _this.ajax_api('get',url_api + '/point-alarm-setting',_this.alarmData,true,function (res) {
           //console.log(irProjPointId)
+          console.log(res)
           if(!res.data.items.length<0){
             return
           }
@@ -975,7 +1148,24 @@
           })
           //_this.tableDataCha = result4
           _this.tableDataChaOld = result4
-          //console.log(result)
+
+          let result5 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 5
+          })
+          _this.tableDataYuexianOld = result5
+          let result6 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 6
+          })
+          _this.tableDataYouweiOld = result6
+          let result7 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 7
+          })
+          _this.tableDataShibaiOld = result7
+          let result8 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 8
+          })
+          _this.tableDataYuzhiOld = result8
+
         })
       },
       alarmLevel(num){

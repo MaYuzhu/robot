@@ -824,7 +824,17 @@
                 "taskStatus": "1",
                 "wind": 0
             },true,function (resData) {
-                //console.log(resData)
+                console.log(resData)
+                if(resData.data == 'valtage'){
+                  _this.$message({message: '电池电量低，不能执行任务'});
+                  _this.$root.eventHub.$emit("robotBack","no_task");
+                  return
+                }
+                if(resData.data == 'path'){
+                  _this.$message({message: '路网中断，不能执行任务'});
+                  _this.$root.eventHub.$emit("robotBack","no_task");
+                  return
+                }
                 _this.ajax_api('get',url_api + '/task/'+ _this.irProjTaskId +'/path',
                     {},true,function (res) {
                         console.log(res)

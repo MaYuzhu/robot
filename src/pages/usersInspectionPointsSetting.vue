@@ -664,7 +664,10 @@
         let _this = this
         let updatePoint = {
           name:row.name,
-          unit:row.unit
+          unit:row.unit,
+          x:row.x,
+          y:row.y,
+          z:row.z
         }
         //console.log(index, row);
         row.edit = false;

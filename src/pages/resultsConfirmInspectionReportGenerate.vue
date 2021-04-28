@@ -103,7 +103,15 @@
           label="识别异常点位数" width="110"
         >
         </el-table-column>
-
+        <el-table-column
+            prop="" align="center"
+            label="巡检覆盖率" width="100"
+        >
+          <template slot-scope="scope">
+            <p>{{scope.row.pointTotalNum/pointNumAll?
+              ((scope.row.pointTotalNum/pointNumAll)*100).toFixed(1)+'%':'-'}}</p>
+          </template>
+        </el-table-column>
         <!--<el-table-column
           prop="src"
           label="图片"
@@ -168,6 +176,7 @@
 
         ajaxExportData:{},
         taskHistoryId:'',
+        pointNumAll:''
       }
     },
     components: {
@@ -176,11 +185,26 @@
       menuBottom
     },
     mounted(){
+      this.getPointNum()
       this.value_start = this.convertToLateDate() + ' 00:00:00'
       this.value_end = this.getDateTime() + ' 23:59:59'
       this.getTableData()
+
     },
     methods:{
+      //覆盖率的查点位总数
+      getPointNum(){
+        let _this = this
+        _this.ajax_api('get',url_api + '/point/pointList',
+          {},
+          false,
+          function (res) {
+            if(res.code == 200){
+              //console.log(res.data.total)
+              _this.pointNumAll = res.data.total
+            }
+          })
+      },
       //定义导出Excel表格事件
       exportExcelText() {
         /* 从表生成工作簿对象 */

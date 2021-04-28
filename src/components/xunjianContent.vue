@@ -49,7 +49,7 @@
             status = '继续'
             break
           case 4:
-            status = '清除'
+            status = '完成'  //清除
             break
           case 5:
             status = '超期'

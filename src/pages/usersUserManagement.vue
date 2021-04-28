@@ -146,9 +146,9 @@
         </div>
         <div class="input_wrap">
           <p>角色：</p>
-          <el-checkbox v-model="checked_roles.checked_role1">管理员</el-checkbox>
-          <el-checkbox v-model="checked_roles.checked_role2">操作员</el-checkbox>
-          <el-checkbox v-model="checked_roles.checked_role3">普通用户</el-checkbox>
+          <el-checkbox v-model="checked_roles.checked_role1">管理员</el-checkbox >
+          <el-checkbox v-model="checked_roles.checked_role2">操作员</el-checkbox >
+          <el-checkbox v-model="checked_roles.checked_role3">普通用户</el-checkbox >
           <span class="must-mark" style="margin-left: 30px">*</span>
         </div>
 
@@ -301,6 +301,7 @@
           checked_role2:false,
           checked_role3:false
         },
+
       }
     },
     components: {
@@ -312,6 +313,7 @@
     	this.getAllUserData()
 
     },
+
     methods:{
     	//新增用户
     	addUser(){
@@ -463,7 +465,7 @@
         }
         _this.dialogVisibleUpdateUser = true
         _this.ajax_api('get',url_api + '/user/info/' + _this.isCheckedUserId, {}, true, function (res) {
-          //console.log(res)//irSysOrganizationId
+          //console.log(res)  //irSysOrganizationId 返回无角色
           _this.irSysOrganizationId = res.data.irSysOrganizationId
           _this.update_account = res.data.account
           _this.update_name = res.data.name,
@@ -508,6 +510,7 @@
                 type: 'success',
               });
               _this.getAllUserData()
+              _this.dialogVisibleUpdateUser = false
             }else {
               _this.$message({
                 message: '操作失败，请重试',

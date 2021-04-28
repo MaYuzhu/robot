@@ -25,6 +25,7 @@ import tasksMultispectralInspection from '@/pages/tasksMultispectralInspection'
 import tasksCustomTask from '@/pages/tasksCustomTask'
 import tasksTaskShow from '@/pages/tasksTaskShow'
 import tasksPicUpload from '@/pages/pictureUpload'  //异物识别上传图片
+import tasksForeignBodyIdentification from '@/pages/tasksForeignBodyIdentification' //异物识别任务
 
 import monitorsInspectionMonitoring from '@/pages/monitorsInspectionMonitoring'
 import monitorsRobotControl from '@/pages/monitorsRobotControl'
@@ -161,7 +162,15 @@ const router = new Router({
       meta:{
         name:'异物缺陷识别'
       }
-    },
+    }, //tasksForeignBodyIdentification
+    {
+      path: '/tasks/foreign-body-identification',
+      name: 'tasksForeignBodyIdentification',
+      component: tasksForeignBodyIdentification,
+      meta:{
+        name:'异物缺陷识别任务'
+      }
+    }, //tasksForeignBodyIdentification
     {
       path: '/tasks/bad-weather',
       name: 'tasksBadWeather',

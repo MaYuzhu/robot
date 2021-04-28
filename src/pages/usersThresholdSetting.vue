@@ -479,6 +479,7 @@
       getAlarmDataOld(){
         let _this = this
         _this.alarmData.irProjPointId = _this.irProjPointId
+        _this.alarmData.size = 1000
         _this.ajax_api('get',url_api + '/point-alarm-setting',_this.alarmData,true,function (res) {
           console.log(res.data)
           if(!res.data.items.length<0){

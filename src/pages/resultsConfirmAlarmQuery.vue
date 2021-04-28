@@ -105,7 +105,7 @@
     </div>
     <div class="content">
       <div class="left">
-        <devTreeNoCheck @devTreeKey="treeCheck" :toTreeData="toTreeData"></devTreeNoCheck>
+        <devTreeNoCheck @childKey="treeCheck" :toTreeData="toTreeData"></devTreeNoCheck>
       </div>
       <div class="right">
         <p>设备告警查询确认</p>
@@ -199,6 +199,9 @@
               <span>点位信息：</span>
               <span style="border: 1px solid #90e8c6;border-radius:3px;
                 padding: 2px 8px">{{point_info}}</span>
+              <span style="margin-left: 10px">识别结果：</span>
+              <span style="border: 1px solid #90e8c6;border-radius:3px;
+                padding: 2px 8px">{{point_value}}</span>
             </div>
             <div style="height: 400px;overflow-y: auto">
               <ul>
@@ -209,7 +212,7 @@
                 </li>
               </ul>
             </div>
-            <div>
+            <div v-show="false">
               <p style="background: #D9ECEA;height: 26px;line-height: 26px;padding-left: 10px">音频文件</p>
               <div>123</div>
             </div>
@@ -217,13 +220,13 @@
               <p style="background: #D9ECEA;height: 26px;line-height: 26px;padding-left: 10px">阈值信息</p>
               <p style="padding: 6px 3px">
                 <span>环境信息</span>
-                <span>环境温度0摄氏度</span>
+                <span>环境温度 -- 摄氏度</span>
               </p>
               <ul style="padding: 6px 3px">
                 <span v-if="tableDataDuiOld[0]" >{{tableDataDuiOld[0].alarmType.name}}
                   :&nbsp;</span>
                 <span v-for="(item, index) in tableDataDuiOld">
-                  {{alarmLevelShow(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{alarmLevelShowY(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
                   {{item.limitValue}}
                   <span v-if="tableDataDuiOld.length!==index+1"> | </span>
                 </span>
@@ -232,7 +235,7 @@
                 <span v-if="tableDataChaOld[0]" >{{tableDataChaOld[0].alarmType.name}}
                   :&nbsp;</span>
                 <span v-for="(item, index) in tableDataChaOld">
-                  {{alarmLevelShow(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{alarmLevelShowY(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
                   {{item.limitValue}}
                   <span v-if="tableDataChaOld.length!==index+1"> | </span>
                 </span>
@@ -241,7 +244,7 @@
                 <span v-if="tableDataWenOld[0]" >{{tableDataWenOld[0].alarmType.name}}
                   :&nbsp;</span>
                 <span v-for="(item, index) in tableDataWenOld">
-                  {{alarmLevelShow(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{alarmLevelShowY(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
                   {{item.limitValue}}
                   <span v-if="tableDataWenOld.length!==index+1"> | </span>
                 </span>
@@ -250,9 +253,46 @@
                 <span v-if="tableDataChaoOld[0]" >{{tableDataChaoOld[0].alarmType.name}}
                   :&nbsp;</span>
                 <span v-for="(item, index) in tableDataChaoOld">
-                  {{alarmLevelShow(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
+                  {{alarmLevelShowY(item.alarmLevel)}}({{item.upOrDown==2?'下限':'上限'}})
                   {{item.limitValue}}
                   <span v-if="tableDataChaoOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataYuexianOld[0]" >{{tableDataYuexianOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataYuexianOld">
+                  {{alarmLevelShowY(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataYuexianOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataYouweiOld[0]" >{{tableDataYouweiOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataYouweiOld">
+                  {{alarmLevelShowY(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataYouweiOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataShibaiOld[0]" >{{tableDataShibaiOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataShibaiOld">
+                  {{alarmLevelShowY(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataShibaiOld.length!==index+1"> | </span>
+                </span>
+              </ul>
+              <ul style="padding: 6px 3px">
+                <span v-if="tableDataYuzhiOld[0]" >{{tableDataYuzhiOld[0].alarmType.name}}
+                  :&nbsp;</span>
+                <span v-for="(item, index) in tableDataYuzhiOld">
+                  {{alarmLevelShowY(item.alarmLevel)}}({{item.upOrDown==0?'下限':'上限'}})
+                  {{item.limitValue}}
+                  <span v-if="tableDataYuzhiOld.length!==index+1"> | </span>
                 </span>
               </ul>
             </div>
@@ -392,11 +432,13 @@
           meter:[],
           face:[]
         },
+        pointIds :'',
         currentPage:1,
         total:1,
         tableDataAlarm:[],
         dialogVisibleAlarm:false,
         point_info:'点位信息',
+        point_value: '结果值',
         imgArr:[
         	{
         		title:'A相可见光',
@@ -431,6 +473,9 @@
           {value:3,label:'三相对比报警'},
           {value:4,label:'三相温差报警'},
           {value:5,label:'越限报警'},
+          {value:6,label:'油位计异常'},
+          {value:7,label:'识别失败'},
+          {value:8,label:'阈值预警'}
         ],
         disabled_option:true,
         value_level:'',
@@ -449,6 +494,9 @@
         	page:1,
           size:10
         },
+        alarmData:{
+          size:1000
+        },
         rowIndex:0,
         checkId:'',
         dialogVisibleMoreCheck:false,
@@ -465,6 +513,10 @@
         tableDataWenOld:[],
         tableDataDuiOld:[],
         tableDataChaOld:[],
+        tableDataYuexianOld:[],
+        tableDataYouweiOld:[],
+        tableDataShibaiOld:[],
+        tableDataYuzhiOld:[]
       }
     },
     mounted(){
@@ -725,14 +777,36 @@
         }
         return alarmLevelName
       },
+      alarmLevelShowY(num){
+        let result = ''
+        switch(num){
+          case 1:
+            result = '预警'
+            break
+          case 2:
+            result = '一般告警'
+            break
+          case 3:
+            result = '严重告警'
+            break
+          case 4:
+            result = '危险告警'
+            break
+          case 5:
+            result = '？'
+            break
+        }
+        return result
+      },
       dblBoxShow(row){
         let _this = this
         _this.rowIndex = row.index
         _this.checkId = row.id
-        //console.log(row.index)
+        //console.log(row)
         //console.log(row.id) GET /ui/point-alarm-history/info/{id}
         _this.dialogVisibleAlarm = true
         _this.point_info = row.point.deviceName
+        _this.point_value = row.valueDesc
         _this.input_value_wrong = ''
         _this.textarea=''
         _this.imgArr = []
@@ -755,7 +829,7 @@
           true,
           function (res) {
             if(res.code == 200){
-              //console.log(res.data)
+              console.log(res)
               //报警等级
               if(res.data.resultStatus==0){
                 _this.radio_result = '0'
@@ -774,9 +848,16 @@
                 _this.radio_value = '1'
                 _this.disabled_input_value = false
               }
+              //正常 或 异常  这里都是异常
+              //console.log(res.data.irBaseAlarmTypeId+1)
+              console.log(_this.alarm_type_option[res.data.irBaseAlarmTypeId-1].label)
+              _this.radio_result = '1'
+              _this.value_type = [_this.alarm_type_option[res.data.irBaseAlarmTypeId-1].value]
+              _this.disabled_option = false
             }
           })
-        _this.getAlarmDataOld(row.pointHistory.id)
+
+        _this.getAlarmDataOld(row.point.id)
       },
       prevData(){
         let _this = this
@@ -792,6 +873,7 @@
         _this.input_value_wrong = ''
         _this.textarea=''
         _this.point_info = _this.tableDataAlarm[_this.rowIndex].point.deviceName
+        _this.point_value = _this.tableDataAlarm[_this.rowIndex].valueDesc
         _this.imgArr = []
         for(let i=0;i<_this.tableDataAlarm[_this.rowIndex].pointHistoryList.length;i++){
           if(_this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].flirPic){
@@ -837,9 +919,12 @@
                 _this.radio_value = '1'
                 _this.disabled_input_value = false
               }
+              _this.radio_result = '1'
+              _this.value_type = [_this.alarm_type_option[res.data.irBaseAlarmTypeId-1].value]
+              _this.disabled_option = false
             }
           })
-        _this.getAlarmDataOld(_this.tableDataAlarm[_this.rowIndex].pointHistory.id)
+        _this.getAlarmDataOld(_this.tableDataAlarm[_this.rowIndex].point.id)
       },
       nextData(){
       	let _this = this
@@ -854,6 +939,7 @@
         _this.input_value_wrong = ''
         _this.textarea=''
         _this.point_info = _this.tableDataAlarm[_this.rowIndex].point.deviceName
+        _this.point_value = _this.tableDataAlarm[_this.rowIndex].valueDesc
         _this.imgArr = []
         for(let i=0;i<_this.tableDataAlarm[_this.rowIndex].pointHistoryList.length;i++){
           if(_this.tableDataAlarm[_this.rowIndex].pointHistoryList[i].flirPic){
@@ -899,9 +985,12 @@
                 _this.radio_value = '1'
                 _this.disabled_input_value = false
               }
+              _this.radio_result = '1'
+              _this.value_type = [_this.alarm_type_option[res.data.irBaseAlarmTypeId-1].value]
+              _this.disabled_option = false
             }
           })
-        _this.getAlarmDataOld(_this.tableDataAlarm[_this.rowIndex].pointHistory.id)
+        _this.getAlarmDataOld(_this.tableDataAlarm[_this.rowIndex].point.id)
       },
       checkConfirm(){
       	let _this = this
@@ -1032,14 +1121,19 @@
         //把每一行的索引放进row
         row.index = rowIndex;
       },
-      treeCheck(data){
-        //console.log(data)
+      treeCheck(val){
+        console.log(val)
+        let _this = this
+        _this.pointIds = val.id
+        _this.ajaxTableData.pointIds = _this.pointIds
+        _this.getTableData()
       },
       getAlarmDataOld(irProjPointId){
         let _this = this
-        _this.ajaxTableData.irProjPointId = irProjPointId
-        _this.ajax_api('get',url_api + '/point-alarm-setting',_this.ajaxTableData,true,function (res) {
-          //console.log(irProjPointId)
+        //console.log(irProjPointId)
+        _this.alarmData.irProjPointId = irProjPointId
+        _this.ajax_api('get',url_api + '/point-alarm-setting',_this.alarmData,true,function (res) {
+          console.log(res)
           if(!res.data.items.length<0){
             return
           }
@@ -1066,7 +1160,23 @@
           })
           //_this.tableDataCha = result4
           _this.tableDataChaOld = result4
-          //console.log(result)
+
+          let result5 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 5
+          })
+          _this.tableDataYuexianOld = result5
+          let result6 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 6
+          })
+          _this.tableDataYouweiOld = result6
+          let result7 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 7
+          })
+          _this.tableDataShibaiOld = result7
+          let result8 = res.data.items.filter(item => {
+            return item.irBaseAlarmTypeId == 8
+          })
+          _this.tableDataYuzhiOld = result8
         })
       },
 

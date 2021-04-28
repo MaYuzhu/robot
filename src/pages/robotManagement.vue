@@ -17,11 +17,12 @@
       <div style="background:lavender;clear: both">
         <XunjianContent :taskInfo="taskInfo"></XunjianContent>
       </div>
-      <taskControl @isVideo="isVideo" :robotId="robotId" class="task_map" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
+      <taskControl @isVideo="isVideo" v-on:robotBack="robotBack"
+                   :robotId="robotId" class="task_map" :irDataTaskHistoryId="irDataTaskHistoryId"></taskControl>
     </div>
-<div v-if="false">
-  <iframe src="../../static/hkVedio/hkvedio.html" width="500" height="300" frameborder="0"></iframe>
-</div>
+    <div v-if="false">
+      <iframe src="../../static/hkVedio/hkvedio.html" width="500" height="300" frameborder="0"></iframe>
+    </div>
     <div class="right" style="width: 35%">
       <div class="right_top" @dblclick="bigDiv">
         <!--<Button @click="test_ie">IE9</Button>-->
@@ -138,6 +139,7 @@
     },
     methods: {
     	red_pic(){
+        //console.log('图片.....');
         $('.red_pic_but').hide()
     		let _this = this
         /*var ros = new ROSLIB.Ros({
@@ -147,7 +149,6 @@
         /*ros.on('connection', function() {
           console.log('Connected to websocket server.');
         });*/
-
         _this.listener = new ROSLIB.Topic({
           ros : _this.ros,
           name : '/thermal/image_proc/compressed',// /thermal/image_proc/compressed
@@ -156,9 +157,10 @@
           messageType : 'geometry_msgs/Twist' // sensor_msgs::CompressedImage*/
 
         });
-
+        console.log(_this.listener);
         _this.listener.subscribe(function(message) {
-          //console.log('Received message on ' +': ' + message.data);
+          //console.log('图片?');
+          //console.log('图片' +': ' + message.data);
           if(!message.data){
             console.log('no picture')
           }
@@ -191,15 +193,15 @@
           url : 'ws://192.168.1.78:9090'
         });
 
-        var listener = new ROSLIB.Topic({
+        var listener_ = new ROSLIB.Topic({
           ros : ros,
           name : '/detect_result',
           messageType : 'robotmsg/InspectedResult'
         });
 
-        listener.subscribe(function(message) {
+        listener_.subscribe(function(message) {
           //console.log(message);
-          listener.unsubscribe();
+          listener_.unsubscribe();
         });
       },
       test_ie(){
@@ -362,7 +364,7 @@
         _this.ajax_api('get',url_api + '/robot',
           {page:1,size:100},
           true,function (res) {
-            //console.log(res)
+            //console.log(robotIdCurrent)
             if(res.code == 200){
               _this.options = res.data.items
               //已选中的机器人
@@ -391,7 +393,6 @@
                 _this.getTaskInfo()
               }
             }
-
           })
       },
       getTaskInfo(){
@@ -417,6 +418,7 @@
             }
           })
           function currentTaskInfo() {
+              clearTimeout(_this.currentTaskInfoTimeId)
               _this.ajax_api('get',url_api + '/robot/'+ _this.robotId +'/current-task',
                   null,
                   true,function (res) {
@@ -527,6 +529,41 @@
         //console.log(margin)
         $('.play_video').css({'margin':margin})
       },
+
+      //一键返航
+      robotBack(e){
+        let _this = this
+        console.log(e)
+        if(e == 'back'){
+          clearTimeout(_this.currentTaskInfoTimeId)
+          setTimeout(function () {
+            _this.taskInfo = {
+              name: '一键返航',
+              taskStatus:'',
+              abnormalPointNum:'',
+              pointTotal:'',
+              currentPoint:'',
+              passPointNum:'',
+              totalRunTime:'',
+              cumulativeRunTime:'',
+            }
+          },1000)
+        }else if(e == 'no_task'){
+          clearTimeout(_this.currentTaskInfoTimeId)
+          setTimeout(function () {
+            _this.taskInfo = {
+              name: '',
+              taskStatus:'',
+              abnormalPointNum:'',
+              pointTotal:'',
+              currentPoint:'',
+              passPointNum:'',
+              totalRunTime:'',
+              cumulativeRunTime:'',
+            }
+          },1000)
+        }
+      }
 
     },
     destroyed(){

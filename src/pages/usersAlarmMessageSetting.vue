@@ -59,7 +59,7 @@
             let alarm_message = res.data.items.filter(item => {
               return item.name == 'alarm-message-setting'
             })
-            //console.log(alarm_message[0].value)
+            console.log(res)
             let alarm_arr = alarm_message[0].value.split(',')
             _this.checkedAlarm = alarm_arr
             console.log(alarm_arr)

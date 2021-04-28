@@ -202,7 +202,7 @@
         moreFaceType:false,
 
         irBaseRobotId:1,
-        irBaseInspectTypeId:1,
+        irBaseInspectTypeId:30,
 
         toTreeData:{
           quyu:[],
@@ -213,7 +213,7 @@
         },
         saveData:{
           description:'',
-          irBaseInspectTypeId:'1',
+          irBaseInspectTypeId:'30',
           irBaseRobotId:1,
           isCustom:'1',
           name:'自定义任务',

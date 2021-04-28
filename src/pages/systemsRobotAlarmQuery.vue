@@ -45,7 +45,7 @@
         >
         </el-table-column>
         <el-table-column
-          prop="address" align="center"
+          prop="sysPoint.displayName" align="center"
           label="报警类型" width="240"
         >
         </el-table-column>
@@ -59,8 +59,8 @@
           label="机器人名称" width="140"
         >
         </el-table-column>
-        <el-table-column align="left" header-align="center"
-          prop="address"
+        <el-table-column
+          prop="sysPoint.description" align="center"
           label="报警内容"
         >
         </el-table-column>
@@ -142,7 +142,7 @@
         _this.ajax_api('get',url_api + '/sys-point-alarm-history',
           _this.alarmData,
           true,function (res) {
-            //console.log(res.data)
+            console.log(res.data)
             _this.tableData = res.data.items
             _this.total = res.data.total
           })

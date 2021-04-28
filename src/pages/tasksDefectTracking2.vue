@@ -157,7 +157,7 @@
         moreFaceType:false,
 
         irBaseRobotId:1,
-        irBaseInspectTypeId:12,
+        irBaseInspectTypeId:19,
 
         toTreeData:{
           quyu:[],
@@ -168,10 +168,10 @@
         },
         saveData:{
           description:'',
-          irBaseInspectTypeId:'12',
+          irBaseInspectTypeId:'19',
           irBaseRobotId:1,
           isCustom:'0',
-          name:'缺陷跟踪',
+          name:'远方异常告警确认',
           points:'',
         },
         savePutData:{},
