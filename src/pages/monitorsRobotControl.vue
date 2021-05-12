@@ -1024,8 +1024,8 @@
               _this.$message({ message: '暂无音频',});
               return
             }else {
-              let resData = res.data.reverse()
-              for(let  i=0;i<res.data.length;i++){
+              //let resData = res.data.reverse()
+              for(let i=0;i<res.data.length;i++){
                 $('.playbackdiv .sound_wrap').append(`
                     <audio class="audio_" src='${url_img}/smcsp/file/${res.data[i]}' controls="controls" style="margin: 8px 0 0 33px">
                     </audio>`)
